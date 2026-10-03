@@ -33,17 +33,23 @@ def check_canary_leakage(data: Any) -> Optional[str]:
         return "AWS_SECRET_KEY_PATTERN"
     return None
 
-def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sandbox] = None) -> Decision:
+def evaluate_tool_call(
+    tool_call: ToolCall,
+    scope: Scope,
+    sandbox: Optional[Sandbox] = None,
+    history: Optional[list] = None
+) -> Decision:
     """
     Phase 7 & 12: Action Guard (Hardened Output-Side Defense Gate).
     Performs deterministic pre-flight inspection before any tool execution:
     1. Tool call integrity validation (fail-closed on null/malformed).
-    2. Global parameter inspection (deterministic blocking of API_KEY= assignments).
-    3. Tool authorization within Scope.
-    4. Path validation (preventing access to confidential/pvt directories, un-scoped files, directory traversals, drive escapes).
-    5. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
-    6. Taint & Canary tracking (blocking exfiltration of canary tokens in any argument).
-    7. Database integrity (blocking unauthorized write_record to audit logs).
+    2. Multi-Chain Taint & Salami Attack Analysis (detecting chained read->exfil sequences).
+    3. Global parameter inspection (deterministic blocking of API_KEY= assignments).
+    4. Tool authorization within Scope.
+    5. Path validation (preventing access to confidential/pvt directories, un-scoped files, directory traversals, drive escapes).
+    6. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
+    7. Taint & Canary tracking (blocking exfiltration of canary tokens in any argument).
+    8. Database integrity (blocking unauthorized write_record to audit logs).
     """
     if not tool_call or not getattr(tool_call, "tool", None):
         return Decision(
@@ -55,6 +61,34 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
 
     tool_name = tool_call.tool
     args = tool_call.args if isinstance(tool_call.args, dict) else {}
+    history = history or []
+
+    # Multi-Chain Call Graph Analysis (Salami / Split-State Attack Detection)
+    # If the session previously loaded an untrusted or sensitive document, and is now attempting
+    # an outbound egress action (send_email) or database write, intercept the multi-stage chain!
+    prior_tools = [h.get("tool") if isinstance(h, dict) else getattr(h, "tool_name", "") for h in history]
+    is_tainted_by_read = "read_file" in prior_tools
+    
+    if is_tainted_by_read and tool_name == "send_email":
+        recipient = str(args.get("to", "")).strip().rstrip(".,;:")
+        recipient_lower = recipient.lower()
+        is_internal = any(recipient_lower.endswith(dom) for dom in INTERNAL_EMAIL_DOMAINS)
+        
+        # If recipient is external or not explicitly authorized for data egress
+        if not is_internal:
+            lineage = [
+                f"Step 1: read_file() [Loaded External Data]",
+                f"Step 2: Agent Reasoning Loop [State Tainted]",
+                f"Step 3: send_email(to='{recipient}') [Attempted External Egress]"
+            ]
+            return Decision(
+                verdict="BLOCK",
+                rule="multi_chain_exfiltration_blocked",
+                reason=f"Multi-stage attack sequence blocked: untrusted document loaded in step 1 attempts external exfiltration in step {len(history)+1}.",
+                evidence=f"read_file -> send_email({recipient})",
+                is_multi_chain=True,
+                chain_lineage=lineage
+            )
 
     # 0. Global Parameter Inspection (Deterministic blocking of API_KEY= or credentials in any tool argument)
     args_str = str(args)

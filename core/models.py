@@ -45,6 +45,8 @@ class ActionGuardResult:
     reason: str = ""
     evidence_snippet: str = ""
     latency_ms: float = 0.0
+    is_multi_chain: bool = False
+    chain_lineage: List[str] = field(default_factory=list)
 
 @dataclass
 class AgentExecutionTrace:

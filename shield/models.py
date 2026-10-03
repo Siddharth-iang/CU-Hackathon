@@ -17,6 +17,8 @@ class Decision(BaseModel):
     rule: str                                                   # machine name, e.g. "recipient_not_in_scope"
     reason: str                                                 # sentence a human can read
     evidence: str = ""                                          # the snippet that triggered it
+    is_multi_chain: bool = False                                # whether multi-chain taint sequence was intercepted
+    chain_lineage: List[str] = Field(default_factory=list)      # lineage transitions for diagram rendering
 
 class ThreatScore(BaseModel):
     score: int = 0                                              # 0 to 100
@@ -41,3 +43,5 @@ class AuditEvent(BaseModel):
     evidence: str = ""                                          # keep short (max about 200 chars)
     tool_call: Optional[Dict[str, Any]] = None
     latency_ms: float = 0.0
+    is_multi_chain: bool = False
+    chain_lineage: List[str] = Field(default_factory=list)
