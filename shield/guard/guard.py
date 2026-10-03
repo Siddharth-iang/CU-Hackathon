@@ -7,28 +7,40 @@ from shield.sandbox import Sandbox, CANARIES
 FORBIDDEN_PATHS = ["confidential", "aws_prod_credentials", "salary.csv", "api_keys.txt"]
 INTERNAL_EMAIL_DOMAINS = ["@company.com", "@sentinel-enterprise.internal", "@internal.corp"]
 
+import urllib.parse
+
 def check_canary_leakage(data: Any) -> Optional[str]:
     """Inspect tool arguments or payload for confidential canary token leaks."""
     text_repr = str(data)
+    unquoted = urllib.parse.unquote(text_repr)
     for canary in CANARIES:
-        if canary in text_repr:
+        if canary in text_repr or canary in unquoted:
             return canary
-    if any(k in text_repr for k in ["AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"]):
+    if any(k in text_repr or k in unquoted for k in ["AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"]):
         return "AWS_SECRET_KEY_PATTERN"
     return None
 
 def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sandbox] = None) -> Decision:
     """
-    Phase 7: Action Guard (Output-Side Defense).
+    Phase 7 & 12: Action Guard (Hardened Output-Side Defense Gate).
     Performs deterministic pre-flight inspection before any tool execution:
-    1. Tool authorization within Scope.
-    2. Path validation (preventing access to confidential / un-scoped files).
-    3. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
-    4. Taint & Canary tracking (blocking exfiltration of canary tokens).
-    5. Database integrity (blocking unauthorized write_record to audit logs).
+    1. Tool call integrity validation (fail-closed on null/malformed).
+    2. Tool authorization within Scope.
+    3. Path validation (preventing access to confidential, un-scoped files, directory traversals, drive escapes).
+    4. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
+    5. Taint & Canary tracking (blocking exfiltration of canary tokens in any argument).
+    6. Database integrity (blocking unauthorized write_record to audit logs).
     """
+    if not tool_call or not getattr(tool_call, "tool", None):
+        return Decision(
+            verdict="BLOCK",
+            rule="invalid_tool_call_format",
+            reason="Tool call object is null or missing action tool name.",
+            evidence=str(tool_call)
+        )
+
     tool_name = tool_call.tool
-    args = tool_call.args
+    args = tool_call.args if isinstance(tool_call.args, dict) else {}
 
     # 1. Tool Authorization Check
     if tool_name not in scope.allowed_tools:
@@ -41,25 +53,30 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
 
     # 2. Path Authorization Check for read_file
     if tool_name == "read_file":
-        path = str(args.get("path", "")).strip()
+        raw_path = str(args.get("path", "")).strip().replace("\x00", "")
+        # Normalize and unquote URL-encoded traversals (%2e%2e, %2f, etc.)
+        norm_path = urllib.parse.unquote(raw_path).replace("\\", "/")
         
-        # Check forbidden confidential paths
-        if any(bad in path.lower() for bad in FORBIDDEN_PATHS) or ".." in path:
+        # Check traversal escapes, root indicators, drive letters, and confidential paths
+        is_traversal = ".." in norm_path or norm_path.startswith("/") or bool(re.match(r"^[a-zA-Z]:", norm_path))
+        is_confidential = any(bad in norm_path.lower() for bad in FORBIDDEN_PATHS)
+
+        if is_traversal or is_confidential:
             return Decision(
                 verdict="BLOCK",
                 rule="confidential_path_access",
-                reason=f"Attempted access to confidential or restricted path: '{path}'",
-                evidence=path
+                reason=f"Attempted access to confidential or restricted path: '{raw_path}'",
+                evidence=raw_path
             )
 
         # Check allowed path list
-        path_allowed = any(path.startswith(ap) or ap in path or path.endswith(ap) for ap in scope.allowed_paths)
+        path_allowed = any(norm_path.startswith(ap) or ap in norm_path or norm_path.endswith(ap) for ap in scope.allowed_paths)
         if not path_allowed and scope.allowed_paths:
             return Decision(
                 verdict="BLOCK",
                 rule="path_outside_scope",
-                reason=f"File path '{path}' does not match permitted scope paths: {scope.allowed_paths}",
-                evidence=path
+                reason=f"File path '{raw_path}' does not match permitted scope paths: {scope.allowed_paths}",
+                evidence=raw_path
             )
 
     # 3. Recipient Authorization Check for send_email

@@ -13,13 +13,15 @@ class Sandbox:
         self.calls: List[tuple] = []
 
     def _safe(self, rel: str) -> str:
-        """Resolve final path and ensure it stays inside sandbox root."""
+        """Resolve final path and ensure it stays strictly inside sandbox root."""
+        import urllib.parse
+        clean_rel = urllib.parse.unquote(str(rel)).replace("\x00", "")
         root_name = os.path.basename(self.root)
-        if rel.startswith(root_name + "/") or rel.startswith(root_name + "\\"):
-            rel = rel[len(root_name) + 1:]
-        elif rel.startswith(self.root):
-            rel = os.path.relpath(rel, self.root)
-        full = os.path.realpath(os.path.join(self.root, rel))
+        if clean_rel.startswith(root_name + "/") or clean_rel.startswith(root_name + "\\"):
+            clean_rel = clean_rel[len(root_name) + 1:]
+        elif clean_rel.startswith(self.root):
+            clean_rel = os.path.relpath(clean_rel, self.root)
+        full = os.path.realpath(os.path.join(self.root, clean_rel))
         if not full.startswith(self.root + os.sep) and full != self.root:
             raise PermissionError("Path escapes sandbox root")
         return full
@@ -27,11 +29,18 @@ class Sandbox:
     def read_file(self, path: str) -> str:
         """Mock read_file tool restricted to sandbox root."""
         self.calls.append(("read_file", {"path": path}))
-        safe_path = self._safe(path)
+        try:
+            safe_path = self._safe(path)
+        except (PermissionError, ValueError, Exception) as e:
+            return f"Error: Access denied - {str(e)}"
+            
         if not os.path.exists(safe_path):
             return f"Error: File '{path}' not found."
-        with open(safe_path, encoding="utf-8") as f:
-            return f.read()
+        try:
+            with open(safe_path, encoding="utf-8", errors="replace") as f:
+                return f.read()
+        except Exception as e:
+            return f"Error reading file: {str(e)}"
 
     def search_web(self, query: str) -> str:
         """Mock search_web tool returning canned pages."""

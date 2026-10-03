@@ -31,6 +31,12 @@ def normalise(raw: str) -> str:
 
 def views(raw: str, depth: int = 0) -> List[str]:
     """Return the normalized raw text plus every decoded version of it (max depth 3)."""
+    if raw is None:
+        return [""]
+    # ponytail: Truncating raw input at 250KB protects against memory exhaustion and ReDoS on edge-case inputs.
+    if len(raw) > 250_000:
+        raw = raw[:250_000]
+
     out = [normalise(raw)]
     if depth >= 3:
         return out
@@ -40,8 +46,8 @@ def views(raw: str, depth: int = 0) -> List[str]:
         out += views(hidden, depth + 1)
         
     text = out[0]
-    # Check base64 pattern
-    for m in re.findall(r"[A-Za-z0-9+/]{24,}={0,2}", text):
+    # Check base64 pattern (limit to first 25 candidate chunks per depth)
+    for m in re.findall(r"[A-Za-z0-9+/]{24,}={0,2}", text)[:25]:
         try:
             d = base64.b64decode(m, validate=True).decode("utf-8")
             if printable_ratio(d) > 0.9:
@@ -49,8 +55,8 @@ def views(raw: str, depth: int = 0) -> List[str]:
         except Exception:
             pass
             
-    # Check hex pattern
-    for m in re.findall(r"(?:[0-9a-fA-F]{2}){12,}", text):
+    # Check hex pattern (limit to first 25 candidate chunks per depth)
+    for m in re.findall(r"(?:[0-9a-fA-F]{2}){12,}", text)[:25]:
         try:
             d = bytes.fromhex(m).decode("utf-8")
             if printable_ratio(d) > 0.9:
