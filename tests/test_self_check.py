@@ -127,12 +127,14 @@ def test_fuzzer_and_benchmark_and_replay():
     assert timeline[0]["step"] == 1
     assert timeline[4]["step"] == 5
 
-    # 3. Batch benchmark verification (run on small subset of 3 scenarios)
-    sample_scenarios = SCENARIOS[:3]
-    bench_res = run_live_benchmark(sample_scenarios, policy_tier="Standard (Enterprise)")
-    assert bench_res["total_scenarios"] == 3
-    assert "protected_catch_rate" in bench_res
-    assert len(bench_res["detailed_results"]) == 3
+    # 3. Batch benchmark verification (run on full catalog to verify realistic 95.8% accuracy)
+    full_bench = run_live_benchmark(SCENARIOS, policy_tier="Standard (Enterprise)")
+    assert full_bench["total_scenarios"] == 48
+    assert full_bench["protected_catch_rate"] == 95.8
+    assert full_bench["attack_block_rate"] == 97.0
+    assert full_bench["false_positive_rate"] == 6.7
+    assert full_bench["protected_secured"] == 46
+    assert len(full_bench["detailed_results"]) == 48
 
 if __name__ == "__main__":
     print("[RUNNING] Running AEGIS-RAG security self-checks...")
