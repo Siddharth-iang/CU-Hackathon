@@ -887,56 +887,94 @@ def show_time_travel_dialog(sc, prot, unprot=None):
     </div>
     """)
 
-    # Interactive Step Slider with formatted labels
-    step_options = [1, 2, 3, 4, 5]
-    step_labels = {
-        1: "1. Ingestion (T=0.0ms)",
-        2: f"2. L1 Firewall ({milestones[1]['timestamp']})",
-        3: f"3. LLM Reasoning ({milestones[2]['timestamp']})",
-        4: f"4. L2 Action Guard ({milestones[3]['timestamp']})",
-        5: f"5. Audit Seal ({milestones[4]['timestamp']})"
-    }
+    # State management for active milestone node
+    if "tt_active_step" not in st.session_state:
+        st.session_state["tt_active_step"] = 5
     
-    selected_step = st.select_slider(
-        "Scrub Incident Milestones",
-        options=step_options,
-        value=5,
-        format_func=lambda s: step_labels[s],
-        key="dlg_tt_slider"
-    )
+    active_step = st.session_state["tt_active_step"]
+    if active_step < 1:
+        active_step = 1
+    if active_step > 5:
+        active_step = 5
 
-    # Fluid Visual Progress Track with Connecting Line and Glowing Pulse
-    track_nodes = []
+    progress_pct = int(((active_step - 1) / 4) * 100)
+
+    # 1. Visual Progress Track with Connected Nodes along timeline
+    track_nodes_html = []
     for s_idx in range(1, 6):
-        is_active = (s_idx == selected_step)
-        is_past = (s_idx <= selected_step)
-        node_bg = "#2563EB" if is_active else ("#10B981" if is_past else "#F3F4F6")
-        node_border = "#1D4ED8" if is_active else ("#059669" if is_past else "#D1D5DB")
-        text_color = "#FFFFFF" if (is_active or is_past) else "#6B7280"
-        pulse_effect = "animation: ttGlowPulse 1.8s infinite ease-in-out;" if is_active else ""
-        track_nodes.append(f"""
-        <div class="tt-step-node" style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: {node_bg}; border: 2px solid {node_border}; color: {text_color}; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; {pulse_effect}">
+        is_active = (s_idx == active_step)
+        is_past = (s_idx < active_step)
+        
+        node_bg = "#2563EB" if is_active else ("#10B981" if is_past else "#FFFFFF")
+        node_border = "#1D4ED8" if is_active else ("#059669" if is_past else "#CBD5E1")
+        text_color = "#FFFFFF" if (is_active or is_past) else "#64748B"
+        pulse_style = "box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.25);" if is_active else ""
+        
+        track_nodes_html.append(f"""
+        <div style="display: flex; flex-direction: column; align-items: center; z-index: 2;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: {node_bg}; border: 2.5px solid {node_border}; color: {text_color}; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; {pulse_style} transition: all 0.25s ease;">
                 {s_idx}
             </div>
-            <span style="font-size: 10px; font-weight: {'700' if is_active else '500'}; color: {'#1E293B' if is_active else '#64748B'}; text-transform: uppercase;">
+            <span style="font-size: 11px; font-weight: {'700' if is_active else '500'}; color: {'#1D4ED8' if is_active else '#334155'}; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.02em;">
                 {milestones[s_idx - 1]['badge']}
             </span>
-            <span style="font-size: 9px; font-family: 'JetBrains Mono', monospace; color: #9CA3AF;">
+            <span style="font-size: 9.5px; font-family: 'JetBrains Mono', monospace; color: #64748B; margin-top: 1px;">
                 {milestones[s_idx - 1]['timestamp']}
             </span>
         </div>
         """)
 
     render_html(f"""
-    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px 10px 16px; margin-bottom: 16px;">
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px 24px 14px 24px; margin-bottom: 12px; position: relative;">
+        <!-- Connecting Timeline Track Bar -->
+        <div style="position: absolute; top: 35px; left: 45px; right: 45px; height: 4px; background: #E2E8F0; border-radius: 2px; z-index: 1;">
+            <div style="width: {progress_pct}%; height: 100%; background: linear-gradient(90deg, #10B981, #2563EB); border-radius: 2px; transition: width 0.35s ease-in-out;"></div>
+        </div>
         <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
-            {"".join(track_nodes)}
+            {"".join(track_nodes_html)}
         </div>
     </div>
     """)
 
+    # 2. Interactive Milestone Node Selector Buttons
+    col_n1, col_n2, col_n3, col_n4, col_n5 = st.columns(5)
+    cols = [col_n1, col_n2, col_n3, col_n4, col_n5]
+    for idx, c in enumerate(cols):
+        s_num = idx + 1
+        m_info = milestones[idx]
+        is_cur = (s_num == active_step)
+        with c:
+            if st.button(
+                f"{'📍 ' if is_cur else ''}Node {s_num}",
+                key=f"btn_node_jump_{s_num}",
+                use_container_width=True,
+                type="primary" if is_cur else "secondary",
+                help=f"Jump timeline to {m_info['title']} ({m_info['timestamp']})"
+            ):
+                st.session_state["tt_active_step"] = s_num
+                st.rerun()
+
+    # 3. Previous / Next Scrubbing Controls
+    col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
+    with col_nav1:
+        if st.button("◀ Previous Node", disabled=(active_step <= 1), use_container_width=True, key="btn_nav_prev"):
+            st.session_state["tt_active_step"] = active_step - 1
+            st.rerun()
+    with col_nav2:
+        render_html(f"""
+        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #4B5563; padding-top: 6px;">
+            Milestone {active_step} of 5 &nbsp;•&nbsp; <span style="font-family: 'JetBrains Mono', monospace; color: #2563EB;">{milestones[active_step - 1]['timestamp']}</span>
+        </div>
+        """)
+    with col_nav3:
+        if st.button("Next Node ▶", disabled=(active_step >= 5), use_container_width=True, key="btn_nav_next"):
+            st.session_state["tt_active_step"] = active_step + 1
+            st.rerun()
+
+    render_html("<div style='height: 10px;'></div>")
+
     # Active Milestone Card with Fluid Slide-In Animation
+    selected_step = active_step
     m = milestones[selected_step - 1]
     
     render_html(f"""
