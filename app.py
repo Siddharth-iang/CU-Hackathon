@@ -381,6 +381,41 @@ st.markdown("""
         background-color: #10B981;
         animation: pulse-green 1.5s infinite ease-in-out;
     }
+
+    /* Fluid Time-Travel Replay & Timeline Animations */
+    @keyframes ttSlideIn {
+        0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+        60% { opacity: 0.9; transform: translateY(-2px) scale(1.005); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes ttGlowPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+    }
+
+    @keyframes ttTrackShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .tt-milestone-card {
+        animation: ttSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tt-milestone-card:hover {
+        border-color: #CBD5E1 !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .tt-step-node {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tt-step-node:hover {
+        transform: translateY(-3px);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -809,7 +844,7 @@ def render_scenario_context(sc):
             </div>
         </div>
         """)
-        col_rep1, col_rep2 = st.columns(2)
+        col_rep1, col_rep2, col_rep3 = st.columns(3)
         with col_rep1:
             if st.button("👁️ Preview Audit Report (Full Window)", key=f"btn_prev_soc2_{sc.id}", use_container_width=True):
                 show_soc2_dialog(soc2_rep, sc.id)
@@ -822,76 +857,162 @@ def render_scenario_context(sc):
                 key=f"btn_dl_soc2_{sc.id}",
                 use_container_width=True
             )
+        with col_rep3:
+            if st.button("⏱️ Replay Timeline (Full Window)", key=f"btn_ctx_tt_{sc.id}", use_container_width=True):
+                show_time_travel_dialog(sc, st.session_state.get("last_prot_trace"), st.session_state.get("last_unprot_trace"))
 
-def render_time_travel_replay(sc, prot, unprot=None, key_prefix="tt"):
+@st.dialog("⏱️ Incident Time-Travel Forensic Replay", width="large")
+def show_time_travel_dialog(sc, prot, unprot=None):
     """
-    Renders an interactive step-by-step forensic scrubber from T=0.0ms to T=+111.0ms.
+    Full-window modal dialog for interactive incident time-travel replay with fluid animations.
     """
     milestones = generate_milestone_timeline(sc, prot, unprot)
+    tot_lat = getattr(prot, "total_latency_ms", 111.0)
+    
+    # Dialog Top Header Card
+    render_html(f"""
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px; font-weight: 700; color: #111827;">Target: {sc.title}</span>
+                    <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">5-Stage Execution Scrubber</span>
+                    <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">T=0.0ms → T=+{tot_lat}ms</span>
+                </div>
+                <div style="font-size: 12px; color: #6B7280; margin-top: 4px;">
+                    Sub-millisecond forensic execution scrubber across Ingestion, L1 Firewall, LLM Reasoning, and L2 Action Guard.
+                </div>
+            </div>
+        </div>
+    </div>
+    """)
+
+    # Interactive Step Slider with formatted labels
+    step_options = [1, 2, 3, 4, 5]
+    step_labels = {
+        1: "1. Ingestion (T=0.0ms)",
+        2: f"2. L1 Firewall ({milestones[1]['timestamp']})",
+        3: f"3. LLM Reasoning ({milestones[2]['timestamp']})",
+        4: f"4. L2 Action Guard ({milestones[3]['timestamp']})",
+        5: f"5. Audit Seal ({milestones[4]['timestamp']})"
+    }
+    
+    selected_step = st.select_slider(
+        "Scrub Incident Milestones",
+        options=step_options,
+        value=5,
+        format_func=lambda s: step_labels[s],
+        key="dlg_tt_slider"
+    )
+
+    # Fluid Visual Progress Track with Connecting Line and Glowing Pulse
+    track_nodes = []
+    for s_idx in range(1, 6):
+        is_active = (s_idx == selected_step)
+        is_past = (s_idx <= selected_step)
+        node_bg = "#2563EB" if is_active else ("#10B981" if is_past else "#F3F4F6")
+        node_border = "#1D4ED8" if is_active else ("#059669" if is_past else "#D1D5DB")
+        text_color = "#FFFFFF" if (is_active or is_past) else "#6B7280"
+        pulse_effect = "animation: ttGlowPulse 1.8s infinite ease-in-out;" if is_active else ""
+        track_nodes.append(f"""
+        <div class="tt-step-node" style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: {node_bg}; border: 2px solid {node_border}; color: {text_color}; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; {pulse_effect}">
+                {s_idx}
+            </div>
+            <span style="font-size: 10px; font-weight: {'700' if is_active else '500'}; color: {'#1E293B' if is_active else '#64748B'}; text-transform: uppercase;">
+                {milestones[s_idx - 1]['badge']}
+            </span>
+            <span style="font-size: 9px; font-family: 'JetBrains Mono', monospace; color: #9CA3AF;">
+                {milestones[s_idx - 1]['timestamp']}
+            </span>
+        </div>
+        """)
+
+    render_html(f"""
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px 10px 16px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+            {"".join(track_nodes)}
+        </div>
+    </div>
+    """)
+
+    # Active Milestone Card with Fluid Slide-In Animation
+    m = milestones[selected_step - 1]
     
     render_html(f"""
-    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; margin-top: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+    <div class="tt-milestone-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid {m['status_color']}; border-radius: 8px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 12.5px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 3px 9px; border-radius: 5px; font-family: 'JetBrains Mono', monospace;">
+                    {m['timestamp']}
+                </span>
+                <span style="font-size: 16px; font-weight: 700; color: #111827;">
+                    {m['title']}
+                </span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <span style="font-size: 10.5px; font-weight: 700; color: #4B5563; background: #F3F4F6; padding: 3px 9px; border-radius: 5px; text-transform: uppercase;">
+                    {m['layer']}
+                </span>
+                <span style="font-size: 11px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid {m['status_color']}40; padding: 3px 9px; border-radius: 5px;">
+                    {m['status']}
+                </span>
+            </div>
+        </div>
+        <p style="font-size: 13.5px; color: #374151; margin-bottom: 14px; line-height: 1.5;">
+            {m['summary']}
+        </p>
+    </div>
+    """)
+
+    # Detail Parameters Grid
+    det_cols = st.columns(len(m["details"]))
+    for col, (k, v) in zip(det_cols, m["details"].items()):
+        with col:
+            render_html(f"""
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 12px; height: 100%;">
+                <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px;">{k}</div>
+                <div style="font-size: 12px; color: #1E293B; font-weight: 500; word-break: break-word;">{v}</div>
+            </div>
+            """)
+
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("---")
+    
+    col_d1, col_d2 = st.columns([1, 1])
+    with col_d1:
+        st.download_button(
+            label="📥 Export Full Incident Trace (JSON)",
+            data=json.dumps(milestones, indent=2),
+            file_name=f"sentinel_time_travel_{sc.id}.json",
+            mime="application/json",
+            use_container_width=True,
+            key=f"dlg_dl_tt_{sc.id}"
+        )
+    with col_d2:
+        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_tt_{sc.id}"):
+            st.rerun()
+
+def render_time_travel_trigger(sc, prot, unprot=None, key_prefix="tt"):
+    """
+    Renders a compact, sleek launch card with a button to open the Time-Travel modal.
+    """
+    render_html(f"""
+    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 14px; font-weight: 700; color: #111827;">⏱️ Incident Time-Travel Replay & Execution Timeline</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: #111827;">⏱️ Incident Time-Travel Replay</span>
                 <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">5 Milestones</span>
-                <span class="pill-neutral" style="font-size: 10px; padding: 2px 7px;">T=0.0ms → T=+{getattr(prot, 'total_latency_ms', 111.0)}ms</span>
+                <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">T=0.0ms → T=+{getattr(prot, 'total_latency_ms', 111.0)}ms</span>
             </div>
-            <div style="font-size: 11.5px; color: #6B7280;">
+            <div style="font-size: 11px; color: #6B7280;">
                 Sub-millisecond forensic state scrubber across pipeline layers
             </div>
         </div>
     </div>
     """)
-    
-    step_idx = st.select_slider(
-        "Scrub Incident Timeline Milestones",
-        options=[1, 2, 3, 4, 5],
-        value=5,
-        format_func=lambda s: f"M{s}: {milestones[s-1]['badge']} ({milestones[s-1]['timestamp']})",
-        key=f"{key_prefix}_step_slider"
-    )
-    
-    m = milestones[step_idx - 1]
-    
-    # Milestone Snapshot Card
-    render_html(f"""
-    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid {m['status_color']}; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 12px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 3px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;">
-                    {m['timestamp']}
-                </span>
-                <span style="font-size: 15px; font-weight: 700; color: #111827;">
-                    {m['title']}
-                </span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-                <span style="font-size: 10px; font-weight: 700; color: #4B5563; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
-                    {m['layer']}
-                </span>
-                <span style="font-size: 10.5px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid {m['status_color']}40; padding: 2px 8px; border-radius: 4px;">
-                    {m['status']}
-                </span>
-            </div>
-        </div>
-        <p style="font-size: 13px; color: #374151; margin-bottom: 10px; line-height: 1.45;">
-            {m['summary']}
-        </p>
-    </div>
-    """)
-    
-    # Render Milestone State Details
-    det_cols = st.columns(len(m["details"]))
-    for col, (k, v) in zip(det_cols, m["details"].items()):
-        with col:
-            render_html(f"""
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 10px; height: 100%;">
-                <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px;">{k}</div>
-                <div style="font-size: 12px; color: #1E293B; font-weight: 500; word-break: break-word;">{v}</div>
-            </div>
-            """)
-    render_html("<div style='height: 10px;'></div>")
+    if st.button("⏱️ Open Time-Travel Replay (Full Window)", key=f"btn_open_tt_{key_prefix}", use_container_width=True, type="secondary"):
+        show_time_travel_dialog(sc, prot, unprot)
 
 # -----------------------------------------------------------------------------
 # SIMULATION ENGINE EXECUTION (DYNAMIC ONLY ON EXPLICIT USER TRIGGER)
@@ -1442,8 +1563,8 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         </div>
         """)
 
-        # Incident Time-Travel Replay Scrubber (Milestones T=0ms to T=+111ms)
-        render_time_travel_replay(active_scenario, prot_trace, unprot_trace, key_prefix="overview_tt")
+        # Incident Time-Travel Replay Trigger Card (Full Window Modal)
+        render_time_travel_trigger(active_scenario, prot_trace, unprot_trace, key_prefix="overview_tt")
 
 # VIEW 2: ATTACK PLAYGROUND (3-STAGE DEMO)
 elif "Playground" in nav_tab:
@@ -1706,7 +1827,7 @@ elif "Audit Log" in nav_tab:
     """)
 
     if prot_trace is not None:
-        render_time_travel_replay(active_scenario, prot_trace, unprot_trace, key_prefix="audit_tt")
+        render_time_travel_trigger(active_scenario, prot_trace, unprot_trace, key_prefix="audit_tt")
 
     if st.session_state.audit_logs:
         df_logs = pd.DataFrame(st.session_state.audit_logs)
