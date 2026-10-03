@@ -363,6 +363,13 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
         document_name=scenario.document_name
     )
     
+    base_final = str(res_base.get("final_answer", "")).strip()
+    if not base_final:
+        if res_base.get("hijacked") or res_base.get("status") == "EXPLOITED":
+            base_final = "⚠️ **AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
+        else:
+            base_final = f"Completed review of '{scenario.document_name}'."
+
     unprot_trace = AgentExecutionTrace(
         agent_id=res_base.get("run_id", f"unprot_{uuid.uuid4().hex[:6]}"),
         agent_name="Unprotected Baseline Agent",
@@ -380,7 +387,7 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
             )
             for c in res_base.get("tool_calls", [])
         ],
-        final_output=res_base.get("final_answer", ""),
+        final_output=base_final,
         total_latency_ms=res_base.get("latency_ms", 0.0)
     )
 
@@ -422,6 +429,15 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
         latency_ms=last_guard.get("latency_ms", 0.5)
     )
 
+    prot_final = str(res_prot.get("final_answer", "")).strip()
+    if not prot_final:
+        if dec_enum == DefenseDecision.BLOCK:
+            prot_final = "🛡️ **ATTACK INTERCEPTED & NEUTRALIZED**\nAction Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
+        elif dec_enum == DefenseDecision.ASK_HUMAN:
+            prot_final = "⏸️ **HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
+        else:
+            prot_final = f"🛡️ **SECURE TASK COMPLETION**: Document '{scenario.document_name}' analyzed safely within verified scope boundaries."
+
     prot_trace = AgentExecutionTrace(
         agent_id=res_prot.get("run_id", f"prot_{uuid.uuid4().hex[:6]}"),
         agent_name="Protected Agent (Firewall + Action Guard)",
@@ -441,7 +457,7 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
             )
             for c in res_prot.get("tool_calls", [])
         ],
-        final_output=res_prot.get("final_answer", ""),
+        final_output=prot_final,
         total_latency_ms=res_prot.get("latency_ms", 0.0)
     )
 

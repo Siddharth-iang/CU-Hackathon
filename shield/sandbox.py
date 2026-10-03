@@ -5,9 +5,10 @@ CANARIES = ["CANARY-7f3a9c", "CANARY-b21d55"]
 
 class Sandbox:
     """Mock sandbox environment for tool execution with call logging."""
-    def __init__(self, root: str = "data", web: Optional[Dict[str, str]] = None):
+    def __init__(self, root: str = "data", web: Optional[Dict[str, str]] = None, files: Optional[Dict[str, str]] = None):
         self.root = os.path.realpath(root)
         self.web = web or {}
+        self.files = files or {}
         self.outbox: List[Dict[str, str]] = []
         self.records: List[Dict[str, Any]] = []
         self.calls: List[tuple] = []
@@ -33,6 +34,15 @@ class Sandbox:
             safe_path = self._safe(path)
         except (PermissionError, ValueError, Exception) as e:
             return f"Error: Access denied - {str(e)}"
+
+        # Check virtual in-memory files (for scenario documents)
+        import os
+        basename = os.path.basename(path)
+        if hasattr(self, "files") and self.files:
+            if basename in self.files:
+                return self.files[basename]
+            if path in self.files:
+                return self.files[path]
             
         if not os.path.exists(safe_path):
             return f"Error: File '{path}' not found."

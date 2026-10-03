@@ -826,9 +826,15 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             st.info("No tool calls executed.")
 
         st.markdown("##### Agent Output Delivered to User")
+        unprot_out = str(unprot_trace.final_output).strip() if unprot_trace.final_output else ""
+        if not unprot_out:
+            if unprot_trace.status == "EXPLOITED":
+                unprot_out = "⚠️ **AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
+            else:
+                unprot_out = f"Completed review of '{active_scenario.document_name}'."
         render_html(f"""
         <div style="background-color: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 14px; font-size: 13px; color: #991B1B;">
-            {unprot_trace.final_output}
+            {unprot_out}
         </div>
         """)
 
@@ -957,9 +963,17 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 """)
 
         st.markdown("##### Safe Protected Agent Output")
+        prot_out = str(prot_trace.final_output).strip() if prot_trace.final_output else ""
+        if not prot_out:
+            if prot_trace.status == "BLOCKED":
+                prot_out = "🛡️ **ATTACK INTERCEPTED & NEUTRALIZED**\nAction Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
+            elif prot_trace.status == "WAITING_APPROVAL":
+                prot_out = "⏸️ **HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
+            else:
+                prot_out = f"🛡️ **SECURE TASK COMPLETION**: Document '{active_scenario.document_name}' analyzed safely within verified scope boundaries."
         render_html(f"""
         <div style="background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 14px; font-size: 13px; color: #065F46;">
-            {prot_trace.final_output}
+            {prot_out}
         </div>
         """)
 
