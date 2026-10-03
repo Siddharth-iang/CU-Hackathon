@@ -81,11 +81,11 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
 
     # 3. Recipient Authorization Check for send_email
     if tool_name == "send_email":
-        recipient = str(args.get("to", "")).strip()
+        recipient = str(args.get("to", "")).strip().rstrip(".,;:")
         recipient_lower = recipient.lower()
 
         # Did the user authorize this recipient in the prompt?
-        user_authorized_recipients = [r.lower() for r in scope.allowed_recipients]
+        user_authorized_recipients = [r.lower().rstrip(".,;:") for r in scope.allowed_recipients]
 
         if recipient_lower not in user_authorized_recipients:
             # If not authorized by user at all -> Hard BLOCK

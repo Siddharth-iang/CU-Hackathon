@@ -36,7 +36,8 @@ def extract_scope(user_prompt: str) -> Scope:
         allowed_tools = ["read_file"]
 
     # 2. Extract allowed email recipients literally stated in user prompt
-    allowed_recipients = EMAIL_REGEX.findall(user_prompt)
+    raw_emails = EMAIL_REGEX.findall(user_prompt)
+    allowed_recipients = [e.rstrip(".,;:") for e in raw_emails]
 
     # 3. Specific document paths mentioned
     file_matches = re.findall(r"[\w-]+\.(?:txt|pdf|md|json|csv)", user_prompt)

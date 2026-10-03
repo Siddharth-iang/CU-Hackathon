@@ -413,7 +413,9 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
     guard_events = [e for e in res_prot.get("audit", []) if e.get("layer") == "action_guard"]
     last_guard = guard_events[-1] if guard_events else {}
     decision_val = last_guard.get("decision", "ALLOW")
-    if decision_val == "BLOCK":
+    if res_prot.get("status") == "WAITING_APPROVAL" or any(c.get("status") == "pending_approval" for c in res_prot.get("tool_calls", [])):
+        dec_enum = DefenseDecision.ASK_HUMAN
+    elif decision_val == "BLOCK":
         dec_enum = DefenseDecision.BLOCK
     elif decision_val == "ASK_HUMAN":
         dec_enum = DefenseDecision.ASK_HUMAN

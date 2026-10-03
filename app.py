@@ -759,9 +759,63 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
     """)
     render_scenario_context(active_scenario)
 
-    # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED)
-    if prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK:
-        render_html("""
+    # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED OR WAITING_APPROVAL)
+    if prot_trace.status == "WAITING_APPROVAL" or (prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN):
+        pending_tool = "send_email"
+        target_recip = "external-consultant@supplyadvisors.com"
+        for tc in prot_trace.tool_calls:
+            if tc.status in ["pending_approval", "blocked", "executed"]:
+                pending_tool = tc.tool_name
+                if tc.arguments and "to" in tc.arguments:
+                    target_recip = tc.arguments["to"]
+                break
+        render_html(f"""
+        <div style="background-color: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 13px;">
+                        ⏸️ HUMAN CONFIRMATION REQUIRED
+                    </span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #D97706;">
+                        {pending_tool}()
+                    </span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <span class="pill-neutral">Pre-Flight Gate L7</span>
+                    <span style="background-color: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">Execution Suspended</span>
+                </div>
+            </div>
+            <p style="font-size: 13.5px; color: #78350F; margin-bottom: 14px; line-height: 1.5;">
+                Action Guard detected an ambiguous external recipient crossing the corporate network perimeter. Automated dispatch is suspended in a zero-trust holding gate pending supervisor authorization.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                <div style="background: #FFFFFF; border: 1px solid #FDE68A; padding: 10px 14px; border-radius: 8px;">
+                    <div style="font-size: 11px; font-weight: 600; color: #92400E; text-transform: uppercase;">Pending Recipient</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #B45309;">{target_recip}</div>
+                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Crosses corporate email domain boundary</div>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid #FDE68A; padding: 10px 14px; border-radius: 8px;">
+                    <div style="font-size: 11px; font-weight: 600; color: #92400E; text-transform: uppercase;">Policy Determination</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #B45309;">ASK_HUMAN</div>
+                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Cross-perimeter transmission requires supervisor confirmation</div>
+                </div>
+            </div>
+        </div>
+        """)
+    elif prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK:
+        blocked_tool = "send_email"
+        blocked_recip = "exfil@attacker.io"
+        blocked_res = "data/confidential/aws_prod_credentials.json"
+        for tc in prot_trace.tool_calls:
+            if tc.status == "blocked":
+                blocked_tool = tc.tool_name
+                if tc.arguments:
+                    if "to" in tc.arguments:
+                        blocked_recip = tc.arguments["to"]
+                    if "path" in tc.arguments:
+                        blocked_res = tc.arguments["path"]
+                break
+        render_html(f"""
         <div class="hero-blocked-banner">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -769,7 +823,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                         ✕ ACTION BLOCKED
                     </span>
                     <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #EF4444;">
-                        send_email()
+                        {blocked_tool}()
                     </span>
                 </div>
                 <div style="display: flex; gap: 8px;">
@@ -783,12 +837,12 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
                 <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
                     <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Recipient</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">attacker@example.com</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_recip}</div>
                     <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: Untrusted external domain (Egress allowlist breach)</div>
                 </div>
                 <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
                     <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Resource</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">confidential/employee_salaries.pdf</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_res}</div>
                     <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: High-risk asset exceeds agent RBAC tier</div>
                 </div>
             </div>
@@ -943,7 +997,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 st.code(fw.sanitized_content[:300] + "...", language="xml")
 
         # Interactive Human-in-the-Loop Confirmation
-        if prot_trace.status == "WAITING_APPROVAL":
+        if prot_trace.status == "WAITING_APPROVAL" or (prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN):
             render_html("""
             <div style="border: 1px solid #FDE68A; background-color: #FFFBEB; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
                 <div style="font-weight: 700; color: #92400E; margin-bottom: 4px;">Human Confirmation Required</div>
@@ -954,13 +1008,16 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             """)
             col_b1, col_b2 = st.columns(2)
             with col_b1:
-                if st.button("Approve Action", type="primary", use_container_width=True):
+                if st.button("Approve Action", type="primary", use_container_width=True, key="btn_appr_guard"):
                     st.session_state.human_approval_state = "APPROVED"
-                    st.success("Action approved by operator. Supervised dispatch permitted.")
             with col_b2:
-                if st.button("Deny & Block", type="secondary", use_container_width=True):
+                if st.button("Deny & Block", type="secondary", use_container_width=True, key="btn_deny_guard"):
                     st.session_state.human_approval_state = "REJECTED"
-                    st.error("Action denied by operator. External transmission blocked.")
+
+            if st.session_state.get("human_approval_state") == "APPROVED":
+                st.success("✅ **ACTION APPROVED**: Supervised dispatch authorized by operator.")
+            elif st.session_state.get("human_approval_state") == "REJECTED":
+                st.error("🛑 **ACTION DENIED**: External transmission cancelled and blocked.")
 
         st.markdown("##### Tool Calls Inspected by Action Guard")
         if prot_trace.tool_calls:
