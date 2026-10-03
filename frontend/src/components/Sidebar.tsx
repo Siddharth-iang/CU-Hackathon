@@ -18,30 +18,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-surface-primary border-r border-border-subtle z-50 flex flex-col justify-between select-none">
+    <aside className="fixed left-0 top-0 h-full w-60 bg-surface border-r border-border-subtle z-50 flex flex-col justify-between select-none transition-colors duration-150">
       <div className="flex flex-col">
         {/* Brand Header */}
-        <div className="h-[52px] px-space-md flex items-center gap-space-sm border-b border-border-subtle bg-surface-primary">
-          <SentinelLogo className="h-8 w-8 object-contain shrink-0" />
+        <div className="h-[52px] px-4 flex items-center gap-3 border-b border-border-subtle bg-surface">
+          <SentinelLogo className="h-7 w-7 object-contain shrink-0" />
           <div className="flex flex-col min-w-0">
-            <span className="font-headline-sm text-headline-sm text-text-primary tracking-tight leading-none">
+            <span className="text-sm font-bold text-text-primary tracking-tight leading-none">
               SENTINEL
             </span>
-            <span className="font-label-sm text-[10px] tracking-wider text-text-muted uppercase leading-none mt-space-2xs">
+            <span className="text-[9px] tracking-wider text-text-muted uppercase leading-none mt-1 font-semibold">
               AGENT SECURITY FIREWALL
             </span>
           </div>
         </div>
 
-        {/* Console Navigation Section */}
-        <div className="px-space-md pt-space-md pb-space-xs">
-          <span className="font-label-sm text-[10px] uppercase text-text-muted tracking-widest font-semibold">
+        {/* Section Label */}
+        <div className="px-4 pt-5 pb-2">
+          <span className="text-[10px] uppercase text-text-muted tracking-widest font-semibold">
             Console Navigation
           </span>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex flex-col gap-space-2xs px-space-xs">
+        <nav className="flex flex-col gap-1 px-2.5">
           {navItems.map((item) => {
             const isActive = currentTab === item.id;
             return (
@@ -49,11 +49,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
                 key={item.id}
                 onClick={() => onSelectTab(item.id)}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-space-sm px-space-sm py-2 rounded text-left transition-colors text-body-md font-body-md ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors text-xs font-medium ${
                   isActive
-                    ? 'bg-surface-secondary text-text-primary border-l-2 border-primary-container font-medium'
+                    ? 'bg-surface-secondary text-primary font-semibold'
                     : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary'
                 }`}
+                type="button"
               >
                 <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
                 <span>{item.label}</span>
@@ -64,29 +65,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
       </div>
 
       {/* Bottom Footer Section */}
-      <div className="flex flex-col border-t border-border-subtle bg-surface-primary">
-        <div className="px-space-md py-space-sm border-b border-border-subtle flex flex-col gap-space-2xs">
+      <div className="flex flex-col border-t border-border-subtle bg-surface">
+        <div className="px-4 py-3 border-b border-border-subtle flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="font-label-sm text-[10px] text-text-muted uppercase tracking-wider">System Status</span>
+            <span className="text-[10px] text-text-muted uppercase tracking-wider font-medium">System Status</span>
             <div className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-status-safe animate-pulse"></span>
-              <span className="font-label-sm text-[10px] font-medium text-status-safe uppercase">Online</span>
+              <span className="text-[10px] font-semibold text-status-safe uppercase">Online</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-body-sm font-body-sm">
-            <span className="font-label-sm text-[11px] text-text-muted">Engine Policy</span>
-            <span className="font-code-block text-[11px] text-text-secondary font-mono">v2.4.1-prod</span>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] text-text-muted">Engine Policy</span>
+            <span className="font-mono text-[11px] text-text-secondary">v2.4.1-prod</span>
           </div>
         </div>
 
-        <div className="p-space-xs">
+        <div className="p-2">
           <button
             onClick={() => onSelectTab('settings')}
-            className={`w-full flex items-center gap-space-sm px-space-sm py-2 rounded text-left transition-colors text-body-md font-body-md ${
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors text-xs font-medium ${
               currentTab === 'settings'
-                ? 'bg-surface-secondary text-text-primary border-l-2 border-primary-container font-medium'
+                ? 'bg-surface-secondary text-primary font-semibold'
                 : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary'
             }`}
+            type="button"
           >
             <span className="material-symbols-outlined text-[18px]">tune</span>
             <span>Settings</span>

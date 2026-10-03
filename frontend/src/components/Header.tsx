@@ -1,81 +1,101 @@
 import React, { useState } from 'react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme }) => {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <header className="fixed top-0 left-60 right-0 h-[52px] bg-surface-primary border-b border-border-subtle z-40 flex items-center justify-between px-space-lg select-none">
+    <header className="fixed top-0 left-60 right-0 h-[52px] bg-surface-primary border-b border-border-subtle z-40 flex items-center justify-between px-space-lg select-none transition-colors duration-150">
       <div className="flex items-center gap-space-md">
         {/* Protection Status Pill */}
-        <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded ${isPaused ? 'bg-[#E5A83B]/10 border border-[#E5A83B]/30' : 'bg-[#35C991]/10 border border-[#35C991]/30'}`}>
-          <span className={`h-2 w-2 rounded-sm ${isPaused ? 'bg-status-warning' : 'bg-status-safe'}`}></span>
-          <span className={`font-label-sm text-[11px] font-medium tracking-wide uppercase ${isPaused ? 'text-status-warning' : 'text-status-safe'}`}>
+        <div
+          className={`inline-flex items-center gap-2 px-3 py-1 rounded text-[12px] font-medium transition-colors ${
+            isPaused
+              ? 'bg-status-warning/10 border border-status-warning/30 text-status-warning'
+              : 'bg-status-safe/10 border border-status-safe/30 text-status-safe'
+          }`}
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              isPaused ? 'bg-status-warning' : 'bg-status-safe animate-pulse'
+            }`}
+          />
+          <span className="font-semibold tracking-wide">
             {isPaused ? 'Interception Paused' : 'Protection Active'}
           </span>
         </div>
 
-        <div className="h-4 w-px bg-border-subtle hidden xl:block"></div>
+        <div className="h-4 w-px bg-border-subtle hidden xl:block" />
 
         {/* Telemetry metadata */}
-        <div className="hidden xl:flex items-center gap-space-md font-label-sm text-[11px]">
+        <div className="hidden xl:flex items-center gap-space-md text-[12px]">
           <div className="flex items-center gap-1.5">
-            <span className="text-text-muted uppercase">Session:</span>
-            <span className="bg-surface-secondary text-text-primary px-1.5 py-0.5 rounded border border-border-subtle font-mono text-[11px]">
+            <span className="text-text-muted">Session:</span>
+            <span className="font-mono text-text-primary px-1.5 py-0.5 rounded bg-surface-secondary border border-border-subtle text-[11px]">
               SES-8F31A2
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-text-muted uppercase">Target:</span>
-            <span className="text-text-secondary font-mono text-[11px]">RAG-FinOps-v3</span>
+            <span className="text-text-muted">Target:</span>
+            <span className="font-mono text-text-secondary text-[11px]">RAG-FinOps-v3</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-text-muted uppercase">Latency:</span>
-            <span className="text-status-safe font-mono text-[11px]">624ms avg</span>
+            <span className="text-text-muted">Latency:</span>
+            <span className="text-status-safe font-medium">18ms</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-text-muted uppercase">Mode:</span>
-            <span className="text-primary font-mono text-[11px] font-medium">ENFORCING</span>
+            <span className="text-text-muted">Policy:</span>
+            <span className="text-primary font-semibold text-[11px] bg-primary/10 px-1.5 py-0.5 rounded">
+              ENFORCING
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-space-md">
-        <div className="flex items-center gap-space-xs">
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="h-7 px-2.5 bg-surface-secondary hover:bg-surface-elevated text-text-secondary hover:text-text-primary border border-border-subtle hover:border-border-strong rounded text-label-sm font-label-sm transition-colors flex items-center gap-1.5"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[14px]">
-              {isPaused ? 'play_arrow' : 'pause'}
-            </span>
-            <span>{isPaused ? 'Resume Interception' : 'Pause Interception'}</span>
-          </button>
+      <div className="flex items-center gap-space-sm">
+        {/* Light / Dark Mode Toggle */}
+        <button
+          onClick={onToggleTheme}
+          title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          className="h-8 px-2.5 bg-surface-secondary hover:bg-surface-elevated text-text-secondary hover:text-text-primary border border-border-subtle rounded text-[12px] font-medium transition-colors flex items-center gap-1.5"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[16px]">
+            {isDarkMode ? 'light_mode' : 'dark_mode'}
+          </span>
+          <span className="hidden sm:inline font-sans text-[11px]">
+            {isDarkMode ? 'Light' : 'Dark'}
+          </span>
+        </button>
 
-          <button
-            onClick={() => alert("Exporting JSON audit logs...")}
-            className="h-7 px-2.5 bg-surface-secondary hover:bg-surface-elevated text-text-secondary hover:text-text-primary border border-border-subtle hover:border-border-strong rounded text-label-sm font-label-sm transition-colors flex items-center gap-1.5"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[14px]">download</span>
-            <span>Export Logs</span>
-          </button>
-        </div>
+        {/* Interception Toggle */}
+        <button
+          onClick={() => setIsPaused(!isPaused)}
+          className="h-8 px-2.5 bg-surface-secondary hover:bg-surface-elevated text-text-secondary hover:text-text-primary border border-border-subtle rounded text-[12px] font-medium transition-colors flex items-center gap-1.5"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[16px]">
+            {isPaused ? 'play_arrow' : 'pause'}
+          </span>
+          <span className="hidden md:inline font-sans text-[11px]">
+            {isPaused ? 'Resume' : 'Pause'}
+          </span>
+        </button>
 
-        <div className="h-4 w-px bg-border-subtle"></div>
+        <div className="h-4 w-px bg-border-subtle" />
 
-        <div className="flex items-center gap-space-sm">
-          <span className="px-2 py-0.5 rounded bg-surface-secondary border border-border-subtle text-text-muted font-code-block text-[11px] font-mono uppercase">
+        {/* User Info / Environment */}
+        <div className="flex items-center gap-2 pl-1">
+          <span className="px-2 py-0.5 rounded bg-surface-secondary border border-border-subtle text-text-muted font-mono text-[11px] hidden sm:inline">
             PROD-US-EAST
           </span>
-          <div className="flex items-center gap-2 pl-1">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
-            </div>
-            <div className="hidden sm:flex flex-col text-left">
-              <span className="font-label-sm text-[11px] font-medium text-text-primary leading-tight">SEC-OPS</span>
-              <span className="font-label-sm text-[9px] text-text-muted uppercase leading-tight">L3 Engineer</span>
-            </div>
+          <div className="w-8 h-8 rounded-full bg-surface-secondary border border-border-subtle flex items-center justify-center text-text-primary font-semibold text-[12px]">
+            <span className="material-symbols-outlined text-[16px] text-primary">security</span>
           </div>
         </div>
       </div>
