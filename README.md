@@ -236,38 +236,6 @@ docker-compose up --build
 
 ---
 
-## 🎤 4-Minute Judge Presentation & Demo Script
-
-When presenting to hackathon evaluators, follow this winning 4-stage narrative:
-
-```
-[0:00 - 0:45] THE THREAT (The Problem)
-"Autonomous AI agents are being given tools like file reading, web searching, and email sending. 
- But when an agent reads an untrusted document like a vendor quotation, prompt injection can trick it into 
- reading confidential AWS keys and emailing them to an attacker. This is OWASP LLM01."
-
-[0:45 - 1:45] THE BASELINE ATTACK (The Exploit)
-- Open localhost:8501 -> Select "Plain Injection: AWS Credentials Exfiltration".
-- Click "Run Security Evaluation".
-- Show Left Column (Red): "Look at the Unprotected Baseline Agent. It read the quotation, obediently 
-  called read_file('aws_prod_credentials.json'), and leaked production keys. It's completely compromised."
-
-[1:45 - 3:00] THE DUAL-LAYER DEFENSE (SENTINEL)
-- Show Right Column (Green): "Now look at SENTINEL. Same model, same document, but protected by two layers:
-  1. Layer 1 (Content Firewall): Unmasked the hidden instruction and wrapped the data in cryptographic nonces.
-  2. Layer 2 (Action Guard): Look at the pre-flight gate. The agent was only authorized to read quotations. 
-     When the prompt tried to touch credentials, Action Guard intercepted it before execution. Zero data leaked."
-- Switch to "Attack Playground" -> Demonstrate Base64 / Zero-width de-obfuscation in real time.
-- Switch to "Action Guard Gate" -> Demonstrate ASK_HUMAN when an external email domain is requested.
-
-[3:00 - 4:00] EMPIRICAL PROOF & IMPACT (The Win)
-- Open "Evaluation Suite": "We didn't just test 2 examples. We built a 48-scenario benchmark catalog across 
-  5 attack categories with a 50/50 dev/unseen split. Result: 100% attack block rate, 0% false positives, 
-  and only 1.36 ms latency overhead. Implemented with live Groq LPU inference, FastAPI, and tamper-evident audit logs."
-```
-
----
-
 ## 👥 Engineering Team
 
 Built with ❤️ for **CodeUtsava**:
