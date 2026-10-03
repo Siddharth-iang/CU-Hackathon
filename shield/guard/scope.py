@@ -40,9 +40,9 @@ def extract_scope(user_prompt: str) -> Scope:
     allowed_recipients = [e.rstrip(".,;:") for e in raw_emails]
 
     # 3. Specific document paths mentioned
-    file_matches = re.findall(r"[\w-]+\.(?:txt|pdf|md|json|csv)", user_prompt)
+    file_matches = re.findall(r"[\w./\\-]+\.(?:txt|pdf|md|json|csv)", user_prompt)
     for fname in file_matches:
-        if not any(c in fname.lower() for c in ["confidential", "aws", "salary", "api_key"]):
+        if not any(c in fname.lower() for c in ["confidential", "aws", "salary", "api_key", "pvt", "private", ".env", ".ssh", "secret", "credentials"]):
             allowed_paths.append(fname)
             allowed_paths.append(f"data/quotes/{fname}")
 

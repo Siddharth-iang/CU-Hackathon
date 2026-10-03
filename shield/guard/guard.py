@@ -4,8 +4,21 @@ from typing import Dict, Any, Optional
 from shield.models import ToolCall, Scope, Decision
 from shield.sandbox import Sandbox, CANARIES
 
-FORBIDDEN_PATHS = ["confidential", "aws_prod_credentials", "salary.csv", "api_keys.txt"]
+FORBIDDEN_PATHS = [
+    "confidential", "aws_prod_credentials", "salary.csv", "api_keys.txt",
+    "pvt", "private", ".env", ".ssh", ".aws", "credentials", "secrets",
+    "passwd", "shadow", "api_key", "secret_key"
+]
 INTERNAL_EMAIL_DOMAINS = ["@company.com", "@sentinel-enterprise.internal", "@internal.corp"]
+
+CREDENTIAL_ASSIGNMENT_PATTERN = re.compile(
+    r"(?i)\b(api_key|secret_key|access_key|token|auth_token|bearer)\s*=",
+    re.IGNORECASE
+)
+PRIVATE_DIRECTORY_PATTERN = re.compile(
+    r"(?i)(?:^|[/\\])(?:pvt|private|confidential|\.env|\.ssh|\.aws|secrets?)(?:[/\\]|$)",
+    re.IGNORECASE
+)
 
 import urllib.parse
 
@@ -25,11 +38,12 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
     Phase 7 & 12: Action Guard (Hardened Output-Side Defense Gate).
     Performs deterministic pre-flight inspection before any tool execution:
     1. Tool call integrity validation (fail-closed on null/malformed).
-    2. Tool authorization within Scope.
-    3. Path validation (preventing access to confidential, un-scoped files, directory traversals, drive escapes).
-    4. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
-    5. Taint & Canary tracking (blocking exfiltration of canary tokens in any argument).
-    6. Database integrity (blocking unauthorized write_record to audit logs).
+    2. Global parameter inspection (deterministic blocking of API_KEY= assignments).
+    3. Tool authorization within Scope.
+    4. Path validation (preventing access to confidential/pvt directories, un-scoped files, directory traversals, drive escapes).
+    5. Recipient containment (blocking external addresses, triggering ASK_HUMAN for ambiguous perimeters).
+    6. Taint & Canary tracking (blocking exfiltration of canary tokens in any argument).
+    7. Database integrity (blocking unauthorized write_record to audit logs).
     """
     if not tool_call or not getattr(tool_call, "tool", None):
         return Decision(
@@ -41,6 +55,17 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
 
     tool_name = tool_call.tool
     args = tool_call.args if isinstance(tool_call.args, dict) else {}
+
+    # 0. Global Parameter Inspection (Deterministic blocking of API_KEY= or credentials in any tool argument)
+    args_str = str(args)
+    cred_match = CREDENTIAL_ASSIGNMENT_PATTERN.search(args_str)
+    if cred_match:
+        return Decision(
+            verdict="BLOCK",
+            rule="credential_key_pattern_blocked",
+            reason=f"Tool invocation blocked: parameter contains sensitive credential assignment '{cred_match.group(0)}'.",
+            evidence=cred_match.group(0)
+        )
 
     # 1. Tool Authorization Check
     if tool_name not in scope.allowed_tools:
@@ -57,15 +82,16 @@ def evaluate_tool_call(tool_call: ToolCall, scope: Scope, sandbox: Optional[Sand
         # Normalize and unquote URL-encoded traversals (%2e%2e, %2f, etc.)
         norm_path = urllib.parse.unquote(raw_path).replace("\\", "/")
         
-        # Check traversal escapes, root indicators, drive letters, and confidential paths
+        # Check traversal escapes, root indicators, drive letters, and confidential/private paths
         is_traversal = ".." in norm_path or norm_path.startswith("/") or bool(re.match(r"^[a-zA-Z]:", norm_path))
-        is_confidential = any(bad in norm_path.lower() for bad in FORBIDDEN_PATHS)
+        is_private_dir = bool(PRIVATE_DIRECTORY_PATTERN.search(norm_path))
+        is_confidential = is_private_dir or any(bad in norm_path.lower() for bad in FORBIDDEN_PATHS)
 
         if is_traversal or is_confidential:
             return Decision(
                 verdict="BLOCK",
                 rule="confidential_path_access",
-                reason=f"Attempted access to confidential or restricted path: '{raw_path}'",
+                reason=f"Attempted access to private directory or restricted path: '{raw_path}'",
                 evidence=raw_path
             )
 

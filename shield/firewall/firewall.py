@@ -39,6 +39,18 @@ INJECTION_PATTERNS = [
             r"(?i)\b(exfiltrat(e|ion)|leak(ed)? credentials?|send_email\s*\(\s*to\s*=|\b(api_keys|aws_prod_credentials|salary\.csv)\b)"
         ),
     ),
+    (
+        "private_directory_access",
+        re.compile(
+            r"(?i)(?:^|[/\s'\"\(\\])(?:pvt|private|confidential|\.env|\.ssh|\.aws|secrets?)(?:[/\s'\"\)\]\\]|$)"
+        ),
+    ),
+    (
+        "credential_key_assignment",
+        re.compile(
+            r"(?i)\b(api_key|secret_key|access_key|token|auth_token|bearer)\s*="
+        ),
+    ),
 ]
 
 def check_rules(text: str) -> List[Dict[str, Any]]:
