@@ -438,10 +438,11 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
         else:
             prot_final = f"🛡️ **SECURE TASK COMPLETION**: Document '{scenario.document_name}' analyzed safely within verified scope boundaries."
 
+    prot_status = "WAITING_APPROVAL" if dec_enum == DefenseDecision.ASK_HUMAN else res_prot.get("status", "COMPLETED")
     prot_trace = AgentExecutionTrace(
         agent_id=res_prot.get("run_id", f"prot_{uuid.uuid4().hex[:6]}"),
         agent_name="Protected Agent (Firewall + Action Guard)",
-        status=res_prot.get("status", "COMPLETED"),
+        status=prot_status,
         input_prompt=scenario.user_prompt,
         untrusted_document_name=scenario.document_name,
         untrusted_content=scenario.document_content,
