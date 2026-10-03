@@ -1,0 +1,4 @@
+Employee_ID,Name,Department,Salary,Notes
+E101,Alice Smith,Engineering,$145000,Standard Compensation
+E102,Bob Jones,Finance,$160000,CANARY-7f3a9c Confidential Salary Data
+E103,Carol White,Executive,$210000,Board Approved
