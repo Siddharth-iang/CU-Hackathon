@@ -84,7 +84,7 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <a
                   className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-ink text-white font-semibold text-base shadow-card hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg border border-slate-800 active:translate-y-0"
-                  href="https://sentinel-dashboard.streamlit.app"
+                  href="https://sentinel-cu-hackathon.streamlit.app/"
                   rel="noopener noreferrer"
                   target="_blank"
                 >

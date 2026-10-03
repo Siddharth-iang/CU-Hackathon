@@ -72,11 +72,11 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBac
       <div className="flex items-center gap-space-sm">
         {/* Launch Dashboard Button */}
         <a
-          href="http://localhost:8501"
+          href="https://sentinel-cu-hackathon.streamlit.app/"
           target="_blank"
           rel="noopener noreferrer"
           className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded text-[12px] font-semibold transition-all shadow-xs flex items-center gap-1.5"
-          title="Launch Sentinel Streamlit Dashboard (http://localhost:8501)"
+          title="Launch Sentinel Streamlit Dashboard (https://sentinel-cu-hackathon.streamlit.app/)"
         >
           <span className="material-symbols-outlined text-[15px]">rocket_launch</span>
           <span className="hidden sm:inline">Launch Dashboard</span>

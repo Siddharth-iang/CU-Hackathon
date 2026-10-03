@@ -27,7 +27,7 @@ export const FinalCtaSection: React.FC = () => {
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <a
-            href="https://sentinel-dashboard.streamlit.app"
+            href="https://sentinel-cu-hackathon.streamlit.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-ink font-bold text-base shadow-float hover:bg-slate-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"

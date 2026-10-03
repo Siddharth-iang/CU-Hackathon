@@ -1,14 +1,24 @@
 # 🛡️ SENTINEL // PromptShield
 ### Enterprise Dual-Layer Security Firewall & Pre-Flight Action Guard for Autonomous LLM Agents
 
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Landing%20Page-black?style=flat&logo=vercel)](https://cu-hackathon-kappa.vercel.app/)
+[![Streamlit Cloud](https://img.shields.io/badge/Streamlit-Live%20Dashboard-FF4B4B?style=flat&logo=streamlit)](https://sentinel-cu-hackathon.streamlit.app/)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.55-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![Groq LPU](https://img.shields.io/badge/Groq-Llama%203.3%20%2F%20Qwen-F55036.svg)](https://groq.com)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
 [![Security Standard](https://img.shields.io/badge/OWASP-LLM01%20%7C%20LLM02%20Mitigated-success.svg)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 [![Compliance](https://img.shields.io/badge/SOC2-CC6.1%20%7C%20CC6.6%20%7C%20CC6.8-blueviolet.svg)](https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## 🌐 Live Production Deployments
+
+| Component | Production URL | Description |
+| :--- | :--- | :--- |
+| **🚀 Landing Page (Vercel)** | **[https://cu-hackathon-kappa.vercel.app/](https://cu-hackathon-kappa.vercel.app/)** | Award-winning zero-trust AI perimeter landing page with interactive 2D living canvas, threat simulation & benchmarks |
+| **🛡️ Security Console (Streamlit)** | **[https://sentinel-cu-hackathon.streamlit.app/](https://sentinel-cu-hackathon.streamlit.app/)** | Live interactive enterprise dashboard, attack playground, policy studio, forensic replay & evaluation |
 
 ---
 
@@ -253,12 +263,23 @@ LLM_MODEL=qwen/qwen3.8-27b
 *(Note: If no API key is provided, SENTINEL automatically activates the zero-failure deterministic simulation engine, ensuring 100% offline uptime during demos).*
 
 ### 3. Launch the Interactive UI Dashboard
+- **Live Streamlit Cloud Deployment**: **[https://sentinel-cu-hackathon.streamlit.app/](https://sentinel-cu-hackathon.streamlit.app/)**
+- **Or run locally**:
 ```bash
 python -m streamlit run app.py --server.port 8501
 ```
 Open **[http://localhost:8501](http://localhost:8501)** in your browser.
 
-### 4. Launch the Headless REST API
+### 4. Launch the Frontend Landing Page
+- **Live Vercel Deployment**: **[https://cu-hackathon-kappa.vercel.app/](https://cu-hackathon-kappa.vercel.app/)**
+- **Or run locally**:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 5. Launch the Headless REST API
 ```bash
 python -m uvicorn api.main:app --port 8000 --reload
 ```

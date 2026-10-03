@@ -69,7 +69,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-3">
           <a
             className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink text-white font-medium text-sm shadow-subtle hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg border border-slate-800 active:translate-y-0 cursor-pointer"
-            href="https://sentinel-dashboard.streamlit.app"
+            href="https://sentinel-cu-hackathon.streamlit.app/"
             target="_blank"
             rel="noopener noreferrer"
           >
