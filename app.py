@@ -630,7 +630,7 @@ def render_scenario_context(sc):
             st.caption("Exact raw content received by the agent environment:")
             st.code(sc.document_content, language="markdown")
         with c2:
-            st.markdown("##### 🎯 User Prompt & Attack Objective")
+            st.markdown("#####  User Prompt & Attack Objective")
             st.markdown("**Authorized User Prompt:**")
             st.info(sc.user_prompt)
             if sc.injection_payload:
