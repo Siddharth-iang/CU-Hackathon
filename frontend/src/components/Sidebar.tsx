@@ -6,9 +6,10 @@ export type NavTab = 'overview' | 'attack-playground' | 'action-guard' | 'audit-
 interface SidebarProps {
   currentTab: NavTab;
   onSelectTab: (tab: NavTab) => void;
+  onBackToLanding?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onBackToLanding }) => {
   const navItems: { id: NavTab; label: string; icon: string }[] = [
     { id: 'overview', label: 'Overview', icon: 'security' },
     { id: 'attack-playground', label: 'Attack Playground', icon: 'terminal' },
@@ -21,16 +22,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
     <aside className="fixed left-0 top-0 h-full w-60 bg-surface border-r border-border-subtle z-50 flex flex-col justify-between select-none transition-colors duration-150">
       <div className="flex flex-col">
         {/* Brand Header */}
-        <div className="h-[52px] px-4 flex items-center gap-3 border-b border-border-subtle bg-surface">
-          <SentinelLogo className="h-7 w-7 object-contain shrink-0" />
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-text-primary tracking-tight leading-none">
-              SENTINEL
-            </span>
-            <span className="text-[9px] tracking-wider text-text-muted uppercase leading-none mt-1 font-semibold">
-              AGENT SECURITY FIREWALL
-            </span>
+        <div className="h-[52px] px-4 flex items-center justify-between border-b border-border-subtle bg-surface">
+          <div className="flex items-center gap-2.5">
+            <SentinelLogo className="h-6 w-6 object-contain shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-text-primary tracking-tight leading-none">
+                SENTINEL
+              </span>
+              <span className="text-[8px] tracking-wider text-text-muted uppercase leading-none mt-1 font-semibold">
+                SECURITY GATEWAY
+              </span>
+            </div>
           </div>
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="p-1 text-text-muted hover:text-primary hover:bg-surface-secondary rounded transition-colors"
+              title="Return to Landing Page"
+            >
+              <span className="material-symbols-outlined text-[18px]">home</span>
+            </button>
+          )}
         </div>
 
         {/* Section Label */}

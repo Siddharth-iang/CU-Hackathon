@@ -3,14 +3,27 @@ import React, { useState } from 'react';
 interface HeaderProps {
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  onBackToLanding?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme }) => {
+export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBackToLanding }) => {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
     <header className="fixed top-0 left-60 right-0 h-[52px] bg-surface-primary border-b border-border-subtle z-40 flex items-center justify-between px-space-lg select-none transition-colors duration-150">
       <div className="flex items-center gap-space-md">
+        {onBackToLanding && (
+          <button
+            onClick={onBackToLanding}
+            className="h-8 px-2.5 bg-surface-secondary hover:bg-surface-elevated text-text-secondary hover:text-text-primary border border-border-subtle rounded text-[12px] font-medium transition-colors flex items-center gap-1.5 mr-2"
+            type="button"
+            title="Return to Landing Page"
+          >
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>Landing Page</span>
+          </button>
+        )}
+
         {/* Protection Status Pill */}
         <div
           className={`inline-flex items-center gap-2 px-3 py-1 rounded text-[12px] font-medium transition-colors ${
@@ -57,6 +70,19 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme }) => 
       </div>
 
       <div className="flex items-center gap-space-sm">
+        {/* Launch Dashboard Button */}
+        <a
+          href="http://localhost:8501"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded text-[12px] font-semibold transition-all shadow-xs flex items-center gap-1.5"
+          title="Launch Sentinel Streamlit Dashboard (http://localhost:8501)"
+        >
+          <span className="material-symbols-outlined text-[15px]">rocket_launch</span>
+          <span className="hidden sm:inline">Launch Dashboard</span>
+          <span className="material-symbols-outlined text-[13px] opacity-80">open_in_new</span>
+        </a>
+
         {/* Light / Dark Mode Toggle */}
         <button
           onClick={onToggleTheme}

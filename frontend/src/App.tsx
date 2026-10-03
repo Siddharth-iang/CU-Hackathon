@@ -6,13 +6,18 @@ import { AttackPlaygroundView } from './components/AttackPlaygroundView';
 import { ActionGuardView } from './components/ActionGuardView';
 import { AuditLogView } from './components/AuditLogView';
 import { EvaluationView } from './components/EvaluationView';
+import { LandingPage } from './components/landing/LandingPage';
 
 export const App: React.FC = () => {
+  // Default view is the Landing Page
+  const [viewMode, setViewMode] = useState<'landing' | 'console'>('landing');
   const [currentTab, setCurrentTab] = useState<NavTab>('overview');
+
+  // Default to light theme per user specification
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('sentinel_theme');
     if (saved) return saved === 'dark';
-    return true; // default dark, user can toggle to light
+    return false; // User requested: theme will be light
   });
 
   useEffect(() => {
@@ -29,15 +34,29 @@ export const App: React.FC = () => {
     setIsDarkMode((prev) => !prev);
   };
 
+  // If in landing page view mode, display the rich landing page
+  if (viewMode === 'landing') {
+    return <LandingPage />;
+  }
+
+  // Console view mode
   return (
     <div className="bg-canvas min-h-screen font-sans text-text-primary antialiased transition-colors duration-150">
       {/* Fixed Left Sidebar */}
-      <Sidebar currentTab={currentTab} onSelectTab={setCurrentTab} />
+      <Sidebar
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        onBackToLanding={() => setViewMode('landing')}
+      />
 
       {/* Main Content Area */}
       <div className="pl-60">
         {/* Fixed Top Header */}
-        <Header isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
+        <Header
+          isDarkMode={isDarkMode}
+          onToggleTheme={toggleTheme}
+          onBackToLanding={() => setViewMode('landing')}
+        />
 
         {/* Dynamic View Router */}
         <main className="relative pt-[52px] bg-canvas min-h-screen">
