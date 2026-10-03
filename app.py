@@ -611,6 +611,46 @@ render_html(f"""
 </div>
 """)
 
+# -----------------------------------------------------------------------------
+# FULL-WINDOW MODAL DIALOGS
+# -----------------------------------------------------------------------------
+@st.dialog("📄 Complete Untrusted Document Viewer", width="large")
+def show_document_dialog(doc_name: str, doc_content: str):
+    st.markdown(f"#### 📄 Raw Ingested Document: `{doc_name}`")
+    st.caption("Complete unmodified text ingested into the agent context retrieval pipeline:")
+    st.text_area("Full Document Text", value=doc_content, height=420, disabled=True, label_visibility="collapsed")
+    col_d1, col_d2 = st.columns([1, 1])
+    with col_d1:
+        st.download_button(
+            label="📥 Download Raw Document",
+            data=doc_content,
+            file_name=doc_name,
+            mime="text/plain",
+            use_container_width=True,
+            key=f"dlg_dl_doc_{doc_name}"
+        )
+    with col_d2:
+        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_doc_{doc_name}"):
+            st.rerun()
+
+@st.dialog("📋 SOC2 & OWASP Forensic Incident Audit Report", width="large")
+def show_soc2_dialog(report_text: str, scenario_id: str):
+    st.markdown(report_text)
+    st.markdown("---")
+    col_d1, col_d2 = st.columns([1, 1])
+    with col_d1:
+        st.download_button(
+            label="📥 Export Report (.md)",
+            data=report_text,
+            file_name=f"sentinel_soc2_report_{scenario_id}.md",
+            mime="text/markdown",
+            use_container_width=True,
+            key=f"dlg_dl_soc2_{scenario_id}"
+        )
+    with col_d2:
+        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_soc2_{scenario_id}"):
+            st.rerun()
+
 # Helper function to render active scenario context banner
 def render_scenario_context(sc):
     s_badge = '<span class="pill-info">Unseen Test Set</span>' if sc.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
@@ -636,18 +676,27 @@ def render_scenario_context(sc):
     with st.expander(f"👁️ Preview Complete Document & Injected Prompt ({sc.document_name})", expanded=False):
         c1, c2 = st.columns([1, 1])
         with c1:
-            st.markdown(f"##### 📄 Full Untrusted Document: `{sc.document_name}`")
+            h_col1, h_col2 = st.columns([2, 1])
+            with h_col1:
+                st.markdown(f"##### 📄 Full Untrusted Document: `{sc.document_name}`")
+            with h_col2:
+                if st.button("⛶ Full Window", key=f"btn_fs_doc_{sc.id}", help="Open full document in large window"):
+                    show_document_dialog(sc.document_name, sc.document_content)
             st.caption("Exact raw content received by the agent environment:")
             st.code(sc.document_content, language="markdown")
         with c2:
-            st.markdown("#####  User Prompt & Attack Objective")
+            st.markdown("##### 🎯 User Prompt & Attack Objective")
             st.markdown("**Authorized User Prompt:**")
             st.info(sc.user_prompt)
             if sc.injection_payload:
                 st.markdown("**Adversarial Injected Instruction:**")
                 st.error(sc.injection_payload)
             st.markdown("**Expected Attacker Exploit Action:**")
-            st.code(sc.expected_exploit_action, language="text")
+            render_html(f"""
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-left: 3px solid #EF4444; border-radius: 6px; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #1E293B; line-height: 1.5; white-space: pre-wrap; word-break: break-word;">
+{sc.expected_exploit_action}
+            </div>
+            """)
 
     if st.session_state.get("last_prot_trace") is not None:
         soc2_rep = generate_soc2_incident_report(
@@ -657,18 +706,33 @@ def render_scenario_context(sc):
             policy_tier=st.session_state.get("policy_profile_selected", "Standard (Enterprise)"),
             session_id="SES-8F31A2"
         )
-        col_rep1, col_rep2 = st.columns([1, 1])
+        render_html("""
+        <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 13.5px; font-weight: 700; color: #111827;">📋 SOC2 & OWASP Forensic Audit Evidence</span>
+                    <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">Type-II Certified</span>
+                    <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">LLM01 / LLM02</span>
+                </div>
+                <div style="font-size: 11px; color: #6B7280;">
+                    SHA-256 Tamper-Sealed Audit Artifact
+                </div>
+            </div>
+        </div>
+        """)
+        col_rep1, col_rep2 = st.columns(2)
         with col_rep1:
+            if st.button("👁️ Preview Audit Report (Full Window)", key=f"btn_prev_soc2_{sc.id}", use_container_width=True):
+                show_soc2_dialog(soc2_rep, sc.id)
+        with col_rep2:
             st.download_button(
-                label="📄 Export Forensic Incident Report (SOC2 & OWASP)",
+                label="📥 Export Audit Report (.md)",
                 data=soc2_rep,
-                file_name=f"sentinel_incident_report_{sc.id}.md",
+                file_name=f"sentinel_soc2_report_{sc.id}.md",
                 mime="text/markdown",
+                key=f"btn_dl_soc2_{sc.id}",
                 use_container_width=True
             )
-        with col_rep2:
-            with st.expander("👁️ Preview SOC2 & OWASP Audit Report", expanded=False):
-                st.markdown(soc2_rep)
 
 # -----------------------------------------------------------------------------
 # SIMULATION ENGINE EXECUTION (DYNAMIC ONLY ON EXPLICIT USER TRIGGER)
