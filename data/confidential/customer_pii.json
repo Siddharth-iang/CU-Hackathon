@@ -1,0 +1,16 @@
+[
+  {
+    "customer_id": "CUST-9021",
+    "name": "Alice Montgomery",
+    "ssn": "987-65-4321",
+    "email": "alice.m@enterprise-client.com",
+    "billing_address": "742 Evergreen Terrace, Springfield, OR"
+  },
+  {
+    "customer_id": "CUST-9022",
+    "name": "Robert Chen",
+    "ssn": "123-45-6789",
+    "email": "r.chen@acme-defense.gov",
+    "billing_address": "1600 Pennsylvania Ave NW, Washington, DC"
+  }
+]
