@@ -10,7 +10,8 @@ from core.reporting import generate_soc2_incident_report
 from core.policy_studio import POLICY_PROFILES, evaluate_custom_policy
 from core.fuzzer import MUTATION_STRATEGIES, fuzz_scenario
 from core.benchmark import run_live_benchmark
-from core.replay import generate_milestone_timeline
+from core.replay import generate_milestone_timeline, render_replay_html
+import streamlit.components.v1 as components
 from shield.audit import AuditLogger
 from shield.config import config
 
@@ -407,41 +408,6 @@ st.markdown("""
     .tt-milestone-card:hover {
         border-color: #CBD5E1 !important;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
-    }
-
-    /* Small Milestone Dots directly along the Slider Timeline Track Line */
-    div[data-testid="stSlider"] div[data-baseweb="slider"] {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-    }
-
-    div[data-testid="stSlider"] div[data-baseweb="slider"] > div:first-child {
-        position: relative !important;
-        overflow: visible !important;
-        height: 6px !important;
-        background-color: #E2E8F0 !important;
-        border-radius: 3px !important;
-        background-image: 
-            radial-gradient(circle 3.5px at 0% 50%, #64748B 99%, transparent 100%),
-            radial-gradient(circle 3.5px at 25% 50%, #64748B 99%, transparent 100%),
-            radial-gradient(circle 3.5px at 50% 50%, #64748B 99%, transparent 100%),
-            radial-gradient(circle 3.5px at 75% 50%, #64748B 99%, transparent 100%),
-            radial-gradient(circle 3.5px at 100% 50%, #64748B 99%, transparent 100%) !important;
-        background-repeat: no-repeat !important;
-    }
-
-    /* Style slider thumb knob with smooth hover ring */
-    div[data-testid="stSlider"] div[role="slider"] {
-        width: 18px !important;
-        height: 18px !important;
-        background-color: #2563EB !important;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
-        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-    }
-
-    div[data-testid="stSlider"] div[role="slider"]:hover {
-        transform: scale(1.15) !important;
-        box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.35) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -894,89 +860,9 @@ def show_time_travel_dialog(sc, prot, unprot=None):
     Full-window modal dialog for interactive incident time-travel replay with fluid animations.
     """
     milestones = generate_milestone_timeline(sc, prot, unprot)
-    tot_lat = getattr(prot, "total_latency_ms", 111.0)
-    
-    # Dialog Top Header Card
-    render_html(f"""
-    <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px; font-weight: 700; color: #111827;">Target: {sc.title}</span>
-                    <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">5-Stage Execution Scrubber</span>
-                    <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">T=0.0ms → T=+{tot_lat}ms</span>
-                </div>
-                <div style="font-size: 12px; color: #6B7280; margin-top: 4px;">
-                    Sub-millisecond forensic execution scrubber across Ingestion, L1 Firewall, LLM Reasoning, and L2 Action Guard.
-                </div>
-            </div>
-        </div>
-    </div>
-    """)
+    replay_html = render_replay_html(sc, prot, unprot)
+    components.html(replay_html, height=495, scrolling=False)
 
-    # Interactive Step Slider with concise step labels
-    step_options = [1, 2, 3, 4, 5]
-    step_labels = {
-        1: "1. Ingest",
-        2: "2. L1 Firewall",
-        3: "3. LLM Reason",
-        4: "4. L2 Guard",
-        5: "5. Audit Seal"
-    }
-    
-    selected_step = st.select_slider(
-        "Scrub Incident Milestones",
-        options=step_options,
-        value=5,
-        format_func=lambda s: step_labels[s],
-        key="dlg_tt_slider"
-    )
-
-    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-
-    # Active Milestone Card with Fluid Slide-In Animation
-    m = milestones[selected_step - 1]
-    
-    render_html(f"""
-    <div class="tt-milestone-card" style="background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid {m['status_color']}; border-radius: 8px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 12.5px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 3px 9px; border-radius: 5px; font-family: 'JetBrains Mono', monospace;">
-                    {m['timestamp']}
-                </span>
-                <span style="font-size: 16px; font-weight: 700; color: #111827;">
-                    {m['title']}
-                </span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-                <span style="font-size: 10.5px; font-weight: 700; color: #4B5563; background: #F3F4F6; padding: 3px 9px; border-radius: 5px; text-transform: uppercase;">
-                    {m['layer']}
-                </span>
-                <span style="font-size: 11px; font-weight: 700; color: {m['status_color']}; background: #F8FAFC; border: 1px solid {m['status_color']}40; padding: 3px 9px; border-radius: 5px;">
-                    {m['status']}
-                </span>
-            </div>
-        </div>
-        <p style="font-size: 13.5px; color: #374151; margin-bottom: 14px; line-height: 1.5;">
-            {m['summary']}
-        </p>
-    </div>
-    """)
-
-    # Detail Parameters Grid
-    det_cols = st.columns(len(m["details"]))
-    for col, (k, v) in zip(det_cols, m["details"].items()):
-        with col:
-            render_html(f"""
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 12px; height: 100%;">
-                <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px;">{k}</div>
-                <div style="font-size: 12px; color: #1E293B; font-weight: 500; word-break: break-word;">{v}</div>
-            </div>
-            """)
-
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.markdown("---")
-    
     col_d1, col_d2 = st.columns([1, 1])
     with col_d1:
         st.download_button(
