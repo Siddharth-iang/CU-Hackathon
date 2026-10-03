@@ -606,7 +606,7 @@ def render_scenario_context(sc):
     s_badge = '<span class="pill-info">Unseen Test Set</span>' if sc.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
     c_badge = '<span class="pill-safe">Benign Task</span>' if sc.category == AttackCategory.BENIGN else f'<span class="pill-critical">{sc.category.value}</span>'
     render_html(f"""
-    <div class="sentinel-card" style="padding: 14px 20px; margin-bottom: 20px; background-color: #FFFFFF; border: 1px solid #E5E7EB;">
+    <div class="sentinel-card" style="padding: 14px 20px; margin-bottom: 8px; background-color: #FFFFFF; border: 1px solid #E5E7EB;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 14px; font-weight: 700; color: #111827;">Target Scenario: {sc.title}</span>
@@ -622,6 +622,22 @@ def render_scenario_context(sc):
         </div>
     </div>
     """)
+
+    with st.expander(f"👁️ Preview Complete Document & Injected Prompt ({sc.document_name})", expanded=False):
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            st.markdown(f"##### 📄 Full Untrusted Document: `{sc.document_name}`")
+            st.caption("Exact raw content received by the agent environment:")
+            st.code(sc.document_content, language="markdown")
+        with c2:
+            st.markdown("##### 🎯 User Prompt & Attack Objective")
+            st.markdown("**Authorized User Prompt:**")
+            st.info(sc.user_prompt)
+            if sc.injection_payload:
+                st.markdown("**Adversarial Injected Instruction:**")
+                st.error(sc.injection_payload)
+            st.markdown("**Expected Attacker Exploit Action:**")
+            st.code(sc.expected_exploit_action, language="text")
 
 # -----------------------------------------------------------------------------
 # SIMULATION ENGINE EXECUTION (DYNAMIC ONLY ON EXPLICIT USER TRIGGER)
