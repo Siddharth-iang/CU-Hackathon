@@ -397,6 +397,15 @@ if "current_scenario" not in st.session_state:
 if "human_approval_state" not in st.session_state:
     st.session_state.human_approval_state = "IDLE"
 
+if "has_evaluated" not in st.session_state:
+    st.session_state.has_evaluated = False
+
+if "current_scenario_id" not in st.session_state:
+    st.session_state.current_scenario_id = None
+
+if "trigger_run" not in st.session_state:
+    st.session_state.trigger_run = False
+
 # -----------------------------------------------------------------------------
 # SIDEBAR: EXACT SENTINEL BRANDING, NAVIGATION & CONFIGURATION
 # -----------------------------------------------------------------------------
@@ -475,6 +484,14 @@ with st.sidebar:
         selected_index = scenario_options.index(selected_option)
         active_scenario = filtered_scenarios[selected_index]
 
+    # Reset evaluation state if user switches scenarios
+    current_id = active_scenario.id if hasattr(active_scenario, "id") else active_scenario.title
+    if st.session_state.current_scenario_id != current_id:
+        st.session_state.current_scenario_id = current_id
+        st.session_state.has_evaluated = False
+        st.session_state.last_unprot_trace = None
+        st.session_state.last_prot_trace = None
+
     st.session_state.current_scenario = active_scenario
 
     render_html('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>')
@@ -518,7 +535,17 @@ with st.sidebar:
 # TOP HEADER BAR MATCHING Header.tsx
 # -----------------------------------------------------------------------------
 is_fully_protected = enable_firewall and enable_action_guard
-status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> Protection Active</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span> Interception Paused</span>'
+has_eval = st.session_state.get("has_evaluated", False) and st.session_state.get("last_prot_trace") is not None
+
+if has_eval:
+    status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> Protection Active</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span> Interception Paused</span>'
+    latency_text = f"{st.session_state.last_prot_trace.total_latency_ms}ms avg"
+    latency_color = "#10B981"
+else:
+    status_pill = '<span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> STANDBY // AWAITING RUN</span>'
+    latency_text = "Standby"
+    latency_color = "#6B7280"
+
 mode_text = "ENFORCING" if is_fully_protected else ("PARTIAL" if (enable_firewall or enable_action_guard) else "DISABLED")
 mode_pill = f'<span class="pill-info" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>' if is_fully_protected else f'<span class="pill-warning" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>'
 
@@ -544,7 +571,7 @@ render_html(f"""
         </div>
         <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
             <span style="color: #6B7280;">Latency:</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #10B981; font-weight: 600;">18ms avg</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {latency_color}; font-weight: 600;">{latency_text}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
             <span style="color: #6B7280;">Policy:</span>
@@ -597,36 +624,92 @@ def render_scenario_context(sc):
     """)
 
 # -----------------------------------------------------------------------------
-# SIMULATION ENGINE EXECUTION
+# SIMULATION ENGINE EXECUTION (DYNAMIC ONLY ON EXPLICIT USER TRIGGER)
 # -----------------------------------------------------------------------------
-if run_btn or st.session_state.last_unprot_trace is None:
-    if "Live Core" in defense_engine:
-        unprot, prot = execute_live_shield(active_scenario)
-    else:
-        unprot, prot = simulate_execution(active_scenario)
-    st.session_state.last_unprot_trace = unprot
-    st.session_state.last_prot_trace = prot
-    st.session_state.human_approval_state = "IDLE"
+is_run_triggered = run_btn or st.session_state.get("trigger_run", False)
+if st.session_state.get("trigger_run", False):
+    st.session_state.trigger_run = False
 
-    log_entry = {
-        "timestamp": time.strftime("%H:%M:%S"),
-        "scenario_id": active_scenario.id,
-        "title": active_scenario.title,
-        "category": active_scenario.category.value,
-        "split": "Unseen" if active_scenario.is_unseen_split else "Development",
-        "firewall_flagged": prot.firewall_result.is_flagged if prot.firewall_result else False,
-        "guard_decision": prot.guard_result.decision.value if prot.guard_result else "ALLOW",
-        "rule_violated": prot.guard_result.rule_violated if prot.guard_result else "NONE",
-        "unprotected_status": unprot.status,
-        "protected_status": prot.status,
-        "firewall_latency_ms": prot.firewall_result.latency_ms if prot.firewall_result else 0.0,
-        "guard_latency_ms": prot.guard_result.latency_ms if prot.guard_result else 0.0,
-        "total_latency_ms": prot.total_latency_ms
-    }
-    st.session_state.audit_logs.insert(0, log_entry)
+if is_run_triggered:
+    st.session_state.has_evaluated = True
+    with st.spinner("Executing real-time agent evaluation & security defense inspection..."):
+        if "Live Core" in defense_engine:
+            unprot, prot = execute_live_shield(active_scenario)
+        else:
+            unprot, prot = simulate_execution(active_scenario)
+        st.session_state.last_unprot_trace = unprot
+        st.session_state.last_prot_trace = prot
+        st.session_state.human_approval_state = "IDLE"
+
+        log_entry = {
+            "timestamp": time.strftime("%H:%M:%S"),
+            "scenario_id": active_scenario.id,
+            "title": active_scenario.title,
+            "category": active_scenario.category.value,
+            "split": "Unseen" if active_scenario.is_unseen_split else "Development",
+            "firewall_flagged": prot.firewall_result.is_flagged if prot.firewall_result else False,
+            "guard_decision": prot.guard_result.decision.value if prot.guard_result else "ALLOW",
+            "rule_violated": prot.guard_result.rule_violated if prot.guard_result else "NONE",
+            "unprotected_status": unprot.status,
+            "protected_status": prot.status,
+            "firewall_latency_ms": prot.firewall_result.latency_ms if prot.firewall_result else 0.0,
+            "guard_latency_ms": prot.guard_result.latency_ms if prot.guard_result else 0.0,
+            "total_latency_ms": prot.total_latency_ms
+        }
+        st.session_state.audit_logs.insert(0, log_entry)
 
 unprot_trace = st.session_state.last_unprot_trace
 prot_trace = st.session_state.last_prot_trace
+
+def render_standby_view(sc):
+    render_html("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>CONSOLE</span> / <span class="active-crumb">STANDBY</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Security Overview & Agent Comparison</h1>
+                <span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> AWAITING TRIGGER</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-info" style="font-size: 11px;">POLICY: ENFORCING</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">SES-8F31A2</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Side-by-side behavioral telemetry comparing an unprotected baseline RAG agent vs. Sentinel-protected agent.
+        </p>
+    </div>
+    """)
+    render_scenario_context(sc)
+
+    render_html(f"""
+    <div style="background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 44px 24px; text-align: center; margin-top: 10px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+        <div style="width: 52px; height: 52px; border-radius: 14px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 14px auto;">
+            🛡️
+        </div>
+        <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">
+            Ready for Evaluation
+        </h3>
+        <p style="font-size: 13.5px; color: #6B7280; max-width: 480px; margin: 0 auto 18px auto;">
+            Click <strong>"Run Security Evaluation"</strong> below to evaluate this scenario.
+        </p>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 18px; border-radius: 8px; font-size: 12.5px;">
+            <span style="color: #64748B;">Ready to test:</span>
+            <strong style="color: #2563EB;">{sc.title}</strong>
+            <span style="color: #CBD5E1;">•</span>
+            <span style="color: #64748B;">Target Document:</span>
+            <code style="color: #0F172A; font-family: 'JetBrains Mono', monospace;">{sc.document_name}</code>
+        </div>
+    </div>
+    """)
+
+    col_c1, col_c2, col_c3 = st.columns([1, 2, 1])
+    with col_c2:
+        if st.button("🛡️ Run Security Evaluation Now", type="primary", key="main_run_eval_btn", use_container_width=True):
+            st.session_state.trigger_run = True
+            st.rerun()
 
 # -----------------------------------------------------------------------------
 # DYNAMIC ROUTER BASED ON SIDEBAR NAVIGATION
@@ -634,6 +717,10 @@ prot_trace = st.session_state.last_prot_trace
 
 # VIEW 1: SIDE-BY-SIDE AGENT COMPARISON
 if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
+    if not st.session_state.get("has_evaluated", False) or prot_trace is None:
+        render_standby_view(active_scenario)
+        st.stop()
+
     render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
@@ -878,6 +965,10 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
 
 # VIEW 2: ATTACK PLAYGROUND (3-STAGE DEMO)
 elif "Playground" in nav_tab:
+    if not st.session_state.get("has_evaluated", False) or prot_trace is None:
+        render_standby_view(active_scenario)
+        st.stop()
+
     render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
@@ -1016,6 +1107,10 @@ elif "Playground" in nav_tab:
 
 # VIEW 3: ACTION GUARD PRE-FLIGHT GATE
 elif "Action Guard" in nav_tab:
+    if not st.session_state.get("has_evaluated", False) or prot_trace is None:
+        render_standby_view(active_scenario)
+        st.stop()
+
     render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
