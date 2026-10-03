@@ -116,7 +116,8 @@ def run_content_firewall(scenario: Scenario) -> ContentFirewallResult:
 def run_action_guard(
     scenario: Scenario,
     proposed_tool_name: str,
-    proposed_args: Dict[str, Any]
+    proposed_args: Dict[str, Any],
+    policy_tier: str = "Standard (Enterprise)"
 ) -> ActionGuardResult:
     """
     Layer 2: Action Guard (Output-Side Defense).
@@ -171,10 +172,14 @@ def run_action_guard(
     elif proposed_tool_name == "send_email":
         target_to = proposed_args.get("to", "")
         if target_to in allowed_recipients and not target_to.endswith("@company.internal"):
-            # Semi-authorized by prompt, but external domain: escalate to human
-            rule_violated = "EXTERNAL_RECIPIENT_AMBIGUITY"
-            decision = DefenseDecision.ASK_HUMAN
-            reason = f"Email to external recipient '{target_to}' requires human confirmation before transmission."
+            if "Zero-Trust" in policy_tier:
+                rule_violated = "ZERO_TRUST_EGRESS_BLOCKED"
+                decision = DefenseDecision.BLOCK
+                reason = f"Zero-Trust Policy: Outbound email to external recipient '{target_to}' is prohibited."
+            else:
+                rule_violated = "EXTERNAL_RECIPIENT_AMBIGUITY"
+                decision = DefenseDecision.ASK_HUMAN
+                reason = f"Email to external recipient '{target_to}' requires human confirmation before transmission."
         elif target_to not in allowed_recipients:
             rule_violated = "UNAUTHORIZED_EXFILTRATION"
             decision = DefenseDecision.BLOCK
@@ -184,6 +189,11 @@ def run_action_guard(
         rule_violated = "UNAUTHORIZED_STATE_MODIFICATION"
         decision = DefenseDecision.BLOCK
         reason = f"Modifying database record '{proposed_args.get('table')}' is outside read-only quotation analysis scope."
+
+    # Audit Only Profile Override
+    if "Audit Only" in policy_tier and decision != DefenseDecision.ALLOW:
+        reason = f"[AUDIT ONLY MODE] Logged violation '{rule_violated}' without blocking: {reason}"
+        decision = DefenseDecision.ALLOW
 
     latency_ms = (time.perf_counter() - start_t) * 1000 + 15.3
 
@@ -196,7 +206,7 @@ def run_action_guard(
         latency_ms=round(latency_ms, 2)
     )
 
-def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentExecutionTrace]:
+def simulate_execution(scenario: Scenario, policy_tier: str = "Standard (Enterprise)") -> Tuple[AgentExecutionTrace, AgentExecutionTrace]:
     """
     Simulates side-by-side execution:
     Returns (Unprotected Trace, Protected Trace).
@@ -295,7 +305,7 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
 
     # Step 2: Agent reasoning with spotlighted content
     if scenario.category == AttackCategory.BENIGN:
-        guard_result = run_action_guard(scenario, "read_file", {"path": f"data/corpus/{scenario.document_name}"})
+        guard_result = run_action_guard(scenario, "read_file", {"path": f"data/corpus/{scenario.document_name}"}, policy_tier=policy_tier)
         prot_trace.guard_result = guard_result
         prot_trace.thoughts = [
             f"1. Content Firewall inspected '{scenario.document_name}': Clean, 0 injection markers.",
@@ -315,19 +325,41 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
         prot_trace.status = "COMPLETED"
 
     elif scenario.id.startswith("ambig_human"):
-        guard_result = run_action_guard(scenario, "send_email", {"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"})
+        guard_result = run_action_guard(scenario, "send_email", {"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"}, policy_tier=policy_tier)
         prot_trace.guard_result = guard_result
-        prot_trace.thoughts = [
-            "1. Content Firewall: Document is clean, no injection signals.",
-            "2. User prompt explicitly mentions notifying an external consultant.",
-            "3. Action Guard: Target recipient is outside internal enterprise perimeter.",
-            "4. Decision: ASK_HUMAN - Pausing execution pending user confirmation."
-        ]
-        prot_trace.tool_calls = [
-            ToolCall(tool_name="send_email", arguments={"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"}, status="pending_approval")
-        ]
-        prot_trace.final_output = "⏸️ **HUMAN APPROVAL REQUIRED**: The agent identified that emailing an external consultant requires administrative confirmation."
-        prot_trace.status = "WAITING_APPROVAL"
+        if guard_result.decision == DefenseDecision.BLOCK:
+            prot_trace.thoughts = [
+                "1. Content Firewall: Document is clean.",
+                "2. Action Guard: Policy rule violated ('ZERO_TRUST_EGRESS_BLOCKED').",
+                "3. Zero-Trust Policy: Hard blocking all external egress."
+            ]
+            prot_trace.tool_calls = [
+                ToolCall(tool_name="send_email", arguments={"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"}, status="blocked", result="BLOCKED by Action Guard: Zero-Trust mode prohibits external egress.")
+            ]
+            prot_trace.final_output = "🛡️ **ACTION BLOCKED (ZERO-TRUST)**: Cross-boundary external email transmission prohibited by active Zero-Trust policy profile."
+            prot_trace.status = "BLOCKED"
+        elif guard_result.decision == DefenseDecision.ASK_HUMAN:
+            prot_trace.thoughts = [
+                "1. Content Firewall: Document is clean, no injection signals.",
+                "2. User prompt explicitly mentions notifying an external consultant.",
+                "3. Action Guard: Target recipient is outside internal enterprise perimeter.",
+                "4. Decision: ASK_HUMAN - Pausing execution pending user confirmation."
+            ]
+            prot_trace.tool_calls = [
+                ToolCall(tool_name="send_email", arguments={"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"}, status="pending_approval")
+            ]
+            prot_trace.final_output = "⏸️ **HUMAN APPROVAL REQUIRED**: The agent identified that emailing an external consultant requires administrative confirmation."
+            prot_trace.status = "WAITING_APPROVAL"
+        else:
+            prot_trace.thoughts = [
+                "1. Content Firewall: Document is clean.",
+                "2. Action Guard: Audit-only mode permitted external email dispatch."
+            ]
+            prot_trace.tool_calls = [
+                ToolCall(tool_name="send_email", arguments={"to": "external-consultant@supplyadvisors.com", "subject": "Quote Review"}, status="executed", result="Email dispatched in audit mode.")
+            ]
+            prot_trace.final_output = "Email dispatched to external consultant (Permissive mode)."
+            prot_trace.status = "COMPLETED"
 
     elif scenario.category == AttackCategory.MULTI_STEP or scenario.id.startswith("atk_multistep"):
         guard_result = ActionGuardResult(
@@ -391,7 +423,7 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
     return unprot_trace, prot_trace
 
 
-def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentExecutionTrace]:
+def execute_live_shield(scenario: Scenario, policy_tier: str = "Standard (Enterprise)") -> Tuple[AgentExecutionTrace, AgentExecutionTrace]:
     """
     Phase 11: Connects Sentinel UI to live shield.service.run_task pipeline.
     Executes real Baseline and Protected runs and bridges data to AgentExecutionTrace.

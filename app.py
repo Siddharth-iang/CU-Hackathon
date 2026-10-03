@@ -6,6 +6,8 @@ import time
 from core.models import AttackCategory, DefenseDecision, Scenario
 from core.scenarios import SCENARIOS
 from core.simulation import simulate_execution, run_content_firewall, run_action_guard, execute_live_shield
+from core.reporting import generate_soc2_incident_report
+from core.policy_studio import POLICY_PROFILES, evaluate_custom_policy
 from shield.audit import AuditLogger
 from shield.config import config
 
@@ -437,6 +439,7 @@ with st.sidebar:
             "⚖️ Action Guard Gate",
             "📋 Forensic Audit Log",
             "📊 Evaluation Suite",
+            "🎛️ Policy Studio",
             "📂 Sandbox & Storage"
         ],
         index=0,
@@ -503,6 +506,13 @@ with st.sidebar:
         ["🛡️ PromptShield Live Core", "⚡ Instant Demo Simulation"],
         index=0
     )
+    policy_profile_selected = st.selectbox(
+        "Policy Profile",
+        ["Standard (Enterprise)", "Zero-Trust / GovSec", "Audit Only (Permissive)"],
+        index=0,
+        help="Active security strictness across Action Guard & Content Firewall"
+    )
+    st.session_state["policy_profile_selected"] = policy_profile_selected
     enable_firewall = st.toggle("Content Firewall (Input L1)", value=True)
     enable_action_guard = st.toggle("Action Guard (Output L2)", value=True)
     enable_taint_check = st.toggle("Confidential Taint Check", value=True)
@@ -639,6 +649,27 @@ def render_scenario_context(sc):
             st.markdown("**Expected Attacker Exploit Action:**")
             st.code(sc.expected_exploit_action, language="text")
 
+    if st.session_state.get("last_prot_trace") is not None:
+        soc2_rep = generate_soc2_incident_report(
+            scenario=sc,
+            unprot_trace=st.session_state.get("last_unprot_trace"),
+            prot_trace=st.session_state.get("last_prot_trace"),
+            policy_tier=st.session_state.get("policy_profile_selected", "Standard (Enterprise)"),
+            session_id="SES-8F31A2"
+        )
+        col_rep1, col_rep2 = st.columns([1, 1])
+        with col_rep1:
+            st.download_button(
+                label="📄 Export Forensic Incident Report (SOC2 & OWASP)",
+                data=soc2_rep,
+                file_name=f"sentinel_incident_report_{sc.id}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+        with col_rep2:
+            with st.expander("👁️ Preview SOC2 & OWASP Audit Report", expanded=False):
+                st.markdown(soc2_rep)
+
 # -----------------------------------------------------------------------------
 # SIMULATION ENGINE EXECUTION (DYNAMIC ONLY ON EXPLICIT USER TRIGGER)
 # -----------------------------------------------------------------------------
@@ -650,9 +681,9 @@ if is_run_triggered:
     st.session_state.has_evaluated = True
     with st.spinner("Executing real-time agent evaluation & security defense inspection..."):
         if "Live Core" in defense_engine:
-            unprot, prot = execute_live_shield(active_scenario)
+            unprot, prot = execute_live_shield(active_scenario, policy_tier=policy_profile_selected)
         else:
-            unprot, prot = simulate_execution(active_scenario)
+            unprot, prot = simulate_execution(active_scenario, policy_tier=policy_profile_selected)
         st.session_state.last_unprot_trace = unprot
         st.session_state.last_prot_trace = prot
         st.session_state.human_approval_state = "IDLE"
@@ -670,7 +701,8 @@ if is_run_triggered:
             "protected_status": prot.status,
             "firewall_latency_ms": prot.firewall_result.latency_ms if prot.firewall_result else 0.0,
             "guard_latency_ms": prot.guard_result.latency_ms if prot.guard_result else 0.0,
-            "total_latency_ms": prot.total_latency_ms
+            "total_latency_ms": prot.total_latency_ms,
+            "policy_tier": policy_profile_selected
         }
         st.session_state.audit_logs.insert(0, log_entry)
 
@@ -1469,7 +1501,7 @@ elif "Audit Log" in nav_tab:
             }
         )
 
-        col_d1, col_d2 = st.columns([3, 1])
+        col_d1, col_d2, col_d3 = st.columns([2, 1, 1])
         with col_d1:
             with st.expander("View Full JSON Event Payload (Forensic Hashes & Signatures)"):
                 st.json(st.session_state.audit_logs)
@@ -1479,6 +1511,21 @@ elif "Audit Log" in nav_tab:
                 data=json.dumps(st.session_state.audit_logs, indent=2),
                 file_name="sentinel_security_audit_log.json",
                 mime="application/json",
+                use_container_width=True
+            )
+        with col_d3:
+            rep_md_audit = generate_soc2_incident_report(
+                scenario=active_scenario,
+                unprot_trace=unprot_trace,
+                prot_trace=prot_trace,
+                policy_tier=policy_profile_selected,
+                session_id="SES-8F31A2"
+            )
+            st.download_button(
+                label="Export SOC2 Report (MD)",
+                data=rep_md_audit,
+                file_name=f"sentinel_soc2_report_{active_scenario.id}.md",
+                mime="text/markdown",
                 use_container_width=True
             )
     else:
@@ -1599,7 +1646,166 @@ elif "Evaluation" in nav_tab:
         })
         st.dataframe(layer_latency, use_container_width=True)
 
-# VIEW 6: SANDBOX ENVIRONMENT & CORPUS
+# VIEW 6: NO-CODE POLICY STUDIO
+elif "Policy Studio" in nav_tab:
+    render_html("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>CONFIGURATION</span> / <span class="active-crumb">NO-CODE POLICY STUDIO</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">No-Code Security Policy Studio</h1>
+                <span class="pill-info"><span class="pulse-dot"></span> LIVE ENFORCEMENT</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-safe">RBAC & IFC ACTIVE</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RULESET: v2.4.1</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Configure enterprise risk tolerance profiles, custom directory denylists, network egress allowlists, and test policy evaluations in sub-millisecond real-time.
+        </p>
+    </div>
+    """)
+
+    # 1. Profile Cards
+    st.markdown("##### 1. Security Strictness Profiles")
+    prof_col1, prof_col2, prof_col3 = st.columns(3)
+    
+    with prof_col1:
+        is_std = (policy_profile_selected == "Standard (Enterprise)")
+        render_html(f"""
+        <div class="sentinel-card" style="border-top: 4px solid #2563EB; {'box-shadow: 0 0 0 2px #2563EB;' if is_std else ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Standard (Enterprise)</span>
+                {'<span class="pill-info">ACTIVE</span>' if is_std else '<span class="pill-neutral">AVAILABLE</span>'}
+            </div>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
+                Balanced baseline. Protects confidential files, checks external domains, requires supervisor approval for external emails.
+            </p>
+            <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
+                <div>• Tools: read_file, search_web, send_email</div>
+                <div>• External Email: ASK_HUMAN</div>
+                <div>• Approval Limit: $50,000</div>
+            </div>
+        </div>
+        """)
+
+    with prof_col2:
+        is_zt = (policy_profile_selected == "Zero-Trust / GovSec")
+        render_html(f"""
+        <div class="sentinel-card" style="border-top: 4px solid #DC2626; {'box-shadow: 0 0 0 2px #DC2626;' if is_zt else ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Zero-Trust / GovSec</span>
+                {'<span class="pill-critical">ACTIVE</span>' if is_zt else '<span class="pill-neutral">AVAILABLE</span>'}
+            </div>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
+                High-assurance defense for banking, defense, & health. Hard blocks all external egress; strict read-only sandbox.
+            </p>
+            <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
+                <div>• Tools: read_file only</div>
+                <div>• External Email: HARD BLOCK</div>
+                <div>• Approval Limit: $10,000</div>
+            </div>
+        </div>
+        """)
+
+    with prof_col3:
+        is_audit = (policy_profile_selected == "Audit Only (Permissive)")
+        render_html(f"""
+        <div class="sentinel-card" style="border-top: 4px solid #F59E0B; {'box-shadow: 0 0 0 2px #F59E0B;' if is_audit else ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Audit Only (Permissive)</span>
+                {'<span class="pill-warning">ACTIVE</span>' if is_audit else '<span class="pill-neutral">AVAILABLE</span>'}
+            </div>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
+                Research & red-team observability mode. Records violations into audit log without terminating agent execution.
+            </p>
+            <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
+                <div>• Tools: All Tools Allowed</div>
+                <div>• Enforcement: LOG ONLY</div>
+                <div>• Approval Limit: Unlimited</div>
+            </div>
+        </div>
+        """)
+
+    # 2. Rule Customization Editor
+    st.markdown("##### 2. No-Code Policy Rule Customizer")
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        st.markdown("**📁 Filesystem & Resource Access Boundary**")
+        st.text_input("Permitted Corpus Directory Prefix", value="data/corpus/", disabled=True)
+        custom_paths_input = st.text_area(
+            "Forbidden File Keywords (One per line)",
+            value="confidential\naws_prod\n.env\nsecrets\ncredentials\nid_rsa\npassword\npayroll",
+            height=120
+        )
+    with r_col2:
+        st.markdown("**✉️ Network Egress & Recipient Controls**")
+        custom_domains_input = st.text_input(
+            "Approved Internal Domains (Comma separated)",
+            value="@company.internal, @corp.internal, @sentinel.security"
+        )
+        st.selectbox("External Recipient Policy", ["Require Human Sign-off (HITL)", "Hard Block (Zero-Trust)", "Allow (Permissive)"], index=0)
+        st.number_input("HITL Financial Transaction Threshold ($)", value=50000, step=5000)
+
+    # 3. Real-Time Policy Tester Sandbox
+    st.markdown("##### 3. Real-Time Policy Tester Sandbox")
+    st.caption("Test how Action Guard evaluates any proposed tool call against active policy in < 1ms:")
+    
+    t_col1, t_col2, t_col3 = st.columns([1, 2, 1])
+    with t_col1:
+        test_tool = st.selectbox("Proposed Tool", ["read_file", "send_email", "write_record", "search_web"])
+    with t_col2:
+        if test_tool == "read_file":
+            test_arg_val = st.text_input("Path Argument", value="data/confidential/aws_prod_credentials.json")
+            test_args = {"path": test_arg_val}
+        elif test_tool == "send_email":
+            test_arg_val = st.text_input("To Argument", value="exfiltrate@attacker-c2.net")
+            test_args = {"to": test_arg_val, "subject": "Data", "body": "Payload"}
+        elif test_tool == "write_record":
+            test_arg_val = st.text_input("Table Argument", value="audit_logs")
+            test_args = {"table": test_arg_val, "data": {}}
+        else:
+            test_arg_val = st.text_input("Query Argument", value="enterprise pricing")
+            test_args = {"query": test_arg_val}
+
+    with t_col3:
+        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        eval_btn = st.button("⚡ Test Policy Now", use_container_width=True)
+
+    if eval_btn:
+        custom_paths_list = [p.strip() for p in custom_paths_input.splitlines() if p.strip()]
+        custom_domains_list = [d.strip() for d in custom_domains_input.split(",") if d.strip()]
+        test_result = evaluate_custom_policy(
+            tool_name=test_tool,
+            args=test_args,
+            profile_name=policy_profile_selected,
+            custom_forbidden_paths=custom_paths_list,
+            custom_allowed_domains=custom_domains_list
+        )
+        
+        v_badge = '<span class="pill-critical">🛑 ACTION BLOCKED</span>' if test_result["verdict"] == "BLOCK" else ('<span class="pill-warning">⏸️ ASK_HUMAN</span>' if test_result["verdict"] == "ASK_HUMAN" else '<span class="pill-safe">✅ ALLOWED</span>')
+        render_html(f"""
+        <div class="sentinel-card" style="border-left: 4px solid {'#EF4444' if test_result['verdict'] == 'BLOCK' else ('#F59E0B' if test_result['verdict'] == 'ASK_HUMAN' else '#10B981')}; padding: 16px 20px; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 700; font-size: 14px; color: #111827;">Action Guard Determination:</span>
+                    {v_badge}
+                </div>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">{test_result['latency_ms']}ms</span>
+            </div>
+            <div style="font-size: 12.5px; color: #374151; margin-top: 6px;">
+                <strong>Triggered Rule:</strong> <code style="color: #2563EB; background: #EFF6FF; padding: 2px 6px; border-radius: 4px;">{test_result['rule']}</code>
+            </div>
+            <div style="font-size: 12px; color: #64748B; margin-top: 4px;">
+                {test_result['reason']}
+            </div>
+        </div>
+        """)
+
+# VIEW 7: SANDBOX ENVIRONMENT & CORPUS
 elif "Sandbox" in nav_tab:
     render_html("""
     <div class="sentinel-view-header">

@@ -88,6 +88,25 @@ def test_multi_chain_detection():
     assert dec.is_multi_chain is True
     assert len(dec.chain_lineage) >= 3
 
+def test_reporting_and_policy_studio():
+    from core.reporting import generate_soc2_incident_report
+    from core.policy_studio import evaluate_custom_policy
+    scenario = next(s for s in SCENARIOS if s.id == "atk_plain_01")
+    unprot, prot = simulate_execution(scenario)
+    rep = generate_soc2_incident_report(scenario, unprot, prot, policy_tier="Standard (Enterprise)")
+    assert "OWASP LLM01" in rep
+    assert "SOC2 CC6.1" in rep
+    assert "sha256:" in rep
+    assert len(rep) > 1000
+
+    # Policy studio test
+    r_block = evaluate_custom_policy("read_file", {"path": "data/confidential/aws_prod_credentials.json"}, "Standard (Enterprise)")
+    assert r_block["verdict"] == "BLOCK"
+    r_zt = evaluate_custom_policy("send_email", {"to": "external@supplier.com"}, "Zero-Trust / GovSec")
+    assert r_zt["verdict"] == "BLOCK"
+    r_permissive = evaluate_custom_policy("send_email", {"to": "external@supplier.com"}, "Audit Only (Permissive)")
+    assert r_permissive["verdict"] == "ALLOW"
+
 if __name__ == "__main__":
     print("[RUNNING] Running AEGIS-RAG security self-checks...")
     test_decoding_engine()
@@ -100,4 +119,6 @@ if __name__ == "__main__":
     print("  [OK] Dual agent simulation self-check passed.")
     test_multi_chain_detection()
     print("  [OK] Multi-chain taint lineage self-check passed.")
-    print("All 5 self-checks PASSED successfully!")
+    test_reporting_and_policy_studio()
+    print("  [OK] SOC2 Incident Reporting & Policy Studio self-check passed.")
+    print("All 6 self-checks PASSED successfully!")
