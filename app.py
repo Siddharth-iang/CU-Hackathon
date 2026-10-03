@@ -1447,9 +1447,6 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         </div>
         """)
 
-        # Incident Time-Travel Replay Trigger Card (Full Window Modal)
-        render_time_travel_trigger(active_scenario, prot_trace, unprot_trace, key_prefix="overview_tt")
-
 # VIEW 2: ATTACK PLAYGROUND (3-STAGE DEMO)
 elif "Playground" in nav_tab:
     if not st.session_state.get("has_evaluated", False) or prot_trace is None:

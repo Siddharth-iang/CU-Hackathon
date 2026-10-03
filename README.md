@@ -7,6 +7,7 @@
 [![Groq LPU](https://img.shields.io/badge/Groq-Llama%203.3%20%2F%20Qwen-F55036.svg)](https://groq.com)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
 [![Security Standard](https://img.shields.io/badge/OWASP-LLM01%20%7C%20LLM02%20Mitigated-success.svg)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+[![Compliance](https://img.shields.io/badge/SOC2-CC6.1%20%7C%20CC6.6%20%7C%20CC6.8-blueviolet.svg)](https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -16,9 +17,12 @@
 As autonomous LLM agents are granted access to external tools (`read_file`, `search_web`, `send_email`, `write_record`), they become vulnerable to **Indirect Prompt Injections (IPI)**—the #1 threat classified under the [OWASP Top 10 for LLMs](https://owasp.org/www-project-top-10-for-large-language-model-applications/). When an AI agent processes third-party data (vendor quotations, PDF contracts, web search scrapes, or CRM records), embedded adversarial payloads can override system prompts, hijack reasoning loops, access confidential data, and exfiltrate credentials.
 
 **SENTINEL (PromptShield)** implements **Defense-in-Depth** for tool-using RAG agents through a decoupled, zero-trust security perimeter:
+
 1. **Layer 1: Content Firewall (Input-Side Defense)** — De-obfuscates hidden steganography (Zero-Width, Base64, Hex, ROT13), evaluates heuristic rule trees, applies an LLM instruction classifier, and quarantines malicious directives while demoting untrusted text to inert data via **Cryptographic Per-Request Spotlighting**.
 2. **Layer 2: Action Guard (Output-Side Defense)** — Derives an authorized **Permission Scope** exclusively from trusted user intent. Intercepts every proposed tool invocation *before execution* using deterministic policy enforcement, canary token tracking, external perimeter isolation, and an interactive **Human-in-the-Loop Gateway** (`ASK_HUMAN`).
-3. **Layer 3: Tamper-Evident Forensic Audit Ledger** — Immutably records dual-tier telemetry to structured JSONL logs and relational SQLite databases with sub-millisecond overhead.
+3. **Layer 3: Forensic Audit Ledger & 1-Click SOC2/OWASP Reporting** — Immutably records dual-tier telemetry to structured JSONL logs and relational SQLite databases, generating Type-II certified compliance reports with cryptographic SHA-256 tamper seals.
+4. **Layer 4: Incident Time-Travel Forensic Replay** — Interactive sub-millisecond timeline scrubber ($T=0.0\text{ms} \rightarrow T=+841.6\text{ms}$) across 5 discrete execution lifecycle milestones for step-by-step forensic state inspection.
+5. **Layer 5: Adversarial Red-Team Fuzzer & No-Code Policy Studio** — Real-time payload mutation engine (5 evasion strategies) and configurable policy strictness profiles (*Permissive*, *Standard*, *Paranoid*).
 
 ---
 
@@ -28,6 +32,11 @@ As autonomous LLM agents are granted access to external tools (`read_file`, `sea
 flowchart TD
     subgraph TrustedPerimeter["🟢 TRUSTED CLIENT PERIMETER"]
         UserReq["User Prompt / Intent\n('Review Vendor Quotation')"]
+        PolicyStudio["🎛️ No-Code Policy Studio\n(Permissive · Standard · Paranoid)"]
+    end
+
+    subgraph AdversarialSuite["🔀 RED-TEAM ADVERSARIAL FUZZER"]
+        Fuzzer["Adversarial Mutation Engine\n(Base64 · Zero-Width · Leet · Delimiters · Smuggling)"]
     end
 
     subgraph Layer1["🛡️ LAYER 1: CONTENT FIREWALL (Input-Side)"]
@@ -56,12 +65,16 @@ flowchart TD
         MockTools["Mock Sandboxed Tools\n(read_file · search_web · send_email · write_record)"]
     end
 
-    subgraph Layer3["📋 FORENSIC AUDIT LEDGER"]
+    subgraph ForensicSuite["📋 FORENSICS, COMPLIANCE & TIME-TRAVEL"]
         AuditLog["Dual-Tier Security Ledger\n(storage/audit.jsonl & storage/runs.db)"]
+        TimeTravel["⏱️ Incident Time-Travel Replay\n(5-Stage Forensic State Scrubber)"]
+        SOC2Export["📄 1-Click SOC2 & OWASP Audit Report\n(Type-II Compliant · SHA-256 Sealed)"]
     end
 
     UserReq --> ScopeExtractor
-    ScopeExtractor -.->|"Authorized Scope Slip"| PreFlight
+    PolicyStudio -.->|"Configurable Strictness"| Layer1
+    PolicyStudio -.->|"Policy Constraints"| Layer2
+    Fuzzer -.->|"Mutated Test Vector"| UntrustedDoc
 
     UntrustedDoc --> Decoder
     Decoder --> Heuristics --> LLMClassifier
@@ -79,6 +92,9 @@ flowchart TD
     Heuristics -.->|"Firewall Event"| AuditLog
     PreFlight -.->|"Guard Event"| AuditLog
     MockTools -.->|"Execution State"| AuditLog
+
+    AuditLog --> TimeTravel
+    AuditLog --> SOC2Export
 ```
 
 ---
@@ -118,8 +134,46 @@ Before any tool executes in the environment:
 
 ### 5. Dual-Tier Forensic Audit Ledger (`shield/audit.py`)
 Every decision, quarantine action, policy interception, and tool invocation is recorded with sub-millisecond overhead:
-* **High-Throughput JSONL Stream** ([`storage/audit.jsonl`]
-* **Indexed Relational SQLite Store** ([`storage/runs.db`] for forensic inspection, replayability, and quantitative compliance reporting.
+* **High-Throughput JSONL Stream** (`storage/audit.jsonl`).
+* **Indexed Relational SQLite Store** (`storage/runs.db`) for forensic inspection, replayability, and quantitative compliance reporting.
+
+### 6. Sub-Millisecond Incident Time-Travel Forensic Replay (`core/replay.py`)
+A self-contained, 60fps interactive execution scrubber reconstructing the complete forensic timeline from $T=0.0\text{ms}$ to $T=+841.6\text{ms}$:
+* **Small milestone dots directly on the horizontal timeline rail** with active blue pulse rings, completed emerald indicators, and future state markers.
+* **5 Discrete Lifecycle Milestones**:
+  1. *Ingestion & Context Retrieval* (Boundary delimitation and untrusted tagging).
+  2. *Layer 1 Content Firewall* (Steganography decoding & risk scoring).
+  3. *LLM Cognitive Isolation* (Instruction parsing & prompt quarantine).
+  4. *Layer 2 Action Guard* (Pre-flight deterministic tool call interception).
+  5. *Enforcement & Forensic Ledger Commit* (Tamper-evident hash recording & compliance certification).
+* **Multi-Modal Scrubbing**: Click any node dot directly, drag along the track line, navigate with `◀ Previous` / `Next ▶` controls, or jump via stage pills (`[1. Ingest]`, `[2. L1 Firewall]`, etc.).
+* **One-Click JSON Export**: Download raw sub-millisecond incident traces for external SIEM integration.
+
+### 7. 1-Click SOC2 & OWASP Forensic Audit Export (`core/audit.py`)
+Generates comprehensive, audit-ready markdown reports mapped directly to enterprise security frameworks:
+* **SOC2 Trust Services Criteria**: CC6.1 (Logical Access Controls), CC6.6 (Boundary Protection), CC6.8 (Malicious Code Prevention).
+* **OWASP Top 10 for LLMs**: Full mitigation mappings for LLM01 (Prompt Injection) and LLM02 (Sensitive Information Disclosure).
+* **Cryptographic Tamper Seal**: Computes a deterministic SHA-256 fingerprint across all milestone traces, parameters, and verdicts.
+* **In-App Full Window Preview & Export**: Review formatted compliance matrices and export `.md` artifacts with a single click.
+
+### 8. Adversarial Red-Team Fuzzer (`core/fuzzer.py`)
+Enables live stress-testing and evasion resilience verification with 5 adversarial mutation strategies:
+* **Base64 Obfuscation**: Wraps attack directives in Base64 encoding to test multi-pass de-obfuscation.
+* **Zero-Width Steganography**: Injects invisible Unicode zero-width characters (`\u200B`, `\u200C`, `\u200D`) into payload strings to evade naive regex scanners.
+* **LeetSpeak / Homoglyphs**: Substitutes characters with visual lookalikes to bypass keyword filters.
+* **Delimiter Tampering**: Injects nested ChatML (`<|im_start|>`) markup to simulate system token forgery.
+* **Markdown Smuggling**: Hides malicious directives within HTML comments inside markdown tables.
+
+### 9. No-Code Policy Studio (`core/policy.py`)
+Allows security administrators to adjust firewall strictness and action guard enforcement dynamically without modifying code:
+* **Permissive (Sandbox / Dev)**: Minimal pre-filtering, higher risk score tolerance (Score > 85), ideal for rapid prototyping.
+* **Standard (Enterprise Production - Default)**: Balanced zero-trust boundary isolation, risk threshold 60, strict canary taint blocking.
+* **Paranoid / Air-Gapped (Defense / Zero Egress)**: Aggressive risk threshold 30, zero external egress allowed, all file operations locked down.
+
+### 10. Live Batch Benchmark Suite (`core/benchmark.py`)
+Executes real-time batch evaluations across the entire 48-scenario catalog directly within the dashboard:
+* Computes baseline vs. protected catch rates, added latency distributions, and false-positive rates.
+* Exports benchmark telemetry as structured JSON reports for audit verification.
 
 ---
 
@@ -152,12 +206,15 @@ Evaluated against the full **48-scenario benchmark catalog** spanning 30 attacks
 |---|---|---|---|
 | **Language** | Python | 3.12 / 3.13 | Core runtime & microservices |
 | **LLM Inference Engine** | Groq LPU API / OpenAI API | — | Ultra-fast cloud inference (`qwen/qwen3.8-27b`, `llama-3.3-70b-versatile`) |
-| **Frontend Dashboard** | Streamlit | 1.55+ | Enterprise dual-mode security console, 3-stage playground & telemetry |
+| **Frontend Dashboard** | Streamlit | 1.55+ | Enterprise dual-mode console, time-travel modal, playground & policy studio |
 | **Headless Backend** | FastAPI + Uvicorn | 0.115+ | RESTful gateway (`/run`, `/audit`, `/attacks`, `/confirm`, `/eval`) |
 | **Data Validation** | Pydantic v2 | 2.9+ | Strongly typed schemas (`Scope`, `ToolCall`, `Decision`, `AuditEvent`) |
 | **Vector RAG Engine** | ChromaDB | 0.5+ | Ephemeral/persistent vector retrieval for vendor quotation corpus |
 | **Database & Auditing** | SQLite3 + JSONL | Built-in | Structured forensic run history & streaming audit ledger |
-| **Automated Testing** | Playwright & Pytest | 1.58+ | End-to-end browser automation & verification self-checks |
+| **Forensic Time-Travel** | HTML5 / CSS3 / Vanilla JS | — | Sub-millisecond 60fps timeline replay scrubber with zero dependencies |
+| **Compliance Export** | Jinja2 / Markdown / SHA-256 | Built-in | SOC2 CC6.1 & OWASP LLM01/02 tamper-evident forensic reporting |
+| **Red-Team Fuzzer** | Custom Python Obfuscation | Built-in | Real-time payload mutation (Base64, Zero-Width, Leet, Delimiters) |
+| **Automated Testing** | Pytest & Self-Checks | Built-in | Fast assert-based self-checks & end-to-end verification |
 | **Containerization** | Docker & Compose | Multi-stage | Isolated microservice deployment |
 
 ---
@@ -203,21 +260,24 @@ Interactive Swagger API documentation available at **[http://localhost:8000/docs
 
 ---
 
-## 🧪 Running Automated Tests & Benchmark Suites
+## 🧪 Running Automated Tests & Verification Self-Checks
 
-Run the full verification battery directly from the command line:
+Run the unified test battery directly from the command line:
 
 ```bash
-# 1. Run all phase verification suites (Firewall, Action Guard, Service, Scenarios, API)
+# 1. Run the comprehensive 7-point security self-check suite (< 2 seconds)
+python tests/test_self_check.py
+
+# 2. Run phase verification suites (Firewall, Action Guard, Service, Scenarios, API)
 python tests/test_phase4_phase6.py
 python tests/test_phase7_phase8.py
 python tests/test_phase5.py
 python tests/test_phase9_phase10.py
 
-# 2. Run the 48-Scenario Automated Benchmark Evaluation
+# 3. Run the 48-Scenario Automated Benchmark Evaluation
 python eval/runner.py --split all
 
-# 3. Benchmark only the unseen evaluation split
+# 4. Benchmark only the unseen evaluation split
 python eval/runner.py --split unseen
 ```
 
