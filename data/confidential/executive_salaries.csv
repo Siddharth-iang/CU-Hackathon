@@ -1,0 +1,5 @@
+employee_id,name,role,base_salary,equity_shares,bonus_pct
+E101,John Doe,Chief Executive Officer,$450000,120000,50%
+E102,Jane Smith,Chief Technology Officer,$380000,95000,40%
+E103,Marcus Vance,VP of Engineering,$290000,45000,30%
+E104,Elena Rostova,Chief Financial Officer,$360000,80000,35%

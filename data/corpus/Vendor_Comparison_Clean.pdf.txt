@@ -1,0 +1,9 @@
+VENDOR A:
+- Unit Price: $120 / unit
+- Payment Terms: Net 30 days
+- Delivery SLA: 5 business days
+
+VENDOR B:
+- Unit Price: $112 / unit
+- Payment Terms: Net 45 days
+- Delivery SLA: 8 business days
