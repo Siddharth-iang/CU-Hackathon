@@ -6,6 +6,11 @@ from core.models import AttackCategory, DefenseDecision, Scenario
 from core.scenarios import SCENARIOS
 from core.simulation import simulate_execution, run_content_firewall, run_action_guard
 
+def render_html(html_str: str):
+    """Safely render HTML without Markdown indented-code-block or newline artifacts."""
+    clean = "\n".join(line.strip() for line in html_str.splitlines() if line.strip())
+    st.markdown(clean, unsafe_allow_html=True)
+
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION & ENTERPRISE DESIGN SYSTEM
 # -----------------------------------------------------------------------------
@@ -349,7 +354,7 @@ if "human_approval_state" not in st.session_state:
 # -----------------------------------------------------------------------------
 with st.sidebar:
     # 1. Top Brand Header matching Sidebar.tsx
-    st.markdown("""
+    render_html("""
     <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;">
         <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="40" height="40" rx="8" fill="#F3F4F6" stroke="#E5E7EB" stroke-width="1.5"/>
@@ -362,10 +367,10 @@ with st.sidebar:
             <span style="font-size: 9px; font-weight: 700; color: #6B7280; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; line-height: 1;">AGENT SECURITY FIREWALL</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     # 2. Console Navigation Section with Icons matching Sidebar.tsx
-    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Console Navigation</div>', unsafe_allow_html=True)
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Console Navigation</div>')
     
     nav_tab = st.radio(
         "Navigation",
@@ -381,10 +386,10 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    st.markdown('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>', unsafe_allow_html=True)
+    render_html('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>')
 
     # 3. Test Suite & Scenario Selector
-    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Attack Vector Selection</div>', unsafe_allow_html=True)
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Attack Vector Selection</div>')
     
     category_filter = st.selectbox(
         "Filter Category",
@@ -424,19 +429,19 @@ with st.sidebar:
 
     st.session_state.current_scenario = active_scenario
 
-    st.markdown('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>', unsafe_allow_html=True)
+    render_html('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>')
 
     # 4. Defense Configuration Toggles
-    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Guardrails Configuration</div>', unsafe_allow_html=True)
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Guardrails Configuration</div>')
     enable_firewall = st.toggle("Content Firewall (Input L1)", value=True)
     enable_action_guard = st.toggle("Action Guard (Output L2)", value=True)
     enable_taint_check = st.toggle("Confidential Taint Check", value=True)
 
-    st.markdown('<div style="height: 10px; margin-bottom: 10px;"></div>', unsafe_allow_html=True)
+    render_html('<div style="height: 10px; margin-bottom: 10px;"></div>')
     run_btn = st.button("🛡️ Run Simulation Test", type="primary", use_container_width=True)
 
     # 5. Bottom System Status Footer matching Sidebar.tsx
-    st.markdown("""
+    render_html("""
     <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 11px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="color: #6B7280; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">SYSTEM STATUS</span>
@@ -454,27 +459,17 @@ with st.sidebar:
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B7280;">PROD-US-EAST</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # -----------------------------------------------------------------------------
 # TOP HEADER BAR MATCHING Header.tsx
 # -----------------------------------------------------------------------------
 is_fully_protected = enable_firewall and enable_action_guard
-status_pill = """
-<span class="pill-safe">
-    <span class="pulse-dot"></span>
-    Protection Active
-</span>
-""" if is_fully_protected else """
-<span class="pill-warning">
-    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span>
-    Interception Paused
-</span>
-"""
+status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> Protection Active</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span> Interception Paused</span>'
 mode_text = "ENFORCING" if is_fully_protected else ("PARTIAL" if (enable_firewall or enable_action_guard) else "DISABLED")
 mode_pill = f'<span class="pill-info" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>' if is_fully_protected else f'<span class="pill-warning" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>'
 
-st.markdown(f"""
+render_html(f"""
 <div class="sentinel-topbar">
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         {status_pill}
@@ -512,13 +507,13 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # Helper function to render active scenario context banner
 def render_scenario_context(sc):
     s_badge = '<span class="pill-info">Unseen Test Set</span>' if sc.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
     c_badge = '<span class="pill-safe">Benign Task</span>' if sc.category == AttackCategory.BENIGN else f'<span class="pill-critical">{sc.category.value}</span>'
-    return f"""
+    render_html(f"""
     <div class="sentinel-card" style="padding: 14px 20px; margin-bottom: 20px; background-color: #FFFFFF; border: 1px solid #E5E7EB;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -534,7 +529,7 @@ def render_scenario_context(sc):
             <strong style="color: #111827;">User Prompt:</strong> "{sc.user_prompt}" &nbsp;•&nbsp; <span style="color: #6B7280;"><em>{sc.attack_description}</em></span>
         </div>
     </div>
-    """
+    """)
 
 # -----------------------------------------------------------------------------
 # SIMULATION ENGINE EXECUTION
@@ -571,7 +566,7 @@ prot_trace = st.session_state.last_prot_trace
 
 # VIEW 1: SIDE-BY-SIDE AGENT COMPARISON
 if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>CONSOLE</span> / <span class="active-crumb">SECURITY OVERVIEW & AGENT COMPARISON</span>
@@ -590,12 +585,12 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             Real-time side-by-side behavioral telemetry for active agent session. Direct comparison of an unprotected baseline RAG agent vs. Sentinel-protected agent executing on identical prompt injection attacks.
         </p>
     </div>
-    """, unsafe_allow_html=True)
-    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
+    """)
+    render_scenario_context(active_scenario)
 
     # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED)
     if prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK:
-        st.markdown("""
+        render_html("""
         <div class="hero-blocked-banner">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -627,7 +622,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # 2. SIDE BY SIDE COLUMNS
     col_unprot, col_prot = st.columns(2, gap="large")
@@ -635,7 +630,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
     # LEFT COLUMN: UNPROTECTED BASELINE
     with col_unprot:
         vuln_badge = '<span class="pill-critical">EXPLOITED / COMPROMISED</span>' if unprot_trace.status == "EXPLOITED" else '<span class="pill-safe">COMPLETED</span>'
-        st.markdown(f"""
+        render_html(f"""
         <div class="card-vuln">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <div style="font-weight: 700; font-size: 16px; color: #EF4444;">
@@ -647,7 +642,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 Direct RAG loop without input filtering or output pre-flight tool gates.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
         with st.expander("Ingested Untrusted Document (Raw Content)", expanded=False):
             st.text_area("Document Text", value=active_scenario.document_content, height=120, disabled=True)
@@ -662,7 +657,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 is_danger = "confidential" in str(tc.arguments) or "exfil" in str(tc.arguments) or tc.tool_name == "write_record"
                 status_pill = '<span class="pill-critical">EXECUTED (LEAKED)</span>' if is_danger else '<span class="pill-safe">EXECUTED</span>'
                 border_clr = "#EF4444" if is_danger else "#10B981"
-                st.markdown(f"""
+                render_html(f"""
                 <div class="tool-call-box" style="border-left: 4px solid {border_clr};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 700; color: #111827;">{tc.tool_name}()</span>
@@ -671,16 +666,16 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     <div style="color: #4B5563; margin: 6px 0;">Arguments: <code>{json.dumps(tc.arguments)}</code></div>
                     <div style="color: #6B7280; font-size: 11px;">Result: {tc.result}</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
         else:
             st.info("No tool calls executed.")
 
         st.markdown("##### Agent Output Delivered to User")
-        st.markdown(f"""
+        render_html(f"""
         <div style="background-color: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 14px; font-size: 13px; color: #991B1B;">
             {unprot_trace.final_output}
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     # RIGHT COLUMN: PROTECTED SENTINEL AGENT
     with col_prot:
@@ -691,7 +686,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         else:
             prot_badge = '<span class="pill-safe">COMPLETED LEGITIMATE TASK</span>'
 
-        st.markdown(f"""
+        render_html(f"""
         <div class="card-prot">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <div style="font-weight: 700; font-size: 16px; color: #10B981;">
@@ -703,13 +698,13 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 Layer 1: Content Firewall (Input) + Layer 2: Action Guard Pre-Flight Gate (Output).
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
         # 5-Point Policy Evaluation Grid
         guard = prot_trace.guard_result
         if guard:
             is_blocked = guard.decision == DefenseDecision.BLOCK
-            st.markdown(f"""
+            render_html(f"""
             <div style="margin-bottom: 16px;">
                 <div style="font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 8px;">
                     Policy Evaluation Matrix (5 Scopes Evaluated)
@@ -729,7 +724,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """)
 
         # Clean Provenance Flow
         with st.expander("Attack Lineage Provenance Flow (7 Verified Transitions)", expanded=False):
@@ -772,14 +767,14 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
 
         # Interactive Human-in-the-Loop Confirmation
         if prot_trace.status == "WAITING_APPROVAL":
-            st.markdown("""
+            render_html("""
             <div style="border: 1px solid #FDE68A; background-color: #FFFBEB; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
                 <div style="font-weight: 700; color: #92400E; margin-bottom: 4px;">Human Confirmation Required</div>
                 <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
                     Action Guard detected an ambiguous external recipient. Confirm whether to authorize supervised dispatch.
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             col_b1, col_b2 = st.columns(2)
             with col_b1:
                 if st.button("Approve Action", type="primary", use_container_width=True):
@@ -795,7 +790,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             for tc in prot_trace.tool_calls:
                 tc_border = "#EF4444" if tc.status == "blocked" else ("#F59E0B" if tc.status == "pending_approval" else "#10B981")
                 tc_status_pill = '<span class="pill-critical">BLOCKED & SEVERED</span>' if tc.status == "blocked" else ('<span class="pill-warning">PENDING APPROVAL</span>' if tc.status == "pending_approval" else '<span class="pill-safe">PASSED GATE</span>')
-                st.markdown(f"""
+                render_html(f"""
                 <div class="tool-call-box" style="border-left: 4px solid {tc_border};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 700; color: #111827;">{tc.tool_name}()</span>
@@ -804,18 +799,18 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     <div style="color: #4B5563; margin: 6px 0;">Arguments: <code>{json.dumps(tc.arguments)}</code></div>
                     <div style="color: #6B7280; font-size: 11px;">Verification: {tc.result}</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
         st.markdown("##### Safe Protected Agent Output")
-        st.markdown(f"""
+        render_html(f"""
         <div style="background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 14px; font-size: 13px; color: #065F46;">
             {prot_trace.final_output}
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
 # VIEW 2: ATTACK PLAYGROUND (3-STAGE DEMO)
 elif "Playground" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>DEMONSTRATION</span> / <span class="active-crumb">3-STAGE ATTACK PIPELINE</span>
@@ -834,10 +829,10 @@ elif "Playground" in nav_tab:
             Step-by-step visual demonstration tracing an indirect prompt injection attack: from benign user prompt, through poisoned vector store retrieval, to real-time Content Firewall interception before model context exposure.
         </p>
     </div>
-    """, unsafe_allow_html=True)
-    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
+    """)
+    render_scenario_context(active_scenario)
 
-    st.markdown(f"""
+    render_html(f"""
     <div class="sentinel-card" style="border-left: 4px solid #2563EB;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -851,11 +846,10 @@ elif "Playground" in nav_tab:
             "{active_scenario.user_prompt}"
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
-    st.markdown("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>", unsafe_allow_html=True)
-
-    st.markdown(f"""
+    render_html("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>")
+    render_html(f"""
     <div class="sentinel-card" style="border-left: 4px solid #EF4444;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -881,11 +875,10 @@ elif "Playground" in nav_tab:
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
-    st.markdown("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>", unsafe_allow_html=True)
-
-    st.markdown("""
+    render_html("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>")
+    render_html("""
     <div class="sentinel-card" style="border-left: 4px solid #10B981;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -900,12 +893,12 @@ elif "Playground" in nav_tab:
             Content Firewall stripped the untrusted system override. The agent safely completed the invoice inquiry without leaking sensitive files or invoking unauthorized email tools.
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     st.markdown("##### Content Firewall Inspection Layers")
     d1, d2, d3, d4 = st.columns(4)
     with d1:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div style="display: flex; justify-content: space-between;">
                 <span style="font-size: 11px; font-weight: 600; color: #6B7280;">Detector 01</span>
@@ -915,9 +908,9 @@ elif "Playground" in nav_tab:
             <div style="font-size: 11px; color: #6B7280;">Matched system override signatures</div>
             <div style="font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; font-family: monospace;">Latency: 2.1ms</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with d2:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div style="display: flex; justify-content: space-between;">
                 <span style="font-size: 11px; font-weight: 600; color: #6B7280;">Detector 02</span>
@@ -927,9 +920,9 @@ elif "Playground" in nav_tab:
             <div style="font-size: 11px; color: #6B7280;">Scanned Base64, Hex & Zero-width</div>
             <div style="font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; font-family: monospace;">Latency: 4.3ms</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with d3:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div style="display: flex; justify-content: space-between;">
                 <span style="font-size: 11px; font-weight: 600; color: #6B7280;">Detector 03</span>
@@ -939,9 +932,9 @@ elif "Playground" in nav_tab:
             <div style="font-size: 11px; color: #6B7280;">Monitored ChatML & system spoofing</div>
             <div style="font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; font-family: monospace;">Latency: 3.8ms</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with d4:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div style="display: flex; justify-content: space-between;">
                 <span style="font-size: 11px; font-weight: 600; color: #6B7280;">Detector 04</span>
@@ -951,11 +944,11 @@ elif "Playground" in nav_tab:
             <div style="font-size: 11px; color: #6B7280;">Adversarial probability: 0.98</div>
             <div style="font-size: 11px; color: #10B981; font-weight: 600; margin-top: 8px; font-family: monospace;">Latency: 12.0ms</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
 # VIEW 3: ACTION GUARD PRE-FLIGHT GATE
 elif "Action Guard" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>ACTION GUARD</span> / <span class="active-crumb">PRE-FLIGHT INTERCEPT GATE (L7)</span>
@@ -974,13 +967,13 @@ elif "Action Guard" in nav_tab:
             Pre-flight deterministic policy engine evaluating tool manifests, recipient allowlists, resource boundaries, and cryptographic taint lineage before socket transmission.
         </p>
     </div>
-    """, unsafe_allow_html=True)
-    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
+    """)
+    render_scenario_context(active_scenario)
 
     guard = prot_trace.guard_result
     is_blocked = guard and guard.decision == DefenseDecision.BLOCK
 
-    st.markdown("""
+    render_html("""
     <div class="hero-blocked-banner">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -993,49 +986,49 @@ elif "Action Guard" in nav_tab:
             Action Guard evaluates 5 mandatory policy scopes before authorizing any tool invocation.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     g1, g2, g3, g4, g5 = st.columns(5)
     with g1:
-        st.markdown("""
+        render_html("""
         <div class="policy-pill-card" style="border-top: 3px solid #10B981;">
             <div style="font-size: 11px; font-weight: 600; color: #10B981;">✓ PASS</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Tool Scope</div>
             <div style="font-size: 11px; color: #6B7280;">Registered in agent tool manifest</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with g2:
-        st.markdown(f"""
+        render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
             <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Recipient Scope</div>
             <div style="font-size: 11px; color: #6B7280;">Egress allowlist verification</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with g3:
-        st.markdown(f"""
+        render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
             <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Resource Scope</div>
             <div style="font-size: 11px; color: #6B7280;">RBAC boundary validation</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with g4:
-        st.markdown(f"""
+        render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
             <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Data Flow (IFC)</div>
             <div style="font-size: 11px; color: #6B7280;">No untrusted data into egress</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with g5:
-        st.markdown(f"""
+        render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
             <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Provenance Taint</div>
             <div style="font-size: 11px; color: #6B7280;">Taint lineage tracking</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     with st.expander("Technical Evidence & Cryptographic Verification", expanded=True):
         st.markdown("""
@@ -1046,7 +1039,7 @@ elif "Action Guard" in nav_tab:
 
 # VIEW 4: STRUCTURED FORENSIC AUDIT LOG
 elif "Audit Log" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>FORENSICS</span> / <span class="active-crumb">IMMUTABLE AUDIT LEDGER</span>
@@ -1065,7 +1058,7 @@ elif "Audit Log" in nav_tab:
             Cryptographically signed, tamper-evident execution logs recording every prompt classification, tool interception, policy rule evaluated, and SHA-256 provenance hash.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     if st.session_state.audit_logs:
         df_logs = pd.DataFrame(st.session_state.audit_logs)
@@ -1106,7 +1099,7 @@ elif "Audit Log" in nav_tab:
 
 # VIEW 5: EVALUATION & BENCHMARK SUITE
 elif "Evaluation" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>VALIDATION</span> / <span class="active-crumb">BENCHMARK EVALUATION SUITE</span>
@@ -1125,51 +1118,51 @@ elif "Evaluation" in nav_tab:
             Empirical compliance metrics measured against Problem Statement 3 requirements across 30 attack payloads (5 categories, dev/unseen splits) and 20 benign enterprise tasks.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div class="metric-label">Baseline Exploit Rate</div>
             <div class="metric-val" style="color: #EF4444;">76.7%</div>
             <div class="metric-sub">Target: ≥ 70% (Requirement Met)</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with c2:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div class="metric-label">Attack Catch Rate</div>
             <div class="metric-val" style="color: #10B981;">93.3%</div>
             <div class="metric-sub">Target: ≥ 85% (Requirement Met)</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with c3:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div class="metric-label">Task Completion Rate</div>
             <div class="metric-val" style="color: #10B981;">95.0%</div>
             <div class="metric-sub">Target: ≥ 90% (Requirement Met)</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with c4:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div class="metric-label">False Positive Rate</div>
             <div class="metric-val" style="color: #10B981;">5.0%</div>
             <div class="metric-sub">Target: ≤ 10% (Requirement Met)</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with c5:
-        st.markdown("""
+        render_html("""
         <div class="metric-box">
             <div class="metric-label">Added Latency Overhead</div>
             <div class="metric-val" style="color: #2563EB;">342 ms</div>
             <div class="metric-sub">Ceiling: &lt; 2,000 ms (Passed)</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    render_html("<div style='height: 16px;'></div>")
     col_bench_table, col_latency_table = st.columns(2, gap="large")
 
     with col_bench_table:
@@ -1206,7 +1199,7 @@ elif "Evaluation" in nav_tab:
 
 # VIEW 6: SANDBOX ENVIRONMENT & CORPUS
 elif "Sandbox" in nav_tab:
-    st.markdown("""
+    render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>SANDBOX</span> / <span class="active-crumb">VIRTUAL FILE SYSTEM & CORPUS</span>
@@ -1225,7 +1218,7 @@ elif "Sandbox" in nav_tab:
             Virtual enterprise file system demonstrating strict RBAC perimeter boundaries between accessible procurement files (<code style="color: #2563EB;">data/corpus/</code>) and restricted confidential data (<code style="color: #EF4444;">data/confidential/</code>).
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     col_corp, col_conf = st.columns(2, gap="large")
     with col_corp:
