@@ -94,6 +94,12 @@ def run_content_firewall(scenario: Scenario) -> ContentFirewallResult:
 
     latency_ms = (time.perf_counter() - start_t) * 1000 + 42.5  # Simulate minimal processing latency
 
+    threat_score_val = 85 if is_injection else 0
+    threat_sev = "CRITICAL" if is_injection else "LOW"
+    breakdown_list = [
+        {"factor": s, "points": 25, "reason": "Adversarial pattern identified"} for s in detected_signals
+    ]
+
     return ContentFirewallResult(
         is_flagged=is_injection,
         risk_level=risk_level,
@@ -101,7 +107,10 @@ def run_content_firewall(scenario: Scenario) -> ContentFirewallResult:
         decoded_payload=decode_signals[0] if decode_signals else None,
         classifier_label=classifier_label,
         sanitized_content=sanitized,
-        latency_ms=round(latency_ms, 2)
+        latency_ms=round(latency_ms, 2),
+        threat_score=threat_score_val,
+        threat_severity=threat_sev,
+        threat_breakdown=breakdown_list
     )
 
 def run_action_guard(
@@ -401,12 +410,16 @@ def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentE
     )
 
     fw_dict = res_prot.get("firewall_result", {})
+    ts_dict = fw_dict.get("threat_score") or {}
     fw_res = ContentFirewallResult(
         is_flagged=(fw_dict.get("status") in ["QUARANTINED", "SANITISED"]),
-        risk_level="CRITICAL" if fw_dict.get("status") == "QUARANTINED" else "LOW",
+        risk_level=ts_dict.get("severity", "CRITICAL" if fw_dict.get("status") == "QUARANTINED" else "LOW"),
         detected_signals=[f.get("rule", "") for f in fw_dict.get("findings", [])],
         sanitized_content=fw_dict.get("safe_text", ""),
-        latency_ms=fw_dict.get("latency_ms", 0.5)
+        latency_ms=fw_dict.get("latency_ms", 0.5),
+        threat_score=ts_dict.get("score", 85 if fw_dict.get("status") == "QUARANTINED" else 0),
+        threat_severity=ts_dict.get("severity", "CRITICAL" if fw_dict.get("status") == "QUARANTINED" else "LOW"),
+        threat_breakdown=ts_dict.get("breakdown", [])
     )
 
     # Determine Guard result from audit events

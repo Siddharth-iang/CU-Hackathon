@@ -2,7 +2,7 @@ import re
 import time
 import json
 from typing import Dict, Any, List, Optional
-from shield.models import FirewallResult
+from shield.models import FirewallResult, ThreatScore
 from shield.firewall.decoder import views, normalise
 from shield.firewall.spotlight import spotlight
 from shield.llm import chat
@@ -113,14 +113,96 @@ def classify_injection_llm(text: str) -> Optional[Dict[str, Any]]:
         pass
     return None
 
+def calculate_threat_score(findings: List[Dict[str, Any]], decoded_views_count: int = 1) -> ThreatScore:
+    """
+    Computes a composite Threat Severity Index (0 - 100) based on:
+    - Stealth & Evasion (Decoded Steganography / Obfuscation)
+    - Instruction Override & System Delimiter Forgery
+    - Asset Target Severity (Private Directories & API_KEY assignments)
+    - Tool & Egress Exfiltration Directives
+    - Compounding Multi-Vector Multiplier (APT detection)
+    """
+    if not findings:
+        return ThreatScore(score=0, severity="LOW", breakdown=[], compound_multiplier=1.0)
+
+    category_weights = {
+        "instruction_override": (30, "Instruction Override / Hijack Directive"),
+        "fake_system_delimiter": (30, "System Delimiter Forgery"),
+        "tool_call_injection": (30, "Tool Execution Hijack Directive"),
+        "mode_escalation": (25, "Privilege Escalation / Filter Bypass"),
+        "data_exfiltration": (30, "Confidential Asset Exfiltration Directive"),
+        "private_directory_access": (35, "Private Directory Access Probe"),
+        "credential_key_assignment": (35, "Credential / API_KEY Assignment"),
+        "classifier_flagged_injection": (25, "Semantic Classifier Detection"),
+    }
+
+    breakdown: List[Dict[str, Any]] = []
+    base_points = 0
+    seen_categories = set()
+
+    for f in findings:
+        rule = f.get("rule", "")
+        # Check if decoded evasion
+        is_decoded = "decoded_" in rule or f.get("layer") == "decoder_hidden_payload"
+        base_rule = rule.replace("decoded_", "")
+
+        weight, desc = category_weights.get(base_rule, (20, "Adversarial Directive"))
+
+        if is_decoded and "Evasion / Steganography" not in seen_categories:
+            breakdown.append({
+                "factor": "Evasion / Steganography",
+                "points": 25,
+                "reason": "Adversarial payload concealed via Base64/Hex/Zero-width encoding"
+            })
+            base_points += 25
+            seen_categories.add("Evasion / Steganography")
+
+        cat_key = desc
+        if cat_key not in seen_categories:
+            breakdown.append({
+                "factor": desc,
+                "points": weight,
+                "reason": f"Matched heuristic: {rule}"
+            })
+            base_points += weight
+            seen_categories.add(cat_key)
+
+    # Multi-Vector Compounding Multiplier:
+    # If 3 or more distinct attack vectors are combined, apply compounding penalty
+    multiplier = 1.0
+    if len(seen_categories) >= 3:
+        multiplier = 1.25
+    elif len(seen_categories) == 2:
+        multiplier = 1.1
+
+    final_score = min(100, int(round(base_points * multiplier)))
+
+    # Determine severity tier
+    if final_score >= 75:
+        severity = "CRITICAL"
+    elif final_score >= 45:
+        severity = "HIGH"
+    elif final_score >= 20:
+        severity = "MEDIUM"
+    else:
+        severity = "LOW"
+
+    return ThreatScore(
+        score=final_score,
+        severity=severity,
+        breakdown=breakdown,
+        compound_multiplier=multiplier
+    )
+
 def run_firewall(raw_text: str, source: str = "document", use_llm_classifier: bool = True) -> FirewallResult:
     """
     Full Content Firewall Pipeline:
     1. Normalization & Decoding of zero-width, Base64, Hex, ROT13.
     2. Rule heuristics scanning on all decoded text representations.
     3. LLM-based instruction classifier (when enabled & accessible).
-    4. Quarantine/Sanitize dangerous segments.
-    5. Spotlight text with unforgeable per-request delimiters.
+    4. Threat Severity Index (TSI) risk scoring.
+    5. Quarantine/Sanitize dangerous segments.
+    6. Spotlight text with unforgeable per-request delimiters.
     """
     start_t = time.perf_counter()
     findings: List[Dict[str, Any]] = []
@@ -144,7 +226,10 @@ def run_firewall(raw_text: str, source: str = "document", use_llm_classifier: bo
         if llm_finding:
             findings.append(llm_finding)
 
-    # 4. Quarantine / Sanitize & Spotlighting
+    # 4. Compute composite Threat Severity Score
+    threat_score = calculate_threat_score(findings, decoded_views_count=len(all_views))
+
+    # 5. Quarantine / Sanitize & Spotlighting
     if findings:
         status = "QUARANTINED"
         # Sanitize known injection patterns
@@ -166,5 +251,6 @@ def run_firewall(raw_text: str, source: str = "document", use_llm_classifier: bo
         status=status,
         safe_text=safe_text,
         findings=findings,
-        latency_ms=latency_ms
+        latency_ms=latency_ms,
+        threat_score=threat_score
     )

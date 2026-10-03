@@ -18,11 +18,18 @@ class Decision(BaseModel):
     reason: str                                                 # sentence a human can read
     evidence: str = ""                                          # the snippet that triggered it
 
+class ThreatScore(BaseModel):
+    score: int = 0                                              # 0 to 100
+    severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = "LOW"
+    breakdown: List[Dict[str, Any]] = Field(default_factory=list)
+    compound_multiplier: float = 1.0
+
 class FirewallResult(BaseModel):
     status: Literal["CLEAN", "SANITISED", "QUARANTINED"]
     safe_text: str                                              # what the agent is allowed to see
     findings: List[Dict[str, Any]] = Field(default_factory=list)# each: {layer, rule, snippet, score}
     latency_ms: float = 0.0
+    threat_score: Optional[ThreatScore] = None
 
 class AuditEvent(BaseModel):
     ts: str

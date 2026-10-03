@@ -931,6 +931,30 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         </div>
         """)
 
+        # Threat Severity Index (TSI) Risk Meter
+        fw = prot_trace.firewall_result
+        score = fw.threat_score if (fw and hasattr(fw, "threat_score") and fw.threat_score is not None) else (85 if (fw and fw.is_flagged) else 0)
+        sev = fw.threat_severity if (fw and hasattr(fw, "threat_severity") and fw.threat_severity) else ("CRITICAL" if score >= 75 else ("HIGH" if score >= 45 else ("MEDIUM" if score >= 20 else "LOW")))
+        meter_color = "#EF4444" if score >= 75 else ("#F97316" if score >= 45 else ("#F59E0B" if score >= 20 else "#10B981"))
+        bg_meter = "#FEF2F2" if score >= 75 else ("#FFF7ED" if score >= 45 else ("#FFFBEB" if score >= 20 else "#ECFDF5"))
+        border_meter = "#FECACA" if score >= 75 else ("#FED7AA" if score >= 45 else ("#FDE68A" if score >= 20 else "#A7F3D0"))
+
+        render_html(f"""
+        <div style="background-color: {bg_meter}; border: 1px solid {border_meter}; border-radius: 8px; padding: 12px 16px; margin: 12px 0 16px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.05em;">
+                    🛡️ Threat Severity Index (TSI)
+                </span>
+                <span style="font-size: 12px; font-weight: 800; color: {meter_color}; font-family: 'JetBrains Mono', monospace;">
+                    {score}/100 • {sev}
+                </span>
+            </div>
+            <div style="width: 100%; height: 8px; background-color: #E5E7EB; border-radius: 4px; overflow: hidden;">
+                <div style="width: {score}%; height: 100%; background-color: {meter_color}; border-radius: 4px;"></div>
+            </div>
+        </div>
+        """)
+
         # 5-Point Policy Evaluation Grid
         guard = prot_trace.guard_result
         if guard:
@@ -976,13 +1000,20 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             """)
 
         # Layer 1 Content Firewall Telemetry
-        fw = prot_trace.firewall_result
         if fw:
-            fw_label = f"Flagged ({fw.risk_level})" if fw.is_flagged else "Clean (Low Risk)"
+            fw_label = f"Flagged ({sev})" if fw.is_flagged else "Clean (Low Risk)"
             with st.expander(f"Layer 1: Content Firewall Telemetry — {fw_label}", expanded=False):
                 col_f1, col_f2 = st.columns(2)
                 col_f1.markdown(f"**Classification:** `{fw.classifier_label}`")
                 col_f2.markdown(f"**Scan Latency:** `{fw.latency_ms} ms`")
+
+                if hasattr(fw, "threat_breakdown") and fw.threat_breakdown:
+                    st.markdown("**Threat Vector Risk Breakdown:**")
+                    for b in fw.threat_breakdown:
+                        factor_name = b.get("factor", "Threat Factor")
+                        pts = b.get("points", 0)
+                        rsn = b.get("reason", "")
+                        st.markdown(f"- **`+{pts} pts`** — **{factor_name}**: *{rsn}*")
 
                 if fw.detected_signals:
                     st.markdown("**Detected Indicators:**")

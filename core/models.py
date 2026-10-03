@@ -33,6 +33,9 @@ class ContentFirewallResult:
     classifier_label: str = "benign_data"  # benign_data, indirect_injection, command_override
     sanitized_content: str = ""
     latency_ms: float = 0.0
+    threat_score: int = 0
+    threat_severity: str = "LOW"
+    threat_breakdown: List[Dict[str, Any]] = field(default_factory=list)
 
 @dataclass
 class ActionGuardResult:
