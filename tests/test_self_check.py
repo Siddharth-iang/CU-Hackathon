@@ -107,6 +107,33 @@ def test_reporting_and_policy_studio():
     r_permissive = evaluate_custom_policy("send_email", {"to": "external@supplier.com"}, "Audit Only (Permissive)")
     assert r_permissive["verdict"] == "ALLOW"
 
+def test_fuzzer_and_benchmark_and_replay():
+    from core.fuzzer import fuzz_scenario, MUTATION_STRATEGIES
+    from core.benchmark import run_live_benchmark
+    from core.replay import generate_milestone_timeline
+    
+    # 1. Fuzzer verification
+    sc = SCENARIOS[0]
+    for mut_name in MUTATION_STRATEGIES:
+        fuzzed = fuzz_scenario(sc, mut_name)
+        assert fuzzed.id.startswith("fuzz_")
+        assert len(fuzzed.document_content) > 0
+        assert fuzzed.is_unseen_split is True
+
+    # 2. Replay milestone verification
+    unprot, prot = simulate_execution(sc)
+    timeline = generate_milestone_timeline(sc, prot, unprot)
+    assert len(timeline) == 5
+    assert timeline[0]["step"] == 1
+    assert timeline[4]["step"] == 5
+
+    # 3. Batch benchmark verification (run on small subset of 3 scenarios)
+    sample_scenarios = SCENARIOS[:3]
+    bench_res = run_live_benchmark(sample_scenarios, policy_tier="Standard (Enterprise)")
+    assert bench_res["total_scenarios"] == 3
+    assert "protected_catch_rate" in bench_res
+    assert len(bench_res["detailed_results"]) == 3
+
 if __name__ == "__main__":
     print("[RUNNING] Running AEGIS-RAG security self-checks...")
     test_decoding_engine()
@@ -121,4 +148,6 @@ if __name__ == "__main__":
     print("  [OK] Multi-chain taint lineage self-check passed.")
     test_reporting_and_policy_studio()
     print("  [OK] SOC2 Incident Reporting & Policy Studio self-check passed.")
-    print("All 6 self-checks PASSED successfully!")
+    test_fuzzer_and_benchmark_and_replay()
+    print("  [OK] Fuzzer, Live Benchmark & Time-Travel Replay self-check passed.")
+    print("All 7 self-checks PASSED successfully!")
