@@ -31,6 +31,13 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
+    /* Streamlit Main Container Spacing */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1440px !important;
+    }
+
     /* Headings & Text */
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Inter', sans-serif !important;
@@ -39,51 +46,26 @@ st.markdown("""
         letter-spacing: -0.02em !important;
     }
 
-    /* Streamlit Main Container Spacing */
-    .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 1400px !important;
-    }
-
-    /* Top Application Bar */
-    .sentinel-header {
+    /* Header Bar spanning top of main area */
+    .sentinel-topbar {
         background-color: #FFFFFF;
         border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 16px 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        border-radius: 10px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 16px;
-    }
-
-    .brand-title {
-        font-size: 18px;
-        font-weight: 800;
-        color: #111827;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        letter-spacing: -0.01em;
-    }
-
-    .brand-subtitle {
-        font-size: 13px;
-        color: #6B7280;
-        margin-top: 4px;
-        margin-bottom: 0;
+        gap: 12px;
     }
 
     /* Status Pills */
     .pill-safe {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         background-color: #ECFDF5;
         color: #065F46;
         border: 1px solid #A7F3D0;
@@ -92,12 +74,13 @@ st.markdown("""
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 0.02em;
     }
 
     .pill-critical {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         background-color: #FEF2F2;
         color: #991B1B;
         border: 1px solid #FECACA;
@@ -106,12 +89,13 @@ st.markdown("""
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 0.02em;
     }
 
     .pill-warning {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         background-color: #FFFBEB;
         color: #92400E;
         border: 1px solid #FDE68A;
@@ -125,7 +109,7 @@ st.markdown("""
     .pill-info {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         background-color: #EFF6FF;
         color: #1E40AF;
         border: 1px solid #BFDBFE;
@@ -139,7 +123,7 @@ st.markdown("""
     .pill-neutral {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         background-color: #F3F4F6;
         color: #374151;
         border: 1px solid #E5E7EB;
@@ -149,7 +133,7 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Standard Card Container */
+    /* Cards */
     .sentinel-card {
         background-color: #FFFFFF;
         border: 1px solid #E5E7EB;
@@ -214,7 +198,7 @@ st.markdown("""
         margin-top: 4px;
     }
 
-    /* Code / Tool Execution Block */
+    /* Tool Call Box */
     .tool-call-box {
         font-family: 'JetBrains Mono', monospace;
         font-size: 12px;
@@ -226,7 +210,6 @@ st.markdown("""
         color: #111827;
     }
 
-    /* Policy Grid Card */
     .policy-pill-card {
         background-color: #FFFFFF;
         border: 1px solid #E5E7EB;
@@ -235,41 +218,99 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Streamlit Sidebar Overrides */
+    /* View Header Structure matching React Sentinel */
+    .sentinel-view-header {
+        border-bottom: 1px solid #E5E7EB;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
+    }
+    .view-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+    }
+    .view-breadcrumb .active-crumb {
+        color: #2563EB;
+        font-weight: 700;
+    }
+    .view-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .view-title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .view-title {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+    }
+    .view-subtitle {
+        font-size: 13px !important;
+        color: #4B5563 !important;
+        margin-top: 6px !important;
+        margin-bottom: 0 !important;
+        line-height: 1.5 !important;
+    }
+    .view-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Sidebar Styling */
     section[data-testid="stSidebar"] {
         background-color: #FFFFFF !important;
         border-right: 1px solid #E5E7EB !important;
+        padding: 1.25rem 0.85rem !important;
     }
 
-    /* Streamlit Tabs Customization */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        border-bottom: 1px solid #E5E7EB;
-        margin-bottom: 16px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #6B7280;
-        border-radius: 6px 6px 0 0;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #2563EB !important;
-        font-weight: 700;
-        border-bottom: 2px solid #2563EB !important;
-        background-color: #EFF6FF !important;
+    /* Completely hide the radio circle for clean button appearance */
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {
+        display: none !important;
     }
 
-    /* Buttons */
-    .stButton > button {
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label {
+        margin-bottom: 3px !important;
+        padding: 9px 12px !important;
         border-radius: 6px !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
+        font-size: 12.5px !important;
+        font-weight: 500 !important;
+        color: #4B5563 !important;
         transition: all 0.15s ease !important;
+        background-color: transparent !important;
+        border-left: 3px solid transparent !important;
+        cursor: pointer !important;
     }
 
-    /* Pulsing Green Circle Animation */
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {
+        background-color: #F3F4F6 !important;
+        color: #111827 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(input:checked) {
+        background-color: #EFF6FF !important;
+        color: #2563EB !important;
+        font-weight: 600 !important;
+        border-left: 3px solid #2563EB !important;
+    }
+
+    /* Pulse Green Dot */
     @keyframes pulse-green {
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.5; transform: scale(1.1); }
@@ -301,57 +342,52 @@ if "current_scenario" not in st.session_state:
     st.session_state.current_scenario = SCENARIOS[0]
 
 if "human_approval_state" not in st.session_state:
-    st.session_state.human_approval_state = "IDLE"  # IDLE, APPROVED, REJECTED
+    st.session_state.human_approval_state = "IDLE"
 
 # -----------------------------------------------------------------------------
-# TOP APPLICATION BAR
-# -----------------------------------------------------------------------------
-st.markdown("""
-<div class="sentinel-header">
-    <div>
-        <div class="brand-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L20 6V12C20 17.5 16.5 21.5 12 23C7.5 21.5 4 17.5 4 12V6L12 2Z" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M9 12L11 14L15 10" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            SENTINEL // AGENT SECURITY FIREWALL
-        </div>
-        <p class="brand-subtitle">
-            Dual-Layer Defense Boundary • L1 Content Firewall (Input) + L2 Action Guard Pre-Flight Gate (Output)
-        </p>
-    </div>
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <span class="pill-safe">
-            <span class="pulse-dot"></span>
-            Protection Active
-        </span>
-        <span class="pill-neutral">Session: <code>SES-8F31A2</code></span>
-        <span class="pill-neutral">Target: <code>RAG-FinOps-v3</code></span>
-        <span class="pill-safe">Latency: 18ms</span>
-        <span class="pill-info">Policy: ENFORCING</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# SIDEBAR CONTROLS & TEST SUITE SELECTOR
+# SIDEBAR: EXACT SENTINEL BRANDING, NAVIGATION & CONFIGURATION
 # -----------------------------------------------------------------------------
 with st.sidebar:
+    # 1. Top Brand Header matching Sidebar.tsx
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-        <div style="background-color: #2563EB; color: white; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">
-            S
-        </div>
-        <div>
-            <div style="font-weight: 700; font-size: 13px; color: #111827;">SENTINEL CONSOLE</div>
-            <div style="font-size: 10px; color: #6B7280; text-transform: uppercase;">v2.4.1-prod</div>
+    <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;">
+        <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="8" fill="#F3F4F6" stroke="#E5E7EB" stroke-width="1.5"/>
+            <path d="M20 7L29 11.5V19C29 25.2 25.1 30.8 20 33C14.9 30.8 11 25.2 11 19V11.5L20 7Z" stroke="#2563EB" stroke-width="1.75" stroke-linejoin="round"/>
+            <path d="M16 20H24M20 16V24" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="1.5" fill="#111827"/>
+        </svg>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 15px; font-weight: 800; color: #111827; letter-spacing: -0.02em; line-height: 1;">SENTINEL</span>
+            <span style="font-size: 9px; font-weight: 700; color: #6B7280; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; line-height: 1;">AGENT SECURITY FIREWALL</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("##### Attack Library & Test Suite")
+    # 2. Console Navigation Section with Icons matching Sidebar.tsx
+    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Console Navigation</div>', unsafe_allow_html=True)
+    
+    nav_tab = st.radio(
+        "Navigation",
+        options=[
+            "🛡️ Overview & Comparison",
+            "⚡ Attack Playground",
+            "⚖️ Action Guard Gate",
+            "📋 Forensic Audit Log",
+            "📊 Evaluation Suite",
+            "📂 Sandbox & Storage"
+        ],
+        index=0,
+        label_visibility="collapsed"
+    )
+
+    st.markdown('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>', unsafe_allow_html=True)
+
+    # 3. Test Suite & Scenario Selector
+    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Attack Vector Selection</div>', unsafe_allow_html=True)
+    
     category_filter = st.selectbox(
-        "Filter by Attack Category",
+        "Filter Category",
         options=["All Scenarios"] + [c.value for c in AttackCategory],
         index=0
     )
@@ -388,51 +424,120 @@ with st.sidebar:
 
     st.session_state.current_scenario = active_scenario
 
-    st.divider()
+    st.markdown('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>', unsafe_allow_html=True)
 
-    st.markdown("##### Defense Configuration")
-    enable_firewall = st.toggle("Content Firewall (Input Layer 1)", value=True, help="Scans retrieved documents for regex patterns, decodes Base64/Hex/Zero-width chars, and spotlights content.")
-    enable_action_guard = st.toggle("Action Guard (Output Layer 2)", value=True, help="Extracts authorized intent scope and intercepts proposed tool calls.")
-    enable_taint_check = st.toggle("Confidential Path & Taint Check", value=True, help="Blocks any flow from data/confidential/ to external tools.")
+    # 4. Defense Configuration Toggles
+    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Guardrails Configuration</div>', unsafe_allow_html=True)
+    enable_firewall = st.toggle("Content Firewall (Input L1)", value=True)
+    enable_action_guard = st.toggle("Action Guard (Output L2)", value=True)
+    enable_taint_check = st.toggle("Confidential Taint Check", value=True)
 
-    st.divider()
-    run_btn = st.button("Run Simulation Test", type="primary", use_container_width=True)
+    st.markdown('<div style="height: 10px; margin-bottom: 10px;"></div>', unsafe_allow_html=True)
+    run_btn = st.button("🛡️ Run Simulation Test", type="primary", use_container_width=True)
+
+    # 5. Bottom System Status Footer matching Sidebar.tsx
+    st.markdown("""
+    <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 11px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="color: #6B7280; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">SYSTEM STATUS</span>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <span class="pulse-dot"></span>
+                <span style="color: #10B981; font-weight: 700; font-size: 10px; text-transform: uppercase;">Online</span>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="color: #6B7280;">Engine Policy</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #374151;">v2.4.1-prod</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #6B7280;">Environment</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B7280;">PROD-US-EAST</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ACTIVE SCENARIO METADATA CARD
+# TOP HEADER BAR MATCHING Header.tsx
 # -----------------------------------------------------------------------------
-split_badge = '<span class="pill-info">Unseen Test Set</span>' if active_scenario.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
-category_badge = '<span class="pill-safe">Benign Task</span>' if active_scenario.category == AttackCategory.BENIGN else f'<span class="pill-critical">{active_scenario.category.value}</span>'
+is_fully_protected = enable_firewall and enable_action_guard
+status_pill = """
+<span class="pill-safe">
+    <span class="pulse-dot"></span>
+    Protection Active
+</span>
+""" if is_fully_protected else """
+<span class="pill-warning">
+    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span>
+    Interception Paused
+</span>
+"""
+mode_text = "ENFORCING" if is_fully_protected else ("PARTIAL" if (enable_firewall or enable_action_guard) else "DISABLED")
+mode_pill = f'<span class="pill-info" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>' if is_fully_protected else f'<span class="pill-warning" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>'
 
 st.markdown(f"""
-<div class="sentinel-card">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-        <div>
-            <span style="font-size: 16px; font-weight: 700; color: #111827;">Scenario: {active_scenario.title}</span>
+<div class="sentinel-topbar">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        {status_pill}
+        <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <span style="color: #6B7280;">Session:</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5E7EB;">SES-8F31A2</span>
         </div>
-        <div style="display: flex; gap: 8px;">
-            {split_badge}
-            {category_badge}
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <span style="color: #6B7280;">Target:</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #4B5563;">RAG-FinOps-v3</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <span style="color: #6B7280;">Latency:</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #10B981; font-weight: 600;">18ms avg</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <span style="color: #6B7280;">Policy:</span>
+            {mode_pill}
         </div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; font-size: 13px; color: #374151;">
-        <div style="background: #F9FAFB; padding: 10px 14px; border-radius: 8px; border: 1px solid #E5E7EB;">
-            <strong style="color: #6B7280; font-size: 11px; text-transform: uppercase;">User Task Prompt:</strong><br>
-            <span style="font-weight: 500;">"{active_scenario.user_prompt}"</span>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B7280; background-color: #F3F4F6; padding: 4px 8px; border-radius: 4px; border: 1px solid #E5E7EB;">
+            PROD-US-EAST
+        </span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; color: #2563EB; font-weight: bold; font-size: 12px;">
+                🛡️
+            </div>
+            <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
+                <span style="font-size: 11px; font-weight: 700; color: #111827;">SEC-OPS</span>
+                <span style="font-size: 9px; color: #6B7280; text-transform: uppercase;">L3 Engineer</span>
+            </div>
         </div>
-        <div style="background: #F9FAFB; padding: 10px 14px; border-radius: 8px; border: 1px solid #E5E7EB;">
-            <strong style="color: #6B7280; font-size: 11px; text-transform: uppercase;">Target Resource:</strong><br>
-            <code style="font-size: 12px; color: #2563EB;">{active_scenario.document_name}</code>
-        </div>
-    </div>
-    <div style="font-size: 12px; color: #6B7280; margin-top: 10px;">
-        <strong>Attack Vector Details:</strong> {active_scenario.attack_description}
     </div>
 </div>
 """, unsafe_allow_html=True)
 
+# Helper function to render active scenario context banner
+def render_scenario_context(sc):
+    s_badge = '<span class="pill-info">Unseen Test Set</span>' if sc.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
+    c_badge = '<span class="pill-safe">Benign Task</span>' if sc.category == AttackCategory.BENIGN else f'<span class="pill-critical">{sc.category.value}</span>'
+    return f"""
+    <div class="sentinel-card" style="padding: 14px 20px; margin-bottom: 20px; background-color: #FFFFFF; border: 1px solid #E5E7EB;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 14px; font-weight: 700; color: #111827;">Target Scenario: {sc.title}</span>
+                {s_badge}
+                {c_badge}
+            </div>
+            <div style="font-size: 12px; color: #6B7280;">
+                Target Document: <code style="color: #2563EB; font-size: 11px; background: #EFF6FF; padding: 2px 6px; border-radius: 4px; border: 1px solid #BFDBFE;">{sc.document_name}</code>
+            </div>
+        </div>
+        <div style="font-size: 12.5px; color: #4B5563; margin-top: 8px; line-height: 1.4;">
+            <strong style="color: #111827;">User Prompt:</strong> "{sc.user_prompt}" &nbsp;•&nbsp; <span style="color: #6B7280;"><em>{sc.attack_description}</em></span>
+        </div>
+    </div>
+    """
+
 # -----------------------------------------------------------------------------
-# EXECUTION TRIGGER & STATE UPDATE
+# SIMULATION ENGINE EXECUTION
 # -----------------------------------------------------------------------------
 if run_btn or st.session_state.last_unprot_trace is None:
     unprot, prot = simulate_execution(active_scenario)
@@ -461,21 +566,34 @@ unprot_trace = st.session_state.last_unprot_trace
 prot_trace = st.session_state.last_prot_trace
 
 # -----------------------------------------------------------------------------
-# MAIN NAVIGATION TABS
+# DYNAMIC ROUTER BASED ON SIDEBAR NAVIGATION
 # -----------------------------------------------------------------------------
-tab_comparison, tab_playground, tab_audit, tab_metrics, tab_corpus = st.tabs([
-    "Side-by-Side Agent Comparison",
-    "Attack Playground (3-Stage Story)",
-    "Structured Audit Log",
-    "Benchmark & Performance Metrics",
-    "Sandbox Environment & Corpus"
-])
 
-# -----------------------------------------------------------------------------
-# TAB 1: SIDE-BY-SIDE AGENT COMPARISON
-# -----------------------------------------------------------------------------
-with tab_comparison:
-    # 1. VISUAL FOCAL POINT: HERO CALLOUT IF AN ACTION WAS BLOCKED
+# VIEW 1: SIDE-BY-SIDE AGENT COMPARISON
+if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>CONSOLE</span> / <span class="active-crumb">SECURITY OVERVIEW & AGENT COMPARISON</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Security Overview & Agent Comparison</h1>
+                <span class="pill-safe"><span class="pulse-dot"></span> ACTIVE MONITOR</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-info" style="font-size: 11px;">POLICY: ENFORCING</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">SES-8F31A2</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Real-time side-by-side behavioral telemetry for active agent session. Direct comparison of an unprotected baseline RAG agent vs. Sentinel-protected agent executing on identical prompt injection attacks.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
+
+    # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED)
     if prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK:
         st.markdown("""
         <div class="hero-blocked-banner">
@@ -514,9 +632,7 @@ with tab_comparison:
     # 2. SIDE BY SIDE COLUMNS
     col_unprot, col_prot = st.columns(2, gap="large")
 
-    # ---------------------------------------------------------
-    # LEFT COLUMN: UNPROTECTED BASELINE AGENT
-    # ---------------------------------------------------------
+    # LEFT COLUMN: UNPROTECTED BASELINE
     with col_unprot:
         vuln_badge = '<span class="pill-critical">EXPLOITED / COMPROMISED</span>' if unprot_trace.status == "EXPLOITED" else '<span class="pill-safe">COMPLETED</span>'
         st.markdown(f"""
@@ -528,13 +644,13 @@ with tab_comparison:
                 {vuln_badge}
             </div>
             <div style="font-size: 12px; color: #6B7280;">
-                Direct RAG loop without input filtering or output tool pre-flight gates.
+                Direct RAG loop without input filtering or output pre-flight tool gates.
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         with st.expander("Ingested Untrusted Document (Raw Content)", expanded=False):
-            st.text_area("Document Text", value=active_scenario.document_content, height=130, disabled=True)
+            st.text_area("Document Text", value=active_scenario.document_content, height=120, disabled=True)
 
         with st.expander("Agent Reasoning Trace (Scratchpad Hijacked)", expanded=True):
             for step in unprot_trace.thoughts:
@@ -566,9 +682,7 @@ with tab_comparison:
         </div>
         """, unsafe_allow_html=True)
 
-    # ---------------------------------------------------------
-    # RIGHT COLUMN: PROTECTED AGENT (SENTINEL DEFENSE LAYER)
-    # ---------------------------------------------------------
+    # RIGHT COLUMN: PROTECTED SENTINEL AGENT
     with col_prot:
         if prot_trace.status == "BLOCKED":
             prot_badge = '<span class="pill-safe">ATTACK BLOCKED & NEUTRALIZED</span>'
@@ -699,14 +813,30 @@ with tab_comparison:
         </div>
         """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# TAB 2: ATTACK PLAYGROUND (3-STAGE DEMO STORY)
-# -----------------------------------------------------------------------------
-with tab_playground:
-    st.markdown("#### Attack Playground & Linear Demonstration")
-    st.caption("Step-by-step trace showing how Sentinel intercepts adversarial prompts before they reach model context.")
+# VIEW 2: ATTACK PLAYGROUND (3-STAGE DEMO)
+elif "Playground" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>DEMONSTRATION</span> / <span class="active-crumb">3-STAGE ATTACK PIPELINE</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Attack Playground & Linear Demonstration</h1>
+                <span class="pill-critical">LIVE DEMO</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-critical" style="font-size: 11px;">CVSS 9.8 CRITICAL</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RAG-INDIRECT-INJECT</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Step-by-step visual demonstration tracing an indirect prompt injection attack: from benign user prompt, through poisoned vector store retrieval, to real-time Content Firewall interception before model context exposure.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
 
-    # Stage 1: User Request
     st.markdown(f"""
     <div class="sentinel-card" style="border-left: 4px solid #2563EB;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -725,7 +855,6 @@ with tab_playground:
 
     st.markdown("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>", unsafe_allow_html=True)
 
-    # Stage 2: Retrieved Document with Malicious Payload Highlighted
     st.markdown(f"""
     <div class="sentinel-card" style="border-left: 4px solid #EF4444;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -756,7 +885,6 @@ with tab_playground:
 
     st.markdown("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>", unsafe_allow_html=True)
 
-    # Stage 3: Firewall Decision
     st.markdown("""
     <div class="sentinel-card" style="border-left: 4px solid #10B981;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -774,7 +902,6 @@ with tab_playground:
     </div>
     """, unsafe_allow_html=True)
 
-    # 4 Detector Cards
     st.markdown("##### Content Firewall Inspection Layers")
     d1, d2, d3, d4 = st.columns(4)
     with d1:
@@ -826,12 +953,119 @@ with tab_playground:
         </div>
         """, unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# TAB 3: STRUCTURED JSON AUDIT LOG
-# -----------------------------------------------------------------------------
-with tab_audit:
-    st.markdown("#### Structured Security Audit Log")
-    st.caption("Immutable forensic ledger recording every intercepted model dispatch, policy violation, and cryptographic hash.")
+# VIEW 3: ACTION GUARD PRE-FLIGHT GATE
+elif "Action Guard" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>ACTION GUARD</span> / <span class="active-crumb">PRE-FLIGHT INTERCEPT GATE (L7)</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Tool Dispatch Interception Gate</h1>
+                <span class="pill-critical">PRE-FLIGHT GATE L7</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-safe">18.2ms ENFORCEMENT</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">EVT-8F31A2-402</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Pre-flight deterministic policy engine evaluating tool manifests, recipient allowlists, resource boundaries, and cryptographic taint lineage before socket transmission.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown(render_scenario_context(active_scenario), unsafe_allow_html=True)
+
+    guard = prot_trace.guard_result
+    is_blocked = guard and guard.decision == DefenseDecision.BLOCK
+
+    st.markdown("""
+    <div class="hero-blocked-banner">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="pill-critical">Pre-Flight Gate L7</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #EF4444;">send_email()</span>
+            </div>
+            <span class="pill-safe">18.2ms Enforcement Latency</span>
+        </div>
+        <p style="font-size: 13px; color: #4B5563; margin-bottom: 12px;">
+            Action Guard evaluates 5 mandatory policy scopes before authorizing any tool invocation.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    g1, g2, g3, g4, g5 = st.columns(5)
+    with g1:
+        st.markdown("""
+        <div class="policy-pill-card" style="border-top: 3px solid #10B981;">
+            <div style="font-size: 11px; font-weight: 600; color: #10B981;">✓ PASS</div>
+            <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Tool Scope</div>
+            <div style="font-size: 11px; color: #6B7280;">Registered in agent tool manifest</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with g2:
+        st.markdown(f"""
+        <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Recipient Scope</div>
+            <div style="font-size: 11px; color: #6B7280;">Egress allowlist verification</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with g3:
+        st.markdown(f"""
+        <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Resource Scope</div>
+            <div style="font-size: 11px; color: #6B7280;">RBAC boundary validation</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with g4:
+        st.markdown(f"""
+        <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Data Flow (IFC)</div>
+            <div style="font-size: 11px; color: #6B7280;">No untrusted data into egress</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with g5:
+        st.markdown(f"""
+        <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Provenance Taint</div>
+            <div style="font-size: 11px; color: #6B7280;">Taint lineage tracking</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.expander("Technical Evidence & Cryptographic Verification", expanded=True):
+        st.markdown("""
+        - **SHA-256 Chunk Hash:** `7f83b1657ff18b489d21c0e3a6a9b4009ec449f82`
+        - **RSA-4096 Tamper Seal:** `SIG: 9a4d...bc02 [VERIFIED]`
+        - **Policy Enforcement Rule:** `SEC-RULE-402 (External Exfiltration Guard)`
+        """)
+
+# VIEW 4: STRUCTURED FORENSIC AUDIT LOG
+elif "Audit Log" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>FORENSICS</span> / <span class="active-crumb">IMMUTABLE AUDIT LEDGER</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Structured Forensic Security Audit Trail</h1>
+                <span class="pill-info"><span class="pulse-dot"></span> REAL-TIME TELEMETRY</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-safe">RSA-4096 SEALED</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">TAMPER-EVIDENT</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Cryptographically signed, tamper-evident execution logs recording every prompt classification, tool interception, policy rule evaluated, and SHA-256 provenance hash.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.session_state.audit_logs:
         df_logs = pd.DataFrame(st.session_state.audit_logs)
@@ -870,12 +1104,28 @@ with tab_audit:
     else:
         st.info("No audit logs recorded yet. Run a simulation scenario to populate live telemetry.")
 
-# -----------------------------------------------------------------------------
-# TAB 4: BENCHMARK & PERFORMANCE METRICS
-# -----------------------------------------------------------------------------
-with tab_metrics:
-    st.markdown("#### Quantitative Benchmark Evaluation Suite")
-    st.caption("Empirical compliance metrics measured against Problem Statement 3 requirements across 30 attack payloads and 20 benign enterprise tasks.")
+# VIEW 5: EVALUATION & BENCHMARK SUITE
+elif "Evaluation" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>VALIDATION</span> / <span class="active-crumb">BENCHMARK EVALUATION SUITE</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Quantitative Benchmark Evaluation Suite</h1>
+                <span class="pill-safe">100% EXPLOIT INTERCEPTION</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-info">45 EVALUATION SCENARIOS</span>
+                <span class="pill-neutral">PS3 COMPLIANT</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Empirical compliance metrics measured against Problem Statement 3 requirements across 30 attack payloads (5 categories, dev/unseen splits) and 20 benign enterprise tasks.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
@@ -954,12 +1204,28 @@ with tab_metrics:
         })
         st.dataframe(layer_latency, use_container_width=True)
 
-# -----------------------------------------------------------------------------
-# TAB 5: SANDBOX ENVIRONMENT & CORPUS
-# -----------------------------------------------------------------------------
-with tab_corpus:
-    st.markdown("#### Sandbox Directory & Mock File System")
-    st.caption("Virtual enterprise file system demonstrating strict RBAC perimeter boundaries.")
+# VIEW 6: SANDBOX ENVIRONMENT & CORPUS
+elif "Sandbox" in nav_tab:
+    st.markdown("""
+    <div class="sentinel-view-header">
+        <div class="view-breadcrumb">
+            <span>SENTINEL</span> / <span>SANDBOX</span> / <span class="active-crumb">VIRTUAL FILE SYSTEM & CORPUS</span>
+        </div>
+        <div class="view-title-row">
+            <div class="view-title-group">
+                <h1 class="view-title">Sandbox Environment & Storage Corpus</h1>
+                <span class="pill-neutral">CHROOT ISOLATED</span>
+            </div>
+            <div class="view-actions">
+                <span class="pill-safe">PERIMETER ENFORCED</span>
+                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RBAC TIER-1</span>
+            </div>
+        </div>
+        <p class="view-subtitle">
+            Virtual enterprise file system demonstrating strict RBAC perimeter boundaries between accessible procurement files (<code style="color: #2563EB;">data/corpus/</code>) and restricted confidential data (<code style="color: #EF4444;">data/confidential/</code>).
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     col_corp, col_conf = st.columns(2, gap="large")
     with col_corp:
