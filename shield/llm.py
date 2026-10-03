@@ -2,19 +2,28 @@ import os
 import time
 import json
 from dotenv import load_dotenv
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
 from shield.config import config
 
 load_dotenv()
 
 def get_client(base_url=None, api_key=None):
+    if OpenAI is None:
+        return None
     b_url = base_url or config.LLM_BASE_URL
     a_key = api_key or config.LLM_API_KEY or "dummy_key"
     if b_url:
         b_url = b_url.rstrip("/")
         if b_url.endswith("/chat/completions"):
             b_url = b_url[:-17].rstrip("/")
-    return OpenAI(base_url=b_url, api_key=a_key, timeout=30)
+    try:
+        return OpenAI(base_url=b_url, api_key=a_key, timeout=30)
+    except Exception:
+        return None
 
 _client = get_client()
 MODEL = config.LLM_MODEL
@@ -25,6 +34,8 @@ def chat(messages, temperature=0.0, max_tokens=600, retries=2, model=None):
     Handles automatic retry with exponential backoff on rate limits/network issues.
     """
     client = get_client()
+    if client is None:
+        raise RuntimeError("OpenAI client is not configured or unavailable")
     target_model = model or config.LLM_MODEL
     
     for attempt in range(retries + 1):

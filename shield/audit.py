@@ -1,7 +1,7 @@
 import json
 import os
 import sqlite3
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from shield.models import AuditEvent
 
 class AuditLogger:
@@ -48,3 +48,49 @@ class AuditLogger:
             
         with open(self.jsonl_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(data) + "\n")
+
+    def log_run(
+        self,
+        run_id: str,
+        started_at: str,
+        mode: str,
+        item_id: str,
+        kind: str,
+        hijacked: bool,
+        task_ok: bool,
+        latency_ms: float,
+        details: Dict[str, Any]
+    ):
+        """Record run summary into SQLite runs table."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                INSERT OR REPLACE INTO runs (
+                    run_id, started_at, mode, item_id, kind, hijacked, task_ok, latency_ms, details
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                run_id,
+                started_at,
+                mode,
+                item_id,
+                kind,
+                1 if hijacked else 0,
+                1 if task_ok else 0,
+                latency_ms,
+                json.dumps(details)
+            ))
+            conn.commit()
+
+    def get_recent_events(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Read recent events from JSONL log."""
+        if not os.path.exists(self.jsonl_path):
+            return []
+        events = []
+        with open(self.jsonl_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        events.append(json.loads(line))
+                    except Exception:
+                        pass
+        return events[-limit:]

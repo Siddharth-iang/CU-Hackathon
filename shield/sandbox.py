@@ -14,6 +14,11 @@ class Sandbox:
 
     def _safe(self, rel: str) -> str:
         """Resolve final path and ensure it stays inside sandbox root."""
+        root_name = os.path.basename(self.root)
+        if rel.startswith(root_name + "/") or rel.startswith(root_name + "\\"):
+            rel = rel[len(root_name) + 1:]
+        elif rel.startswith(self.root):
+            rel = os.path.relpath(rel, self.root)
         full = os.path.realpath(os.path.join(self.root, rel))
         if not full.startswith(self.root + os.sep) and full != self.root:
             raise PermissionError("Path escapes sandbox root")

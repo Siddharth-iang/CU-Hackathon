@@ -345,3 +345,105 @@ def simulate_execution(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentEx
     prot_trace.total_latency_ms = round((time.perf_counter() - start_prot) * 1000 + fw_result.latency_ms + (guard_result.latency_ms if 'guard_result' in locals() else 0), 2)
 
     return unprot_trace, prot_trace
+
+
+def execute_live_shield(scenario: Scenario) -> Tuple[AgentExecutionTrace, AgentExecutionTrace]:
+    """
+    Phase 11: Connects Sentinel UI to live shield.service.run_task pipeline.
+    Executes real Baseline and Protected runs and bridges data to AgentExecutionTrace.
+    """
+    from shield.service import run_task
+    
+    # 1. Baseline Run
+    res_base = run_task(
+        item_id=scenario.id,
+        mode="baseline",
+        user_prompt=scenario.user_prompt,
+        document_content=scenario.document_content,
+        document_name=scenario.document_name
+    )
+    
+    unprot_trace = AgentExecutionTrace(
+        agent_id=res_base.get("run_id", f"unprot_{uuid.uuid4().hex[:6]}"),
+        agent_name="Unprotected Baseline Agent",
+        status=res_base.get("status", "EXPLOITED"),
+        input_prompt=scenario.user_prompt,
+        untrusted_document_name=scenario.document_name,
+        untrusted_content=scenario.document_content,
+        thoughts=res_base.get("thoughts", []),
+        tool_calls=[
+            ToolCall(
+                tool_name=c.get("tool", "unknown"),
+                arguments=c.get("args", {}),
+                status=c.get("status", "executed"),
+                result=str(c.get("result", ""))
+            )
+            for c in res_base.get("tool_calls", [])
+        ],
+        final_output=res_base.get("final_answer", ""),
+        total_latency_ms=res_base.get("latency_ms", 0.0)
+    )
+
+    # 2. Protected Run
+    res_prot = run_task(
+        item_id=scenario.id,
+        mode="protected",
+        user_prompt=scenario.user_prompt,
+        document_content=scenario.document_content,
+        document_name=scenario.document_name
+    )
+
+    fw_dict = res_prot.get("firewall_result", {})
+    fw_res = ContentFirewallResult(
+        is_flagged=(fw_dict.get("status") in ["QUARANTINED", "SANITISED"]),
+        risk_level="CRITICAL" if fw_dict.get("status") == "QUARANTINED" else "LOW",
+        detected_signals=[f.get("rule", "") for f in fw_dict.get("findings", [])],
+        sanitized_content=fw_dict.get("safe_text", ""),
+        latency_ms=fw_dict.get("latency_ms", 0.5)
+    )
+
+    # Determine Guard result from audit events
+    guard_events = [e for e in res_prot.get("audit", []) if e.get("layer") == "action_guard"]
+    last_guard = guard_events[-1] if guard_events else {}
+    decision_val = last_guard.get("decision", "ALLOW")
+    if decision_val == "BLOCK":
+        dec_enum = DefenseDecision.BLOCK
+    elif decision_val == "ASK_HUMAN":
+        dec_enum = DefenseDecision.ASK_HUMAN
+    else:
+        dec_enum = DefenseDecision.ALLOW
+
+    guard_res = ActionGuardResult(
+        decision=dec_enum,
+        authorized_scope=res_prot.get("scope", {}),
+        rule_violated=last_guard.get("rule", "NONE") if dec_enum != DefenseDecision.ALLOW else "NONE",
+        reason=last_guard.get("reason", "Action verified in scope."),
+        evidence_snippet=last_guard.get("evidence", ""),
+        latency_ms=last_guard.get("latency_ms", 0.5)
+    )
+
+    prot_trace = AgentExecutionTrace(
+        agent_id=res_prot.get("run_id", f"prot_{uuid.uuid4().hex[:6]}"),
+        agent_name="Protected Agent (Firewall + Action Guard)",
+        status=res_prot.get("status", "COMPLETED"),
+        input_prompt=scenario.user_prompt,
+        untrusted_document_name=scenario.document_name,
+        untrusted_content=scenario.document_content,
+        firewall_result=fw_res,
+        guard_result=guard_res,
+        thoughts=res_prot.get("thoughts", []),
+        tool_calls=[
+            ToolCall(
+                tool_name=c.get("tool", "unknown"),
+                arguments=c.get("args", {}),
+                status=c.get("status", "executed"),
+                result=str(c.get("result", c.get("reason", "")))
+            )
+            for c in res_prot.get("tool_calls", [])
+        ],
+        final_output=res_prot.get("final_answer", ""),
+        total_latency_ms=res_prot.get("latency_ms", 0.0)
+    )
+
+    return unprot_trace, prot_trace
+
