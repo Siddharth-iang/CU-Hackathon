@@ -118,8 +118,8 @@ Before any tool executes in the environment:
 
 ### 5. Dual-Tier Forensic Audit Ledger (`shield/audit.py`)
 Every decision, quarantine action, policy interception, and tool invocation is recorded with sub-millisecond overhead:
-* **High-Throughput JSONL Stream** ([`storage/audit.jsonl`](file:///c:/Users/dd482/Desktop/CodeUtsava/coding/storage/audit.jsonl)) for SIEM ingestion.
-* **Indexed Relational SQLite Store** ([`storage/runs.db`](file:///c:/Users/dd482/Desktop/CodeUtsava/coding/storage/runs.db)) for forensic inspection, replayability, and quantitative compliance reporting.
+* **High-Throughput JSONL Stream** ([`storage/audit.jsonl`]
+* **Indexed Relational SQLite Store** ([`storage/runs.db`] for forensic inspection, replayability, and quantitative compliance reporting.
 
 ---
 
