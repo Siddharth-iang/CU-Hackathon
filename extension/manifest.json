@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "SENTINEL // AI Prompt Injection Shield",
+  "version": "1.0.0",
+  "description": "Zero-trust indirect prompt injection detector & DOM firewall for autonomous AI web workflows.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SENTINEL AI Web Shield",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

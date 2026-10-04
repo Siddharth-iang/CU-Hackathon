@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from shield.service import run_task, list_attacks
 from shield.audit import AuditLogger
+from shield.firewall import run_firewall
 from eval.runner import run_evaluation
 
 app = FastAPI(
@@ -37,6 +38,13 @@ class RunRequest(BaseModel):
     document_content: Optional[str] = None
     document_name: Optional[str] = None
     mode: str = "protected"  # "baseline" or "protected"
+
+class ScanRequest(BaseModel):
+    url: Optional[str] = "https://webpage.local"
+    title: Optional[str] = ""
+    content: str
+    hidden_snippets: Optional[List[str]] = []
+    comments: Optional[List[str]] = []
 
 class ConfirmRequest(BaseModel):
     run_id: str
@@ -78,6 +86,55 @@ def execute_run(req: RunRequest):
             document_name=req.document_name
         )
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/scan")
+def scan_web_content(req: ScanRequest):
+    """
+    Direct web page & DOM injection scanner for the SENTINEL Chrome extension.
+    Runs raw text, hidden CSS elements, and HTML comments through Layer 1 Multi-View Content Firewall.
+    """
+    try:
+        raw_payloads = [req.content]
+        if req.hidden_snippets:
+            raw_payloads.extend(req.hidden_snippets)
+        if req.comments:
+            raw_payloads.extend(req.comments)
+
+        combined_text = "\n\n".join(s for s in raw_payloads if s and s.strip())
+        source_name = req.url or "webpage"
+
+        fw_res = run_firewall(combined_text, source=source_name, use_llm_classifier=True)
+
+        # ponytail: Log browser extension detections into forensic audit ledger for unified compliance.
+        if fw_res.findings:
+            from shield.models import AuditEvent
+            import uuid
+            run_id = f"ext_{uuid.uuid4().hex[:8]}"
+            event = AuditEvent(
+                ts=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                run_id=run_id,
+                layer="firewall",
+                decision=fw_res.status,
+                rule="chrome_extension_dom_scan",
+                reason=f"Scanned {source_name}: {len(fw_res.findings)} injection signal(s) intercepted.",
+                evidence=str([f.get("snippet", "")[:60] for f in fw_res.findings[:2]]),
+                latency_ms=fw_res.latency_ms
+            )
+            logger.log_event(event)
+
+        return {
+            "url": req.url,
+            "title": req.title,
+            "status": fw_res.status,
+            "threat_score": fw_res.threat_score.score if fw_res.threat_score else 0,
+            "threat_severity": fw_res.threat_score.severity if fw_res.threat_score else "LOW",
+            "threat_breakdown": fw_res.threat_score.breakdown if fw_res.threat_score else [],
+            "findings": fw_res.findings,
+            "latency_ms": fw_res.latency_ms,
+            "safe_text": fw_res.safe_text
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

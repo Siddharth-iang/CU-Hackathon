@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SENTINEL // Web Shield</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      width: 380px;
+      background: #F8FAFD;
+      color: #0F172A;
+      font-size: 13px;
+    }
+    /* Topbar */
+    .topbar {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.01em;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background: #ECFDF5;
+      color: #059669;
+      border: 1px solid #A7F3D0;
+    }
+    .status-badge.offline {
+      background: #FEF2F2;
+      color: #DC2626;
+      border-color: #FECACA;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+    .status-badge.offline .status-dot {
+      background: #EF4444;
+    }
+    /* Main Content */
+    .container {
+      padding: 16px;
+    }
+    /* Target Page Info */
+    .page-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .page-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1E293B;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .page-url {
+      font-size: 11px;
+      color: #64748B;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    /* Primary Scan Button */
+    .btn-scan {
+      width: 100%;
+      background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+      transition: all 0.15s ease;
+    }
+    .btn-scan:hover {
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-scan:active {
+      transform: translateY(0);
+    }
+    .btn-scan:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    /* Results Area */
+    .results-card {
+      display: none;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 14px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .score-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748B;
+    }
+    .score-badge {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .severity-pill {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: 6px;
+    }
+    .sev-critical { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .sev-high { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .sev-medium { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+    .sev-low { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+
+    /* Findings List */
+    .findings-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .finding-item {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-left: 3px solid #EF4444;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+    .finding-rule {
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      justify-content: space-between;
+    }
+    .finding-snippet {
+      font-family: 'JetBrains Mono', monospace, Consolas;
+      font-size: 10.5px;
+      color: #DC2626;
+      background: #FFFFFF;
+      padding: 4px 6px;
+      border-radius: 4px;
+      border: 1px solid #F1F5F9;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+    /* Action Buttons in Results */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-secondary {
+      flex: 1;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: #F1F5F9;
+    }
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #FFFFFF;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* Footer */
+    .footer {
+      padding: 10px 16px;
+      font-size: 10.5px;
+      color: #94A3B8;
+      border-top: 1px solid #E2E8F0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFFFFF;
+    }
+    .footer a {
+      color: #2563EB;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand-title">
+      <span>🛡️</span> SENTINEL AI Shield
+    </div>
+    <div id="apiStatus" class="status-badge">
+      <span class="status-dot"></span>
+      <span id="apiStatusText">API Ready</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-card">
+      <div id="pageTitle" class="page-title">Loading target tab...</div>
+      <div id="pageUrl" class="page-url">--</div>
+    </div>
+
+    <button id="btnScan" class="btn-scan">
+      <span id="btnIcon">🔍</span>
+      <span id="btnText">Scan Page for Injections</span>
+      <div id="btnSpinner" class="spinner"></div>
+    </button>
+
+    <div id="resultsCard" class="results-card">
+      <div class="score-row">
+        <div>
+          <div class="score-title">Threat Assessment</div>
+          <div id="statusLabel" style="font-size: 12px; font-weight: 700; margin-top: 2px;">--</div>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <span id="scoreVal" class="score-badge">0</span>
+          <span style="font-size: 12px; color: #64748B;">/100</span>
+          <span id="severityPill" class="severity-pill sev-low">LOW</span>
+        </div>
+      </div>
+
+      <div id="findingsSection">
+        <div class="findings-header">Detected Injection Signals (<span id="findingsCount">0</span>)</div>
+        <div id="findingsList"></div>
+      </div>
+
+      <div class="action-row">
+        <button id="btnHighlight" class="btn-secondary">📍 Highlight on Page</button>
+        <button id="btnCopySafe" class="btn-secondary">📋 Copy Safe Text</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Zero-Trust LLM Perimeter</span>
+    <a href="http://localhost:8502" target="_blank">Open Console ↗</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
