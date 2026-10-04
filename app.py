@@ -41,11 +41,29 @@ st.markdown("""
 <style>
     /* Global Base */
     .stApp {
-        background-color: #F5F7FB !important;
-        background-image: radial-gradient(circle at 1px 1px, #E2E8F0 1px, transparent 0) !important;
-        background-size: 28px 28px !important;
+        background-color: #F8FAFD !important;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.035) 0px, transparent 40%),
+            radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.035) 0px, transparent 40%),
+            radial-gradient(circle at 1px 1px, #E2E8F0 1px, transparent 0) !important;
+        background-size: 100% 100%, 100% 100%, 28px 28px !important;
         color: #0F172A !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+
+    /* Primary Action Buttons */
+    button[kind="primary"], [data-testid="stBaseButton-primary"] {
+        background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%) !important;
+        border: none !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.22) !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    button[kind="primary"]:hover, [data-testid="stBaseButton-primary"]:hover {
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35) !important;
+        transform: translateY(-1px) !important;
     }
 
     /* Ensure Sidebar Expand & Collapse Buttons are Always Visible & Styled */
@@ -218,6 +236,36 @@ st.markdown("""
         text-transform: uppercase;
     }
 
+    .pill-violet {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #F5F3FF;
+        color: #7C3AED;
+        border: 1px solid #DDD6FE;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .pill-indigo {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #EEF2FF;
+        color: #4F46E5;
+        border: 1px solid #C7D2FE;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
     .pill-neutral {
         display: inline-flex;
         align-items: center;
@@ -242,34 +290,37 @@ st.markdown("""
     }
 
     .card-vuln {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-top: 3px solid #DC2626;
+        background: linear-gradient(180deg, rgba(254, 242, 242, 0.65) 0%, #FFFFFF 64px) !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #FECACA;
+        border-top: 3.5px solid #DC2626;
         border-radius: 14px;
         padding: 22px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
     }
 
     .card-prot {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-top: 3px solid #059669;
+        background: linear-gradient(180deg, rgba(240, 253, 244, 0.65) 0%, #FFFFFF 64px) !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #BBF7D0;
+        border-top: 3.5px solid #059669;
         border-radius: 14px;
         padding: 22px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+        box-shadow: 0 4px 20px rgba(5, 150, 105, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
     }
 
     /* Hero Blocked Callout */
     .hero-blocked-banner {
+        background: linear-gradient(135deg, #FFF8F8 0%, #FFFFFF 100%) !important;
         background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #FECACA;
         border-left: 4px solid #DC2626;
         border-radius: 14px;
         padding: 22px 24px;
         margin-bottom: 22px;
-        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
         animation: fadeInSlide 0.4s ease-out;
     }
 
@@ -285,11 +336,11 @@ st.markdown("""
         border-radius: 14px;
         padding: 18px 20px;
         box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .metric-box:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.07);
     }
     .metric-label {
         font-size: 11px;
@@ -418,10 +469,11 @@ st.markdown("""
     }
 
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(input:checked) {
-        background-color: #EFF6FF !important;
-        color: #2563EB !important;
+        background: linear-gradient(90deg, #EEF2FF 0%, #F5F3FF 100%) !important;
+        color: #4F46E5 !important;
         font-weight: 600 !important;
-        border-left: 3px solid #2563EB !important;
+        border-left: 3px solid #4F46E5 !important;
+        box-shadow: 0 1px 4px rgba(79, 70, 229, 0.08) !important;
     }
 
     /* Flow Arrow Pulse Animation */
@@ -441,16 +493,16 @@ st.markdown("""
 
     /* Pulse Green Dot */
     @keyframes pulse-green {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.45; transform: scale(1.15); }
+        0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+        50% { opacity: 0.8; transform: scale(1.05); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
     }
     .pulse-dot {
         display: inline-block;
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background-color: #059669;
-        animation: pulse-green 1.8s infinite ease-in-out;
+        background-color: #10B981;
+        animation: pulse-green 2s infinite ease-in-out;
     }
 
     /* Fluid Time-Travel Replay & Timeline Animations */
@@ -609,15 +661,16 @@ with st.sidebar:
     # 1. Top Brand Header matching Sidebar.tsx
     render_html("""
     <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;">
-        <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="8" fill="#F3F4F6" stroke="#E5E7EB" stroke-width="1.5"/>
-            <path d="M20 7L29 11.5V19C29 25.2 25.1 30.8 20 33C14.9 30.8 11 25.2 11 19V11.5L20 7Z" stroke="#2563EB" stroke-width="1.75" stroke-linejoin="round"/>
-            <path d="M16 20H24M20 16V24" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="20" cy="20" r="1.5" fill="#111827"/>
-        </svg>
+        <div style="width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #1E40AF 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25); flex-shrink: 0;">
+            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 7L29 11.5V19C29 25.2 25.1 30.8 20 33C14.9 30.8 11 25.2 11 19V11.5L20 7Z" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M16 20H24M20 16V24" stroke="#6EE7B7" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="20" cy="20" r="1.5" fill="#FFFFFF"/>
+            </svg>
+        </div>
         <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 15px; font-weight: 800; color: #111827; letter-spacing: -0.02em; line-height: 1;">SENTINEL</span>
-            <span style="font-size: 9px; font-weight: 700; color: #6B7280; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; line-height: 1;">AGENT SECURITY FIREWALL</span>
+            <span style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; line-height: 1.1;">SENTINEL</span>
+            <span style="font-size: 9px; font-weight: 700; color: #4F46E5; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; line-height: 1;">AGENT SECURITY FIREWALL</span>
         </div>
     </div>
     """)
@@ -871,8 +924,8 @@ def render_kpi_metrics(prot_trace=None):
         <div class="metric-box">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <span class="metric-label">Attacks Detected</span>
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="font-size: 16px; color: #2563EB;">radar</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; border: 1px solid #C7D2FE; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #4F46E5;">radar</span>
                 </div>
             </div>
             <div class="metric-val">{total_detected}</div>
@@ -939,7 +992,7 @@ def render_attack_flow_diagram(sc, prot_trace=None):
     <div class="sentinel-card" style="margin-bottom: 22px; padding: 18px 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="material-symbols-outlined" style="font-size: 18px; color: #2563EB;">account_tree</span>
+                <span class="material-symbols-outlined" style="font-size: 18px; color: #4F46E5;">account_tree</span>
                 <span style="font-size: 13.5px; font-weight: 700; color: #0F172A;">End-to-End Attack & Defense Lifecycle</span>
             </div>
             <span style="font-size: 11px; font-weight: 600; color: #059669; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 10px; border-radius: 20px;">
@@ -949,17 +1002,17 @@ def render_attack_flow_diagram(sc, prot_trace=None):
 
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
             <!-- Node 1 -->
-            <div style="flex: 1; min-width: 95px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">1. Intent</div>
+            <div style="flex: 1; min-width: 95px; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #0284C7; text-transform: uppercase;">1. Intent</div>
                 <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">User Prompt</div>
-                <div style="font-size: 9.5px; color: #64748B;">Authorized Task</div>
+                <div style="font-size: 9.5px; color: #0369A1;">Authorized Task</div>
             </div>
 
             <div class="flow-arrow">&rarr;</div>
 
             <!-- Node 2 -->
-            <div style="flex: 1; min-width: 95px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">2. Retrieval</div>
+            <div style="flex: 1; min-width: 95px; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase;">2. Retrieval</div>
                 <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Untrusted Doc</div>
                 <div style="font-size: 9.5px; color: #64748B;">RAG Vector Store</div>
             </div>
@@ -976,10 +1029,10 @@ def render_attack_flow_diagram(sc, prot_trace=None):
             <div class="flow-arrow">&rarr;</div>
 
             <!-- Node 4 -->
-            <div style="flex: 1; min-width: 100px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
-                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">4. Reasoning</div>
+            <div style="flex: 1; min-width: 100px; background: #FAF5FF; border: 1px solid #DDD6FE; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #7C3AED; text-transform: uppercase;">4. Reasoning</div>
                 <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Agent Execution</div>
-                <div style="font-size: 9.5px; color: #64748B;">Context Tainted</div>
+                <div style="font-size: 9.5px; color: #6D28D9; font-weight: 600;">Context Tainted</div>
             </div>
 
             <div class="flow-arrow">&rarr;</div>
@@ -997,7 +1050,7 @@ def render_attack_flow_diagram(sc, prot_trace=None):
             <div style="flex: 1; min-width: 95px; background: #ECFEFF; border: 1px solid #A5F3FC; border-radius: 8px; padding: 8px 10px; text-align: center;">
                 <div style="font-size: 9px; font-weight: 700; color: #0891B2; text-transform: uppercase;">6. Inspection</div>
                 <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Action Guard</div>
-                <div style="font-size: 9.5px; color: #0891B2;">5 Scopes Verified</div>
+                <div style="font-size: 9.5px; color: #0891B2; font-weight: 600;">5 Scopes Verified</div>
             </div>
 
             <div class="flow-arrow">&rarr;</div>
@@ -1194,9 +1247,9 @@ def render_scenario_context(sc):
         col_fuzz_banner1, col_fuzz_banner2 = st.columns([3, 1])
         with col_fuzz_banner1:
             render_html("""
-            <div style="background: #FEF3C7; border: 1px solid #FCD34D; border-left: 4px solid #D97706; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px;">
-                <div style="font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase;">Active Fuzzed Attack Vector</div>
-                <div style="font-size: 12px; color: #78350F; margin-top: 2px;">This scenario has been mutated with adversarial evasion obfuscation. Click <strong>Run Security Evaluation</strong> to evaluate defense resilience.</div>
+            <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1px solid #DDD6FE; border-left: 4px solid #7C3AED; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;">
+                <div style="font-size: 11px; font-weight: 700; color: #6D28D9; text-transform: uppercase; letter-spacing: 0.04em;">Active Adversarial Fuzzed Vector</div>
+                <div style="font-size: 12px; color: #5B21B6; margin-top: 2px;">This scenario has been mutated with adversarial evasion obfuscation. Click <strong>Run Security Evaluation</strong> to evaluate defense resilience.</div>
             </div>
             """)
         with col_fuzz_banner2:
@@ -1248,14 +1301,14 @@ def render_scenario_context(sc):
             session_id="SES-8F31A2"
         )
         render_html("""
-        <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 3.5px solid #4F46E5; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 13.5px; font-weight: 700; color: #111827;">SOC2 & OWASP Forensic Audit Evidence</span>
-                    <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">Type-II Certified</span>
+                    <span style="font-size: 13.5px; font-weight: 700; color: #0F172A;">SOC2 & OWASP Forensic Audit Evidence</span>
+                    <span class="pill-indigo" style="font-size: 10px; padding: 2px 7px;">Type-II Certified</span>
                     <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">LLM01 / LLM02</span>
                 </div>
-                <div style="font-size: 11px; color: #6B7280;">
+                <div style="font-size: 11px; color: #64748B;">
                     SHA-256 Tamper-Sealed Audit Artifact
                 </div>
             </div>
@@ -1648,7 +1701,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
     with col_vs:
         render_html("""
         <div style="display: flex; height: 100%; min-height: 240px; align-items: center; justify-content: center;">
-            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #64748B; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);">
+            <div style="background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%); border: 1.5px solid #C7D2FE; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #4F46E5; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);">
                 VS
             </div>
         </div>
@@ -2470,7 +2523,7 @@ elif "Policy Studio" in nav_tab:
     with prof_col1:
         is_std = (policy_profile_selected == "Standard (Enterprise)")
         render_html(f"""
-        <div class="sentinel-card" style="border-top: 4px solid #2563EB; {'box-shadow: 0 0 0 2px #2563EB;' if is_std else ''}">
+        <div class="sentinel-card" style="background: linear-gradient(180deg, rgba(239, 246, 255, 0.65) 0%, #FFFFFF 64px); border-top: 4px solid #2563EB; {'box-shadow: 0 0 0 2px #2563EB;' if is_std else ''}">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Standard (Enterprise)</span>
                 {'<span class="pill-info">ACTIVE</span>' if is_std else '<span class="pill-neutral">AVAILABLE</span>'}
@@ -2490,7 +2543,7 @@ elif "Policy Studio" in nav_tab:
     with prof_col2:
         is_zt = (policy_profile_selected == "Zero-Trust / GovSec")
         render_html(f"""
-        <div class="sentinel-card" style="border-top: 4px solid #DC2626; {'box-shadow: 0 0 0 2px #DC2626;' if is_zt else ''}">
+        <div class="sentinel-card" style="background: linear-gradient(180deg, rgba(254, 242, 242, 0.65) 0%, #FFFFFF 64px); border-top: 4px solid #DC2626; {'box-shadow: 0 0 0 2px #DC2626;' if is_zt else ''}">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Zero-Trust / GovSec</span>
                 {'<span class="pill-critical">ACTIVE</span>' if is_zt else '<span class="pill-neutral">AVAILABLE</span>'}
@@ -2510,7 +2563,7 @@ elif "Policy Studio" in nav_tab:
     with prof_col3:
         is_audit = (policy_profile_selected == "Audit Only (Permissive)")
         render_html(f"""
-        <div class="sentinel-card" style="border-top: 4px solid #F59E0B; {'box-shadow: 0 0 0 2px #F59E0B;' if is_audit else ''}">
+        <div class="sentinel-card" style="background: linear-gradient(180deg, rgba(255, 251, 235, 0.65) 0%, #FFFFFF 64px); border-top: 4px solid #F59E0B; {'box-shadow: 0 0 0 2px #F59E0B;' if is_audit else ''}">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Audit Only (Permissive)</span>
                 {'<span class="pill-warning">ACTIVE</span>' if is_audit else '<span class="pill-neutral">AVAILABLE</span>'}
