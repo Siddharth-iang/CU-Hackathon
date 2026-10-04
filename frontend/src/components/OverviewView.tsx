@@ -85,7 +85,7 @@ export const OverviewView: React.FC<{ onNavigateToPlayground: () => void }> = ({
               </span>
             </div>
             <p className="text-sm text-text-secondary mt-1">
-              Real-time protection telemetry for active agent session <span className="font-mono text-text-primary">SES-8F31A2</span>.
+              Real-time protection telemetry for active agent session.
             </p>
           </div>
 

@@ -39,7 +39,25 @@ def test_font_resizing_implemented():
         assert "sentinel_font_size" in content, "Font size persistence missing from Header.tsx"
         assert "A-" in content and "A+" in content, "Font size controls missing from Header.tsx"
 
+def test_no_unnecessary_topbar_labels():
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    app_py = os.path.join(root, "app.py")
+    with open(app_py, "r", encoding="utf-8") as f:
+        content = f.read()
+        assert "PROD-US-EAST" not in content, "PROD-US-EAST still in app.py"
+        assert "SEC-OPS" not in content, "SEC-OPS still in app.py"
+        assert "L3 Engineer" not in content, "L3 Engineer still in app.py"
+        assert "RAG-FinOps-v3" not in content, "RAG-FinOps-v3 still in app.py"
+
+    header_tsx = os.path.join(root, "frontend", "src", "components", "Header.tsx")
+    with open(header_tsx, "r", encoding="utf-8") as f:
+        content = f.read()
+        assert "PROD-US-EAST" not in content, "PROD-US-EAST still in Header.tsx"
+        assert "RAG-FinOps-v3" not in content, "RAG-FinOps-v3 still in Header.tsx"
+
 if __name__ == "__main__":
     test_no_emojis_in_core_and_app()
     test_font_resizing_implemented()
-    print("[OK] UI cleanliness and font resizing assertions passed.")
+    test_no_unnecessary_topbar_labels()
+    print("[OK] UI cleanliness, font resizing, and unneeded label removal assertions passed.")
+

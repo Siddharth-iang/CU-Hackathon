@@ -618,13 +618,9 @@ with st.sidebar:
                 <span style="color: #10B981; font-weight: 700; font-size: 10px; text-transform: uppercase;">Online</span>
             </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #6B7280;">Engine Policy</span>
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #374151;">v2.4.1-prod</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #6B7280;">Environment</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B7280;">PROD-US-EAST</span>
         </div>
     </div>
     """)
@@ -637,15 +633,8 @@ has_eval = st.session_state.get("has_evaluated", False) and st.session_state.get
 
 if has_eval:
     status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> Protection Active</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span> Interception Paused</span>'
-    latency_text = f"{st.session_state.last_prot_trace.total_latency_ms}ms avg"
-    latency_color = "#10B981"
 else:
     status_pill = '<span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> STANDBY // AWAITING RUN</span>'
-    latency_text = "Standby"
-    latency_color = "#6B7280"
-
-mode_text = "ENFORCING" if is_fully_protected else ("PARTIAL" if (enable_firewall or enable_action_guard) else "DISABLED")
-mode_pill = f'<span class="pill-info" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>' if is_fully_protected else f'<span class="pill-warning" style="font-size: 10px; padding: 2px 8px;">{mode_text}</span>'
 
 # Active LLM Model Badge
 active_model_name = config.LLM_MODEL if config.LLM_API_KEY else "Llama-3.3-70B"
@@ -663,40 +652,8 @@ with col_top_meta:
             {status_pill}
             <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
             <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280;">Session:</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5E7EB;">SES-8F31A2</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280;">Target:</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #4B5563;">RAG-FinOps-v3</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280;">Latency:</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {latency_color}; font-weight: 600;">{latency_text}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280;">Policy:</span>
-                {mode_pill}
-            </div>
-            <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280;">Model:</span>
+                <span style="color: #6B7280; font-weight: 500;">Model:</span>
                 {model_pill}
-            </div>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B7280; background-color: #F3F4F6; padding: 4px 8px; border-radius: 4px; border: 1px solid #E5E7EB;">
-                PROD-US-EAST
-            </span>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; color: #2563EB; font-weight: bold; font-size: 12px;">
-                    <span class="material-symbols-outlined" style="font-size: 16px; color: #2563EB;">security</span>
-                </div>
-                <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
-                    <span style="font-size: 11px; font-weight: 700; color: #111827;">SEC-OPS</span>
-                    <span style="font-size: 9px; color: #6B7280; text-transform: uppercase;">L3 Engineer</span>
-                </div>
             </div>
         </div>
     </div>
@@ -985,10 +942,6 @@ def render_standby_view(sc):
                 <h1 class="view-title">Security Overview & Agent Comparison</h1>
                 <span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> AWAITING TRIGGER</span>
             </div>
-            <div class="view-actions">
-                <span class="pill-info" style="font-size: 11px;">POLICY: ENFORCING</span>
-                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">SES-8F31A2</span>
-            </div>
         </div>
         <p class="view-subtitle">
             Side-by-side behavioral telemetry comparing an unprotected baseline RAG agent vs. Sentinel-protected agent.
@@ -1043,10 +996,6 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             <div class="view-title-group">
                 <h1 class="view-title">Security Overview & Agent Comparison</h1>
                 <span class="pill-safe"><span class="pulse-dot"></span> ACTIVE MONITOR</span>
-            </div>
-            <div class="view-actions">
-                <span class="pill-info" style="font-size: 11px;">POLICY: ENFORCING</span>
-                <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">SES-8F31A2</span>
             </div>
         </div>
         <p class="view-subtitle">

@@ -62,32 +62,6 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBac
             {isPaused ? 'Interception Paused' : 'Protection Active'}
           </span>
         </div>
-
-        <div className="h-4 w-px bg-border-subtle hidden xl:block" />
-
-        {/* Telemetry metadata */}
-        <div className="hidden xl:flex items-center gap-space-md text-[12px]">
-          <div className="flex items-center gap-1.5">
-            <span className="text-text-muted">Session:</span>
-            <span className="font-mono text-text-primary px-1.5 py-0.5 rounded bg-surface-secondary border border-border-subtle text-[11px]">
-              SES-8F31A2
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-text-muted">Target:</span>
-            <span className="font-mono text-text-secondary text-[11px]">RAG-FinOps-v3</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-text-muted">Latency:</span>
-            <span className="text-status-safe font-medium">18ms</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-text-muted">Policy:</span>
-            <span className="text-primary font-semibold text-[11px] bg-primary/10 px-1.5 py-0.5 rounded">
-              ENFORCING
-            </span>
-          </div>
-        </div>
       </div>
 
       <div className="flex items-center gap-space-sm">
@@ -160,18 +134,6 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBac
             {isPaused ? 'Resume' : 'Pause'}
           </span>
         </button>
-
-        <div className="h-4 w-px bg-border-subtle" />
-
-        {/* User Info / Environment */}
-        <div className="flex items-center gap-2 pl-1">
-          <span className="px-2 py-0.5 rounded bg-surface-secondary border border-border-subtle text-text-muted font-mono text-[11px] hidden sm:inline">
-            PROD-US-EAST
-          </span>
-          <div className="w-8 h-8 rounded-full bg-surface-secondary border border-border-subtle flex items-center justify-center text-text-primary font-semibold text-[12px]">
-            <span className="material-symbols-outlined text-[16px] text-primary">security</span>
-          </div>
-        </div>
       </div>
     </header>
   );
