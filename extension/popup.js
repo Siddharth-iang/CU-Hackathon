@@ -166,9 +166,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         action: 'highlight',
         findings: currentFindings
       });
-      btnHighlight.textContent = `📍 Highlighted (${res ? res.highlighted : 0} nodes)`;
+      btnHighlight.textContent = `🟠 Highlighted (${res ? res.highlighted : 0})`;
       setTimeout(() => {
-        btnHighlight.textContent = '📍 Highlight on Page';
+        btnHighlight.textContent = '🟠 Highlight in Orange';
       }, 2000);
     } catch (err) {
       console.error('Could not highlight:', err);

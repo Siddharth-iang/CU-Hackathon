@@ -99,27 +99,42 @@ function highlightElements(findings) {
 
   if (!findings || findings.length === 0) return 0;
 
-  // Inject CSS styles for highlights once
+  // Inject CSS styles for orange threat highlights once
   if (!document.getElementById('sentinel-style-sheet')) {
     const style = document.createElement('style');
     style.id = 'sentinel-style-sheet';
     style.textContent = `
-      @keyframes sentinelPulse {
-        0%, 100% { outline-color: #EF4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-        50% { outline-color: #B91C1C; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.2); }
+      @keyframes sentinelPulseOrange {
+        0%, 100% { 
+          outline-color: #F97316; 
+          box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45); 
+        }
+        50% { 
+          outline-color: #EA580C; 
+          box-shadow: 0 0 0 10px rgba(249, 115, 22, 0.25); 
+        }
       }
       .sentinel-threat-highlight {
-        outline: 3px solid #EF4444 !important;
-        background-color: rgba(254, 242, 242, 0.85) !important;
-        animation: sentinelPulse 2s infinite ease-in-out !important;
+        outline: 3px solid #F97316 !important;
+        background-color: #FFEDD5 !important; /* Vibrant light orange marker background */
+        color: #9A3412 !important; /* Contrast dark burnt orange text */
+        font-size: 13px !important; /* Forces invisible 0px/1px font text to be readable */
+        font-weight: 600 !important;
+        display: inline-block !important; /* Unhides display:none elements */
+        visibility: visible !important;
+        opacity: 1 !important;
+        animation: sentinelPulseOrange 1.8s infinite ease-in-out !important;
         position: relative !important;
         border-radius: 4px !important;
+        padding: 3px 8px !important;
+        z-index: 99999 !important;
+        text-shadow: none !important;
       }
       .sentinel-threat-badge {
         position: absolute !important;
         top: -24px !important;
         left: 0 !important;
-        background: #DC2626 !important;
+        background: #EA580C !important; /* Deep tactical orange */
         color: #FFFFFF !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         font-size: 11px !important;
@@ -127,11 +142,12 @@ function highlightElements(findings) {
         padding: 3px 8px !important;
         border-radius: 4px !important;
         z-index: 2147483647 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.35) !important;
         display: inline-flex !important;
         align-items: center !important;
         gap: 4px !important;
         pointer-events: none !important;
+        white-space: nowrap !important;
       }
     `;
     document.head.appendChild(style);
@@ -141,13 +157,23 @@ function highlightElements(findings) {
   let firstHighlightedEl = null;
 
   findings.forEach((finding) => {
-    const snippet = (finding.snippet || '').trim();
+    let snippet = (finding.snippet || '').trim();
     if (!snippet || snippet.length < 4) return;
 
+    // Clean comment or hidden element prefixes if present
+    if (snippet.startsWith('<!--') && snippet.endsWith('-->')) {
+      snippet = snippet.slice(4, -3).trim();
+    }
+    if (snippet.includes(']: ')) {
+      snippet = snippet.split(']: ').slice(1).join(']: ').trim();
+    }
+
+    const searchSnippet = snippet.slice(0, 40).toLowerCase();
+
     // Search for element containing this text
-    const allEls = document.querySelectorAll('p, div, span, li, td, h1, h2, h3, h4, section, article, footer, header');
+    const allEls = document.querySelectorAll('p, div, span, li, td, h1, h2, h3, h4, section, article, footer, header, code, pre');
     for (const el of allEls) {
-      if (el.children.length < 3 && el.textContent.includes(snippet)) {
+      if (el.children.length < 4 && el.textContent.toLowerCase().includes(searchSnippet)) {
         el.classList.add('sentinel-threat-highlight');
         if (!el.querySelector('.sentinel-threat-badge')) {
           const badge = document.createElement('div');
@@ -170,9 +196,9 @@ function highlightElements(findings) {
       topBanner.id = 'sentinel-top-banner';
       topBanner.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%;
-        background: #991B1B; color: #FFFFFF; font-weight: bold;
+        background: #EA580C; color: #FFFFFF; font-weight: bold;
         padding: 10px 16px; font-size: 13px; z-index: 2147483647;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3); text-align: center;
+        box-shadow: 0 4px 12px rgba(234,88,12,0.35); text-align: center;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       `;
       topBanner.innerHTML = `⚠️ <strong>SENTINEL AI Web Shield:</strong> ${findings.length} indirect prompt injection payload(s) detected on this page!`;
