@@ -2068,6 +2068,13 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             render_policy_matrix(guard)
 
         # Attack Lineage Provenance Flow
+        blocked_tool = "send_email"
+        if prot_trace and prot_trace.tool_calls:
+            for tc in prot_trace.tool_calls:
+                if tc.status in ["blocked", "pending_approval"]:
+                    blocked_tool = tc.tool_name
+                    break
+
         with st.expander("Attack Lineage Provenance Flow (7 Verified Transitions)", expanded=False):
             flow_events = [
                 ("09:42:01", "Document ingested from vector store", "#2563EB", f"Resource: {active_scenario.document_name}"),
