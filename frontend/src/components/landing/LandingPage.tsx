@@ -61,15 +61,6 @@ export const LandingPage: React.FC = () => {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-6 space-y-6"
             >
-              {/* Eyebrow Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 shadow-subtle text-xs font-mono font-medium text-ink">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span className="w-2 h-2 rounded-full bg-emerald-500 -ml-4" />
-                <span className="text-ink font-semibold">AUTONOMOUS AI SECURITY</span>
-                <span className="text-slate-300">|</span>
-                <span className="text-accent-blue font-semibold">ZERO TRUST</span>
-              </div>
-
               {/* Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight text-ink leading-[1.1]">
                 Secure <span className="text-accent-blue">every decision</span> your AI agent makes.

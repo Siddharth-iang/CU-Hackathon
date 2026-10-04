@@ -6,12 +6,12 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Left Footer Brand */}
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-ink">SENTINEL</span>
-              <span>//</span>
-              <span className="text-accent-blue font-bold">PromptShield</span>
-            </div>
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <img
+              src="/sentinel_logo_horizontal_transparent.png"
+              alt="SENTINEL PromptShield"
+              className="h-8 w-auto object-contain"
+            />
             <span className="text-ink-muted">Zero-trust security for autonomous AI agents.</span>
           </div>
 

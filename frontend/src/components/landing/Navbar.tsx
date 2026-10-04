@@ -19,31 +19,12 @@ export const Navbar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Brand Logo */}
-        <a className="flex items-center gap-3.5 group" href="#">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ink via-slate-900 to-sky-950 flex items-center justify-center shadow-subtle group-hover:shadow transition-all border border-slate-700/40 group-hover:border-sky-500/50">
-            <svg
-              className="w-5 h-5 text-sky-400"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2.2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="m9 12 2 2 4-4" stroke="#10B981" strokeWidth="2.5" />
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg tracking-tight text-ink font-sans">SENTINEL</span>
-              <span className="text-xs text-ink-subtle font-mono font-medium tracking-wider">//</span>
-              <span className="text-xs font-bold text-accent-blue tracking-wider font-mono">PROMPTSHIELD</span>
-            </div>
-            <span className="text-[10px] text-ink-subtle tracking-wider uppercase font-mono font-medium">
-              Autonomous Zero-Trust
-            </span>
-          </div>
+        <a className="flex items-center group" href="#">
+          <img
+            src="/sentinel_logo_horizontal_transparent.png"
+            alt="SENTINEL PromptShield"
+            className="h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+          />
         </a>
 
         {/* Desktop Nav Links */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const FinalCtaSection: React.FC = () => {
   return (
@@ -12,9 +12,12 @@ export const FinalCtaSection: React.FC = () => {
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-700/80 text-xs font-mono text-sky-400 mb-2">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>PRODUCTION-READY ZERO-TRUST SHIELD</span>
+        <div className="flex justify-center mb-2">
+          <img
+            src="/sentinel_icon_transparent.png"
+            alt="SENTINEL"
+            className="w-12 h-12 object-contain"
+          />
         </div>
 
         <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">

@@ -1987,7 +1987,7 @@ elif "Playground" in nav_tab:
         render_standby_view(active_scenario)
         st.stop()
 
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>DEMONSTRATION</span> / <span class="active-crumb">3-STAGE ATTACK PIPELINE</span>
@@ -2130,7 +2130,7 @@ elif "Action Guard" in nav_tab:
         render_standby_view(active_scenario)
         st.stop()
 
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>ACTION GUARD</span> / <span class="active-crumb">PRE-FLIGHT INTERCEPT GATE (L7)</span>

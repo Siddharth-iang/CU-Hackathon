@@ -361,14 +361,6 @@ export const HeroPerimeterCanvas: React.FC<HeroPerimeterCanvasProps> = ({ classN
       {/* HTML5 Canvas for Living Particle System & Concentric Perimeters */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-10" />
 
-      {/* Concentric Layer Indicators (Top Left) */}
-      <div className="absolute top-5 left-5 z-20 pointer-events-none">
-        <span className="text-[10px] font-mono uppercase text-ink-subtle tracking-wider bg-white/90 px-3 py-1.5 rounded-lg border border-slate-200/90 shadow-sm flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
-          Perimeter: Active Dual-Layer Defense
-        </span>
-      </div>
-
       {/* Floating Threat Telemetry Badge (Top Right) */}
       <div
         className={`absolute top-5 right-5 z-20 transition-all duration-300 pointer-events-none ${
