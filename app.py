@@ -21,12 +21,23 @@ def render_html(html_str: str):
     clean = "\n".join(line.strip() for line in html_str.splitlines() if line.strip())
     st.markdown(clean, unsafe_allow_html=True)
 
+import base64
+
+def get_base64_image(image_path: str) -> str:
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return ""
+
+LOGO_HORIZONTAL_B64 = get_base64_image("assets/sentinel_logo_horizontal_transparent.png")
+ICON_B64 = get_base64_image("assets/sentinel_icon_transparent.png")
+
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION & ENTERPRISE DESIGN SYSTEM
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="SENTINEL // Agent Security Firewall",
-    page_icon=None,
+    page_icon="assets/sentinel_icon_transparent.png" if os.path.exists("assets/sentinel_icon_transparent.png") else None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -681,19 +692,9 @@ if "trigger_run" not in st.session_state:
 # -----------------------------------------------------------------------------
 with st.sidebar:
     # 1. Top Brand Header matching Sidebar.tsx
-    render_html("""
-    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); margin-bottom: 12px; margin-top: 0px;">
-        <div style="width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #1E40AF 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25); flex-shrink: 0;">
-            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 7L29 11.5V19C29 25.2 25.1 30.8 20 33C14.9 30.8 11 25.2 11 19V11.5L20 7Z" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M16 20H24M20 16V24" stroke="#6EE7B7" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="20" cy="20" r="1.5" fill="#FFFFFF"/>
-            </svg>
-        </div>
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; line-height: 1.1;">SENTINEL</span>
-            <span style="font-size: 9px; font-weight: 700; color: #4F46E5; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; line-height: 1;">AGENT SECURITY FIREWALL</span>
-        </div>
+    render_html(f"""
+    <div style="display: flex; align-items: center; justify-content: center; padding: 10px 14px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); margin-bottom: 12px; margin-top: 0px;">
+        <img src="data:image/png;base64,{LOGO_HORIZONTAL_B64}" style="max-height: 40px; width: auto; object-fit: contain;" alt="SENTINEL PromptShield" />
     </div>
     """)
 
@@ -866,6 +867,11 @@ with col_top_meta:
     render_html(f"""
     <div class="sentinel-topbar" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03); margin-bottom: 0px !important;">
         <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="data:image/png;base64,{ICON_B64}" style="width: 20px; height: 20px; object-fit: contain;" alt="Sentinel Shield" />
+                <span style="font-weight: 800; font-size: 13.5px; color: #0F172A; letter-spacing: -0.01em;">SENTINEL</span>
+            </div>
+            <div style="height: 18px; width: 1px; background-color: #E2E8F0;"></div>
             {status_pill}
             <div style="height: 18px; width: 1px; background-color: #E2E8F0;"></div>
             <div style="display: flex; align-items: center; gap: 6px; font-size: 12.5px;">
@@ -1459,8 +1465,8 @@ def render_standby_view(sc):
 
     render_html(f"""
     <div style="background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 14px; padding: 36px 24px; text-align: center; margin-top: 14px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-            <span class="material-symbols-outlined" style="font-size: 26px; color: #2563EB;">security</span>
+        <div style="width: 56px; height: 56px; border-radius: 14px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.1);">
+            <img src="data:image/png;base64,{ICON_B64}" style="width: 38px; height: 38px; object-fit: contain;" alt="Sentinel Shield" />
         </div>
         <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px;">
             Ready for Security Evaluation
