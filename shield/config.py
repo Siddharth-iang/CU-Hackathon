@@ -12,4 +12,7 @@ class Config:
     BACKUP_LLM_API_KEY: str = os.environ.get("BACKUP_LLM_API_KEY", "")
     BACKUP_LLM_MODEL: str = os.environ.get("BACKUP_LLM_MODEL", "meta-llama/Llama-3.3-70B-Instruct-Turbo")
 
+    ELEVENLABS_API_KEY: str = os.environ.get("ELEVENLABS_API_KEY", "")
+    ELEVENLABS_VOICE_ID: str = os.environ.get("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
+
 config = Config()
