@@ -3,9 +3,11 @@
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Landing%20Page-black?style=flat&logo=vercel)](https://cu-hackathon-kappa.vercel.app/)
 [![Streamlit Cloud](https://img.shields.io/badge/Streamlit-Live%20Dashboard-FF4B4B?style=flat&logo=streamlit)](https://sentinel-cu-hackathon.streamlit.app/)
+[![Architecture Guide](https://img.shields.io/badge/Documentation-Architecture.md-blue?style=flat&logo=markdown)](architecture.md)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Groq LPU](https://img.shields.io/badge/Groq-Llama%203.3%20%2F%20Qwen-F55036.svg)](https://groq.com)
+[![ElevenLabs](https://img.shields.io/badge/ElevenLabs-Voice%20Alerts-orange.svg)](https://elevenlabs.io)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
 [![Security Standard](https://img.shields.io/badge/OWASP-LLM01%20%7C%20LLM02%20Mitigated-success.svg)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 [![Compliance](https://img.shields.io/badge/SOC2-CC6.1%20%7C%20CC6.6%20%7C%20CC6.8-blueviolet.svg)](https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2)
@@ -13,12 +15,13 @@
 
 ---
 
-## 🌐 Live Production Deployments
+## 🌐 Live Deployments & Documentation
 
-| Component | Production URL | Description |
+| Component | URL / Location | Description |
 | :--- | :--- | :--- |
 | **🚀 Landing Page (Vercel)** | **[https://cu-hackathon-kappa.vercel.app/](https://cu-hackathon-kappa.vercel.app/)** | Award-winning zero-trust AI perimeter landing page with interactive 2D living canvas, threat simulation & benchmarks |
 | **🛡️ Security Console (Streamlit)** | **[https://sentinel-cu-hackathon.streamlit.app/](https://sentinel-cu-hackathon.streamlit.app/)** | Live interactive enterprise dashboard, attack playground, policy studio, forensic replay & evaluation |
+| **📐 System Architecture Spec** | **[`architecture.md`](architecture.md)** | Complete end-to-end architecture documentation explaining every subsystem, multi-view decoding, pre-flight gate, and forensic telemetry |
 
 ---
 
@@ -111,12 +114,14 @@ flowchart TD
 
 ## ⚡ Core Technical Innovations & Defense Mechanisms
 
-### 1. Multilayer Steganographic De-obfuscator (`shield/firewall/decoder.py`)
-Adversaries use encoding layers to bypass naive keyword filters. SENTINEL unpacks recursive payload encodings up to depth 3:
+### 1. Multilayer Steganographic Multi-View De-obfuscator (`shield/firewall/decoder.py`)
+Adversaries use encoding layers to bypass naive keyword filters. SENTINEL implements a **Multi-View De-obfuscation Architecture** that unpacks an untrusted document into parallel textual representations up to depth 3:
+* **Multi-View Decomposition (`views()`)**: Generates normalized baseline text, binary zero-width strings, candidate Base64 blocks, ASCII-hex sequences, and ROT13 deciphered text into parallel evaluatable streams.
 * **Zero-Width Steganography**: Strips and decodes binary unicode steganography (`\u200B` = 0, `\u200C` = 1, `\u200D`, `\uFEFF`).
-* **Base64 Payload Sniffing**: Regex-targets unpadded and standard Base64 blocks, validating character distribution and printable ratios before unpacking.
+* **Base64 Payload Sniffing**: Regex-targets unpadded and standard Base64 blocks, validating character distribution and printable ratios ($> 90\%$) before unpacking.
 * **Hex / Byte String Extraction**: Parses ASCII-hex sequences embedded in raw data streams.
 * **ROT13 Deciphering**: Handles Caesar substitution ciphers commonly used in obfuscated legal disclaimers.
+* **TSI Compound Scoring**: Triggers an automatic $+25$ Evasion penalty and up to $1.25\times$ APT multi-vector multiplier whenever a payload is caught in a decoded view.
 
 ### 2. Cryptographic Nonce Spotlighting (`shield/firewall/spotlight.py`)
 Even after sanitization, untrusted content is never interpolated directly into the system context. Instead, it is wrapped in cryptographically randomized delimiter boundaries:
@@ -184,6 +189,12 @@ Allows security administrators to adjust firewall strictness and action guard en
 Executes real-time batch evaluations across the entire 48-scenario catalog directly within the dashboard:
 * Computes baseline vs. protected catch rates, added latency distributions, and false-positive rates.
 * Exports benchmark telemetry as structured JSON reports for audit verification.
+
+### 11. Tactical Audio Dispatch & CISO Briefings (`core/audio.py`)
+Powered by ElevenLabs text-to-speech with high-assurance in-memory caching:
+* **Tactical Threat Alerts**: Real-time broadcast announcing intercepted injection vectors, flagged attack categories, and defense decisions.
+* **1-Click Executive CISO Audio Briefings**: Compiles incident post-mortems into an authoritative spoken intelligence briefing.
+* **SHA-256 Hashed Audio Cache**: Eliminates redundant API quota usage during dashboard re-renders.
 
 ---
 

@@ -15,7 +15,7 @@ VOICE_PROFILES: Dict[str, str] = {
     "Daniel (Command Broadcast)": "onwK4e9ZLuTAKqWW03F9",
 }
 
-DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"  # Adam
+DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  #Rachel
 
 # ponytail: In-memory dictionary cache to prevent redundant ElevenLabs API quota usage during Streamlit re-renders.
 _AUDIO_CACHE: Dict[str, bytes] = {}
