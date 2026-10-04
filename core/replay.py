@@ -470,11 +470,11 @@ def render_replay_html(scenario: Scenario, prot_trace: Any, unprot_trace: Option
         </div>
 
         <div class="controls-row">
-            <button class="ctrl-btn" id="btn-prev" onclick="changeStep(-1)">◀ Previous</button>
+            <button class="ctrl-btn" id="btn-prev" onclick="changeStep(-1)">&larr; Previous</button>
             <div class="step-summary-indicator">
                 Milestone <b id="summary-step-num">5</b> of 5 • <span id="summary-step-time" style="font-family:'JetBrains Mono',monospace; color:#2563EB; font-weight:700;">T + {tot_lat} ms</span> — <span id="summary-step-phase" style="color:#475569; font-weight:600;">Enforcement & Ledger Commit</span>
             </div>
-            <button class="ctrl-btn" id="btn-next" onclick="changeStep(1)" disabled>Next ▶</button>
+            <button class="ctrl-btn" id="btn-next" onclick="changeStep(1)" disabled>Next &rarr;</button>
         </div>
 
         <div class="pills-row" id="pills-row">

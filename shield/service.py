@@ -295,9 +295,9 @@ def run_task(
 
     if not final_answer or str(final_answer).strip() == "":
         if run_status == "BLOCKED":
-            final_answer = "🛡️ **ATTACK INTERCEPTED & NEUTRALIZED**: Action Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
+            final_answer = "**ATTACK INTERCEPTED & NEUTRALIZED**: Action Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
         elif run_status == "WAITING_APPROVAL":
-            final_answer = "⏸️ **HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
+            final_answer = "**HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
         else:
             final_answer = f"Completed review of '{effective_doc_name}' within verified security scope."
 

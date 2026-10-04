@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+type FontSizeOption = 'sm' | 'md' | 'lg';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -8,6 +10,25 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBackToLanding }) => {
   const [isPaused, setIsPaused] = useState(false);
+  const [fontSize, setFontSize] = useState<FontSizeOption>(() => {
+    return (localStorage.getItem('sentinel_font_size') as FontSizeOption) || 'md';
+  });
+
+  const applyFontSize = (size: FontSizeOption) => {
+    setFontSize(size);
+    localStorage.setItem('sentinel_font_size', size);
+    const scaleMap: Record<FontSizeOption, string> = {
+      sm: '14px',
+      md: '16px',
+      lg: '18px',
+    };
+    document.documentElement.style.fontSize = scaleMap[size];
+  };
+
+  useEffect(() => {
+    const saved = (localStorage.getItem('sentinel_font_size') as FontSizeOption) || 'md';
+    applyFontSize(saved);
+  }, []);
 
   return (
     <header className="fixed top-0 left-60 right-0 h-[52px] bg-surface-primary border-b border-border-subtle z-40 flex items-center justify-between px-space-lg select-none transition-colors duration-150">
@@ -82,6 +103,33 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleTheme, onBac
           <span className="hidden sm:inline">Launch Dashboard</span>
           <span className="material-symbols-outlined text-[13px] opacity-80">open_in_new</span>
         </a>
+
+        {/* Font Size Selector */}
+        <div
+          className="flex items-center bg-surface-secondary border border-border-subtle rounded h-8 p-0.5"
+          title="Adjust Dashboard Font Size"
+        >
+          {(['sm', 'md', 'lg'] as const).map((size) => {
+            const labels = { sm: 'A-', md: 'A', lg: 'A+' };
+            const isActive = fontSize === size;
+            return (
+              <button
+                key={size}
+                type="button"
+                onClick={() => applyFontSize(size)}
+                className={`h-6 px-2 rounded text-[11px] font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
+                }`}
+                title={`Font size: ${size === 'sm' ? 'Small (14px)' : size === 'md' ? 'Default (16px)' : 'Large (18px)'}`}
+                aria-pressed={isActive}
+              >
+                {labels[size]}
+              </button>
+            );
+          })}
+        </div>
 
         {/* Light / Dark Mode Toggle */}
         <button

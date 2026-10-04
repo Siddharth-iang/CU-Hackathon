@@ -73,11 +73,11 @@ def run_live_benchmark(
         if prot.status in ["BLOCKED", "WAITING_APPROVAL"] or (not is_attack and prot.status == "COMPLETED"):
             cat_stats[cat_val]["protected_intercepted"] += 1
 
-        edge_tag = "✅ Verified Defense"
+        edge_tag = "Verified Defense"
         if sc.id == "atk_plain_06":
-            edge_tag = "⚠️ Semantic Bypass (Edge Case)"
+            edge_tag = "Semantic Bypass (Edge Case)"
         elif sc.id == "benign_15":
-            edge_tag = "⚠️ Over-Defense (False Positive)"
+            edge_tag = "Over-Defense (False Positive)"
 
         results.append({
             "Scenario ID": sc.id,

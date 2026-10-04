@@ -25,7 +25,7 @@ def render_html(html_str: str):
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="SENTINEL // Agent Security Firewall",
-    page_icon="🛡️",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -413,8 +413,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# APPLICATION STATE
+# APPLICATION STATE & DYNAMIC FONT SCALING
 # -----------------------------------------------------------------------------
+if "dashboard_font_control" not in st.session_state:
+    st.session_state["dashboard_font_control"] = "A"
+
+# ponytail: Client-side zoom scaling for responsive accessibility without refactoring token classes.
+current_font_scale = st.session_state.get("dashboard_font_control", "A")
+zoom_level = "0.91" if current_font_scale == "A-" else ("1.10" if current_font_scale == "A+" else "1.0")
+st.markdown(f"""
+<style>
+    .stApp {{
+        zoom: {zoom_level} !important;
+    }}
+    [data-testid="stSegmentedControl"] {{
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        padding: 2px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
 if "audit_logs" not in st.session_state:
     st.session_state.audit_logs = []
 
@@ -465,13 +486,13 @@ with st.sidebar:
     nav_tab = st.radio(
         "Navigation",
         options=[
-            "🛡️ Overview & Comparison",
-            "⚡ Attack Playground",
-            "⚖️ Action Guard Gate",
-            "📋 Forensic Audit Log",
-            "📊 Evaluation Suite",
-            "🎛️ Policy Studio",
-            "📂 Sandbox & Storage"
+            "Overview & Comparison",
+            "Attack Playground",
+            "Action Guard Gate",
+            "Forensic Audit Log",
+            "Evaluation Suite",
+            "Policy Studio",
+            "Sandbox & Storage"
         ],
         index=0,
         label_visibility="collapsed"
@@ -570,7 +591,7 @@ with st.sidebar:
     render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Guardrails Configuration</div>')
     defense_engine = st.radio(
         "Execution Engine",
-        ["🛡️ PromptShield Live Core", "⚡ Instant Demo Simulation"],
+        ["PromptShield Live Core", "Instant Demo Simulation"],
         index=0
     )
     policy_profile_selected = st.selectbox(
@@ -585,7 +606,7 @@ with st.sidebar:
     enable_taint_check = st.toggle("Confidential Taint Check", value=True)
 
     render_html('<div style="height: 10px; margin-bottom: 10px;"></div>')
-    run_btn = st.button("🛡️ Run Security Evaluation", type="primary", use_container_width=True)
+    run_btn = st.button("Run Security Evaluation", type="primary", use_container_width=True)
 
     # 5. Bottom System Status Footer matching Sidebar.tsx
     render_html("""
@@ -609,7 +630,7 @@ with st.sidebar:
     """)
 
 # -----------------------------------------------------------------------------
-# TOP HEADER BAR MATCHING Header.tsx
+# TOP HEADER BAR MATCHING Header.tsx WITH FONT RESIZE CONTROL
 # -----------------------------------------------------------------------------
 is_fully_protected = enable_firewall and enable_action_guard
 has_eval = st.session_state.get("has_evaluated", False) and st.session_state.get("last_prot_trace") is not None
@@ -633,63 +654,79 @@ if "Live Core" in defense_engine:
 else:
     model_pill = f'<span style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 4px; border: 1px solid #E5E7EB; display: inline-flex; align-items: center; gap: 5px;"><span style="width:6px; height:6px; border-radius:50%; background:#9CA3AF;"></span>Offline Engine</span>'
 
-render_html(f"""
-<div class="sentinel-topbar">
-    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        {status_pill}
-        <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-            <span style="color: #6B7280;">Session:</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5E7EB;">SES-8F31A2</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-            <span style="color: #6B7280;">Target:</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #4B5563;">RAG-FinOps-v3</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-            <span style="color: #6B7280;">Latency:</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {latency_color}; font-weight: 600;">{latency_text}</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-            <span style="color: #6B7280;">Policy:</span>
-            {mode_pill}
-        </div>
-        <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-            <span style="color: #6B7280;">Model:</span>
-            {model_pill}
-        </div>
-    </div>
+col_top_meta, col_top_font = st.columns([0.84, 0.16], vertical_alignment="center")
 
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B7280; background-color: #F3F4F6; padding: 4px 8px; border-radius: 4px; border: 1px solid #E5E7EB;">
-            PROD-US-EAST
-        </span>
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; color: #2563EB; font-weight: bold; font-size: 12px;">
-                🛡️
+with col_top_meta:
+    render_html(f"""
+    <div class="sentinel-topbar" style="margin-bottom: 0px !important;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            {status_pill}
+            <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                <span style="color: #6B7280;">Session:</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5E7EB;">SES-8F31A2</span>
             </div>
-            <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
-                <span style="font-size: 11px; font-weight: 700; color: #111827;">SEC-OPS</span>
-                <span style="font-size: 9px; color: #6B7280; text-transform: uppercase;">L3 Engineer</span>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                <span style="color: #6B7280;">Target:</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #4B5563;">RAG-FinOps-v3</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                <span style="color: #6B7280;">Latency:</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {latency_color}; font-weight: 600;">{latency_text}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                <span style="color: #6B7280;">Policy:</span>
+                {mode_pill}
+            </div>
+            <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                <span style="color: #6B7280;">Model:</span>
+                {model_pill}
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B7280; background-color: #F3F4F6; padding: 4px 8px; border-radius: 4px; border: 1px solid #E5E7EB;">
+                PROD-US-EAST
+            </span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; color: #2563EB; font-weight: bold; font-size: 12px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #2563EB;">security</span>
+                </div>
+                <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.1;">
+                    <span style="font-size: 11px; font-weight: 700; color: #111827;">SEC-OPS</span>
+                    <span style="font-size: 9px; color: #6B7280; text-transform: uppercase;">L3 Engineer</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-""")
+    """)
+
+with col_top_font:
+    st.markdown('<div style="font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; margin-bottom: 3px; text-align: center; letter-spacing: 0.05em;">Font Size</div>', unsafe_allow_html=True)
+    st.segmented_control(
+        "Font Size",
+        options=["A-", "A", "A+"],
+        default=st.session_state.get("dashboard_font_control", "A"),
+        key="dashboard_font_control",
+        label_visibility="collapsed",
+        help="Adjust dashboard font size: A- (Compact), A (Default), A+ (Large)"
+    )
+
+render_html('<div style="height: 14px;"></div>')
 
 # -----------------------------------------------------------------------------
 # FULL-WINDOW MODAL DIALOGS
 # -----------------------------------------------------------------------------
-@st.dialog("📄 Complete Untrusted Document Viewer", width="large")
+@st.dialog("Complete Untrusted Document Viewer", width="large")
 def show_document_dialog(doc_name: str, doc_content: str):
-    st.markdown(f"#### 📄 Raw Ingested Document: `{doc_name}`")
+    st.markdown(f"#### Raw Ingested Document: `{doc_name}`")
     st.caption("Complete unmodified text ingested into the agent context retrieval pipeline:")
     st.text_area("Full Document Text", value=doc_content, height=420, disabled=True, label_visibility="collapsed")
     col_d1, col_d2 = st.columns([1, 1])
     with col_d1:
         st.download_button(
-            label="📥 Download Raw Document",
+            label="Download Raw Document",
             data=doc_content,
             file_name=doc_name,
             mime="text/plain",
@@ -697,17 +734,17 @@ def show_document_dialog(doc_name: str, doc_content: str):
             key=f"dlg_dl_doc_{doc_name}"
         )
     with col_d2:
-        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_doc_{doc_name}"):
+        if st.button("Close Full Window", use_container_width=True, key=f"dlg_close_doc_{doc_name}"):
             st.rerun()
 
-@st.dialog("📋 SOC2 & OWASP Forensic Incident Audit Report", width="large")
+@st.dialog("SOC2 & OWASP Forensic Incident Audit Report", width="large")
 def show_soc2_dialog(report_text: str, scenario_id: str):
     st.markdown(report_text)
     st.markdown("---")
     col_d1, col_d2 = st.columns([1, 1])
     with col_d1:
         st.download_button(
-            label="📥 Export Report (.md)",
+            label="Export Report (.md)",
             data=report_text,
             file_name=f"sentinel_soc2_report_{scenario_id}.md",
             mime="text/markdown",
@@ -715,7 +752,7 @@ def show_soc2_dialog(report_text: str, scenario_id: str):
             key=f"dlg_dl_soc2_{scenario_id}"
         )
     with col_d2:
-        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_soc2_{scenario_id}"):
+        if st.button("Close Full Window", use_container_width=True, key=f"dlg_close_soc2_{scenario_id}"):
             st.rerun()
 
 # Helper function to render active scenario context banner
@@ -740,19 +777,19 @@ def render_scenario_context(sc):
     </div>
     """)
 
-    with st.expander(f"👁️ Preview Complete Document & Injected Prompt ({sc.document_name})", expanded=False):
+    with st.expander(f"Preview Complete Document & Injected Prompt ({sc.document_name})", expanded=False):
         c1, c2 = st.columns([1, 1])
         with c1:
             h_col1, h_col2 = st.columns([2, 1])
             with h_col1:
-                st.markdown(f"##### 📄 Full Untrusted Document: `{sc.document_name}`")
+                st.markdown(f"##### Full Untrusted Document: `{sc.document_name}`")
             with h_col2:
-                if st.button("⛶ Full Window", key=f"btn_fs_doc_{sc.id}", help="Open full document in large window"):
+                if st.button("Full Window", key=f"btn_fs_doc_{sc.id}", help="Open full document in large window"):
                     show_document_dialog(sc.document_name, sc.document_content)
             st.caption("Exact raw content received by the agent environment:")
             st.code(sc.document_content, language="markdown")
         with c2:
-            st.markdown("##### 🎯 User Prompt & Attack Objective")
+            st.markdown("##### User Prompt & Attack Objective")
             st.markdown("**Authorized User Prompt:**")
             st.info(sc.user_prompt)
             if sc.injection_payload:
@@ -771,7 +808,7 @@ def render_scenario_context(sc):
         with col_fuzz_banner1:
             render_html("""
             <div style="background: #FEF3C7; border: 1px solid #FCD34D; border-left: 4px solid #D97706; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px;">
-                <div style="font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase;">⚡ Active Fuzzed Attack Vector</div>
+                <div style="font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase;">Active Fuzzed Attack Vector</div>
                 <div style="font-size: 12px; color: #78350F; margin-top: 2px;">This scenario has been mutated with adversarial evasion obfuscation. Click <strong>Run Security Evaluation</strong> to evaluate defense resilience.</div>
             </div>
             """)
@@ -785,7 +822,7 @@ def render_scenario_context(sc):
                 st.rerun()
 
     # Phase 1: Adversarial Red-Team Fuzzer Expander
-    with st.expander("🔀 Adversarial Red-Team Fuzzer (Evasion Testing)", expanded=False):
+    with st.expander("Adversarial Red-Team Fuzzer (Evasion Testing)", expanded=False):
         st.markdown("**Test Defense Resilience Against Obfuscation & Evasion Transforms:**")
         st.caption("Apply real-time adversarial mutations (Base64 encoding, zero-width steganography, leetspeak homoglyphs, delimiter tampering, markdown smuggling) to verify if the Content Firewall decoding pass and Action Guard withstand evasion.")
         
@@ -806,7 +843,7 @@ def render_scenario_context(sc):
             st.info(strat_explanations.get(chosen_strat, ""))
         with fcol2:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-            if st.button("🔀 Generate Fuzzed Vector", key=f"btn_apply_fuzz_{sc.id}", use_container_width=True, type="primary"):
+            if st.button("Generate Fuzzed Vector", key=f"btn_apply_fuzz_{sc.id}", use_container_width=True, type="primary"):
                 fuzzed_sc = fuzz_scenario(sc, chosen_strat)
                 st.session_state.current_scenario = fuzzed_sc
                 st.session_state.current_scenario_id = fuzzed_sc.id
@@ -827,7 +864,7 @@ def render_scenario_context(sc):
         <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 13.5px; font-weight: 700; color: #111827;">📋 SOC2 & OWASP Forensic Audit Evidence</span>
+                    <span style="font-size: 13.5px; font-weight: 700; color: #111827;">SOC2 & OWASP Forensic Audit Evidence</span>
                     <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">Type-II Certified</span>
                     <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">LLM01 / LLM02</span>
                 </div>
@@ -839,11 +876,11 @@ def render_scenario_context(sc):
         """)
         col_rep1, col_rep2, col_rep3 = st.columns(3)
         with col_rep1:
-            if st.button("👁️ Preview Audit Report (Full Window)", key=f"btn_prev_soc2_{sc.id}", use_container_width=True):
+            if st.button("Preview Audit Report (Full Window)", key=f"btn_prev_soc2_{sc.id}", use_container_width=True):
                 show_soc2_dialog(soc2_rep, sc.id)
         with col_rep2:
             st.download_button(
-                label="📥 Export Audit Report (.md)",
+                label="Export Audit Report (.md)",
                 data=soc2_rep,
                 file_name=f"sentinel_soc2_report_{sc.id}.md",
                 mime="text/markdown",
@@ -851,10 +888,10 @@ def render_scenario_context(sc):
                 use_container_width=True
             )
         with col_rep3:
-            if st.button("⏱️ Replay Timeline (Full Window)", key=f"btn_ctx_tt_{sc.id}", use_container_width=True):
+            if st.button("Replay Timeline (Full Window)", key=f"btn_ctx_tt_{sc.id}", use_container_width=True):
                 show_time_travel_dialog(sc, st.session_state.get("last_prot_trace"), st.session_state.get("last_unprot_trace"))
 
-@st.dialog("⏱️ Incident Time-Travel Forensic Replay", width="large")
+@st.dialog("Incident Time-Travel Forensic Replay", width="large")
 def show_time_travel_dialog(sc, prot, unprot=None):
     """
     Full-window modal dialog for interactive incident time-travel replay with fluid animations.
@@ -866,7 +903,7 @@ def show_time_travel_dialog(sc, prot, unprot=None):
     col_d1, col_d2 = st.columns([1, 1])
     with col_d1:
         st.download_button(
-            label="📥 Export Full Incident Trace (JSON)",
+            label="Export Full Incident Trace (JSON)",
             data=json.dumps(milestones, indent=2),
             file_name=f"sentinel_time_travel_{sc.id}.json",
             mime="application/json",
@@ -874,7 +911,7 @@ def show_time_travel_dialog(sc, prot, unprot=None):
             key=f"dlg_dl_tt_{sc.id}"
         )
     with col_d2:
-        if st.button("✕ Close Full Window", use_container_width=True, key=f"dlg_close_tt_{sc.id}"):
+        if st.button("Close Full Window", use_container_width=True, key=f"dlg_close_tt_{sc.id}"):
             st.rerun()
 
 def render_time_travel_trigger(sc, prot, unprot=None, key_prefix="tt"):
@@ -885,7 +922,7 @@ def render_time_travel_trigger(sc, prot, unprot=None, key_prefix="tt"):
     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px; margin-top: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 13.5px; font-weight: 700; color: #111827;">⏱️ Incident Time-Travel Replay</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: #111827;">Incident Time-Travel Replay</span>
                 <span class="pill-info" style="font-size: 10px; padding: 2px 7px;">5 Milestones</span>
                 <span class="pill-safe" style="font-size: 10px; padding: 2px 7px;">T=0.0ms → T=+{getattr(prot, 'total_latency_ms', 111.0)}ms</span>
             </div>
@@ -895,7 +932,7 @@ def render_time_travel_trigger(sc, prot, unprot=None, key_prefix="tt"):
         </div>
     </div>
     """)
-    if st.button("⏱️ Open Time-Travel Replay (Full Window)", key=f"btn_open_tt_{key_prefix}", use_container_width=True, type="secondary"):
+    if st.button("Open Time-Travel Replay (Full Window)", key=f"btn_open_tt_{key_prefix}", use_container_width=True, type="secondary"):
         show_time_travel_dialog(sc, prot, unprot)
 
 # -----------------------------------------------------------------------------
@@ -962,8 +999,8 @@ def render_standby_view(sc):
 
     render_html(f"""
     <div style="background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 44px 24px; text-align: center; margin-top: 10px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-        <div style="width: 52px; height: 52px; border-radius: 14px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 14px auto;">
-            🛡️
+        <div style="width: 52px; height: 52px; border-radius: 14px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+            <span class="material-symbols-outlined" style="font-size: 28px; color: #2563EB;">security</span>
         </div>
         <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">
             Ready for Evaluation
@@ -983,7 +1020,7 @@ def render_standby_view(sc):
 
     col_c1, col_c2, col_c3 = st.columns([1, 2, 1])
     with col_c2:
-        if st.button("🛡️ Run Security Evaluation Now", type="primary", key="main_run_eval_btn", use_container_width=True):
+        if st.button("Run Security Evaluation Now", type="primary", key="main_run_eval_btn", use_container_width=True):
             st.session_state.trigger_run = True
             st.rerun()
 
@@ -1034,7 +1071,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="background-color: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 13px;">
-                        ⏸️ HUMAN CONFIRMATION REQUIRED
+                        HUMAN CONFIRMATION REQUIRED
                     </span>
                     <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #D97706;">
                         {pending_tool}()
@@ -1082,11 +1119,11 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 f"Step 1: read_file('{active_scenario.document_name}') — Untrusted file loaded",
                 "Step 2: Agent context tainted by embedded injection",
                 f"Step 3: {blocked_tool}() — Attempted external exfiltration",
-                "🛑 Intercepted: Multi-chain lineage severed by Action Guard"
+                "Intercepted: Multi-chain lineage severed by Action Guard"
             ]
             lineage_html = "".join([
-                f"""<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #1F2937; background: #F9FAFB; padding: 6px 10px; border-radius: 5px; border: 1px solid #E5E7EB; border-left: 3px solid {'#10B981' if ('Intercepted' in item or '🛑' in item) else ('#3B82F6' if 'Step 1' in item else ('#F59E0B' if 'Step 2' in item else '#EF4444'))};">
-                    <span style="font-size: 11px;">{'🛑' if ('Intercepted' in item or '🛑' in item) else '▶'}</span>
+                f"""<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #1F2937; background: #F9FAFB; padding: 6px 10px; border-radius: 5px; border: 1px solid #E5E7EB; border-left: 3px solid {'#10B981' if ('Intercepted' in item or 'BLOCKED' in item) else ('#3B82F6' if 'Step 1' in item else ('#F59E0B' if 'Step 2' in item else '#EF4444'))};">
+                    <span style="font-size: 11px;">{'[BLOCKED]' if ('Intercepted' in item or 'BLOCKED' in item) else '[STEP]'}</span>
                     <span>{item}</span>
                 </div>"""
                 for item in lineage_items
@@ -1098,7 +1135,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="pill-critical" style="font-size: 13px; padding: 5px 10px;">
-                            ⛓️ MULTI-CHAIN BLOCKED
+                            MULTI-CHAIN BLOCKED
                         </span>
                         <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #EF4444;">
                             {blocked_tool}()
@@ -1128,7 +1165,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                             <span style="background: #DBEAFE; color: #1E40AF; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px;">Untrusted Doc</span>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">➔</div>
+                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">&rarr;</div>
 
                         <!-- Step 2 -->
                         <div style="flex: 1; min-width: 110px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 10px; text-align: center;">
@@ -1137,7 +1174,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                             <span style="background: #FEF3C7; color: #92400E; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px;">Taint Spread</span>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">➔</div>
+                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">&rarr;</div>
 
                         <!-- Step 3 -->
                         <div style="flex: 1; min-width: 110px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 8px 10px; text-align: center;">
@@ -1146,12 +1183,12 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                             <span style="background: #FEE2E2; color: #991B1B; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px;">Exfil Attempt</span>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">➔</div>
+                        <div style="display: flex; align-items: center; justify-content: center; color: #94A3B8; font-weight: bold; font-size: 14px;">&rarr;</div>
 
                         <!-- Step 4 -->
                         <div style="flex: 1; min-width: 120px; background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 6px; padding: 8px 10px; text-align: center;">
                             <div style="font-size: 9.5px; font-weight: 700; color: #16A34A; text-transform: uppercase;">4. Guard Gate</div>
-                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; color: #15803D; margin: 3px 0;">🛑 BLOCKED</div>
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; color: #15803D; margin: 3px 0;">[BLOCKED]</div>
                             <span style="background: #DCFCE7; color: #166534; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px;">Lineage Severed</span>
                         </div>
 
@@ -1178,7 +1215,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="pill-critical" style="font-size: 13px; padding: 6px 12px;">
-                            ✕ ACTION BLOCKED
+                            ACTION BLOCKED
                         </span>
                         <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #EF4444;">
                             {blocked_tool}()
@@ -1257,7 +1294,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         unprot_out = str(unprot_trace.final_output).strip() if unprot_trace.final_output else ""
         if not unprot_out:
             if unprot_trace.status == "EXPLOITED":
-                unprot_out = "⚠️ **AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
+                unprot_out = "**AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
             else:
                 unprot_out = f"Completed review of '{active_scenario.document_name}'."
         render_html(f"""
@@ -1301,7 +1338,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         <div style="background-color: {bg_meter}; border: 1px solid {border_meter}; border-radius: 8px; padding: 12px 16px; margin: 12px 0 16px 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.05em;">
-                    🛡️ Threat Severity Index (TSI)
+                    Threat Severity Index (TSI)
                 </span>
                 <span style="font-size: 12px; font-weight: 800; color: {meter_color}; font-family: 'JetBrains Mono', monospace;">
                     {score}/100 • {sev}
@@ -1324,16 +1361,16 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
                     <div class="policy-pill-card" style="border-left: 3px solid #10B981;">
-                        <strong>✓ Tool Scope</strong>: Registered tool manifest
+                        <strong>[PASS] Tool Scope</strong>: Registered tool manifest
                     </div>
                     <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'✕' if is_blocked else '✓'} Recipient Scope</strong>: Egress allowlist
+                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Recipient Scope</strong>: Egress allowlist
                     </div>
                     <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'✕' if is_blocked else '✓'} Resource Scope</strong>: RBAC boundary check
+                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Resource Scope</strong>: RBAC boundary check
                     </div>
                     <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'✕' if is_blocked else '✓'} Data Flow</strong>: IFC egress policy
+                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Data Flow</strong>: IFC egress policy
                     </div>
                 </div>
             </div>
@@ -1376,7 +1413,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 if fw.detected_signals:
                     st.markdown("**Detected Indicators:**")
                     for sig in fw.detected_signals:
-                        st.markdown(f"- ⚠️ `{sig}`")
+                        st.markdown(f"- **[FLAG]** `{sig}`")
 
                 if fw.decoded_payload:
                     st.markdown("**Decoded Obfuscated Payload:**")
@@ -1404,9 +1441,9 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     st.session_state.human_approval_state = "REJECTED"
 
             if st.session_state.get("human_approval_state") == "APPROVED":
-                st.success("✅ **ACTION APPROVED**: Supervised dispatch authorized by operator.")
+                st.success("**ACTION APPROVED**: Supervised dispatch authorized by operator.")
             elif st.session_state.get("human_approval_state") == "REJECTED":
-                st.error("🛑 **ACTION DENIED**: External transmission cancelled and blocked.")
+                st.error("**ACTION DENIED**: External transmission cancelled and blocked.")
 
         st.markdown("##### Tool Calls Inspected by Action Guard")
         if prot_trace.tool_calls:
@@ -1436,11 +1473,11 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         prot_out = str(prot_trace.final_output).strip() if prot_trace.final_output else ""
         if not prot_out:
             if prot_trace.status == "BLOCKED":
-                prot_out = "🛡️ **ATTACK INTERCEPTED & NEUTRALIZED**\nAction Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
+                prot_out = "**ATTACK INTERCEPTED & NEUTRALIZED**\nAction Guard blocked unauthorized tool invocation. Confidential assets protected and zero outbound egress permitted."
             elif prot_trace.status == "WAITING_APPROVAL":
-                prot_out = "⏸️ **HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
+                prot_out = "**HUMAN APPROVAL REQUIRED**: External transmission paused pending administrative authorization."
             else:
-                prot_out = f"🛡️ **SECURE TASK COMPLETION**: Document '{active_scenario.document_name}' analyzed safely within verified scope boundaries."
+                prot_out = f"**SECURE TASK COMPLETION**: Document '{active_scenario.document_name}' analyzed safely within verified scope boundaries."
         render_html(f"""
         <div style="background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 14px; font-size: 13px; color: #065F46;">
             {prot_out}
@@ -1509,7 +1546,7 @@ elif "Playground" in nav_tab:
             
             <div style="background-color: #FEF2F2; border: 2px solid #EF4444; border-radius: 8px; padding: 12px; color: #991B1B;">
                 <div style="font-weight: 700; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; display: flex; justify-content: space-between;">
-                    <span>⚠️ QUARANTINED ADVERSARIAL PAYLOAD</span>
+                    <span>QUARANTINED ADVERSARIAL PAYLOAD</span>
                     <span style="background: #EF4444; color: white; padding: 2px 6px; border-radius: 4px;">FLAGGED INGESTION</span>
                 </div>
                 <div style="font-weight: 700; color: #EF4444;">
@@ -1639,7 +1676,7 @@ elif "Action Guard" in nav_tab:
     with g1:
         render_html("""
         <div class="policy-pill-card" style="border-top: 3px solid #10B981;">
-            <div style="font-size: 11px; font-weight: 600; color: #10B981;">✓ PASS</div>
+            <div style="font-size: 11px; font-weight: 600; color: #10B981;">PASS</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Tool Scope</div>
             <div style="font-size: 11px; color: #6B7280;">Registered in agent tool manifest</div>
         </div>
@@ -1647,7 +1684,7 @@ elif "Action Guard" in nav_tab:
     with g2:
         render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'FAIL' if is_blocked else 'PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Recipient Scope</div>
             <div style="font-size: 11px; color: #6B7280;">Egress allowlist verification</div>
         </div>
@@ -1655,7 +1692,7 @@ elif "Action Guard" in nav_tab:
     with g3:
         render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'FAIL' if is_blocked else 'PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Resource Scope</div>
             <div style="font-size: 11px; color: #6B7280;">RBAC boundary validation</div>
         </div>
@@ -1663,7 +1700,7 @@ elif "Action Guard" in nav_tab:
     with g4:
         render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'FAIL' if is_blocked else 'PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Data Flow (IFC)</div>
             <div style="font-size: 11px; color: #6B7280;">No untrusted data into egress</div>
         </div>
@@ -1671,7 +1708,7 @@ elif "Action Guard" in nav_tab:
     with g5:
         render_html(f"""
         <div class="policy-pill-card" style="border-top: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'✕ FAIL' if is_blocked else '✓ PASS'}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {'#EF4444' if is_blocked else '#10B981'};">{'FAIL' if is_blocked else 'PASS'}</div>
             <div style="font-weight: 700; font-size: 13px; margin: 4px 0;">Provenance Taint</div>
             <div style="font-size: 11px; color: #6B7280;">Taint lineage tracking</div>
         </div>
@@ -1785,12 +1822,12 @@ elif "Evaluation" in nav_tab:
     </div>
     """)
 
-    # ⚡ Phase 2: Live Batch Benchmark Runner Action Header
+    # Phase 2: Live Batch Benchmark Runner Action Header
     render_html("""
     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div>
-                <div style="font-size: 14px; font-weight: 700; color: #111827;">⚡ Live Batch Benchmark Engine</div>
+                <div style="font-size: 14px; font-weight: 700; color: #111827;">Live Batch Benchmark Engine</div>
                 <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
                     Execute empirical security validation across all 48 scenarios in real-time under policy: <strong>{}</strong>.
                 </div>
@@ -1803,7 +1840,7 @@ elif "Evaluation" in nav_tab:
     with col_btn_bench1:
         st.caption("Measures actual exploit interception, non-synthetic frontier resilience, and sub-millisecond latency distributions.")
     with col_btn_bench2:
-        run_live_btn = st.button("▶️ Run Live Benchmark (All 48 Scenarios)", type="primary", use_container_width=True, key="btn_run_live_batch")
+        run_live_btn = st.button("Run Live Benchmark (All 48 Scenarios)", type="primary", use_container_width=True, key="btn_run_live_batch")
 
     if run_live_btn:
         progress_bar = st.progress(0)
@@ -1821,7 +1858,7 @@ elif "Evaluation" in nav_tab:
         )
         st.session_state["live_benchmark_results"] = live_res
         progress_bar.empty()
-        status_txt.success(f"✅ Live Benchmark Complete! Evaluated {live_res['total_scenarios']} scenarios in {live_res['total_eval_time_seconds']}s (Catch Rate: {live_res['protected_catch_rate']}%).")
+        status_txt.success(f"Live Benchmark Complete! Evaluated {live_res['total_scenarios']} scenarios in {live_res['total_eval_time_seconds']}s (Catch Rate: {live_res['protected_catch_rate']}%).")
 
     # Determine metrics: Live or Pre-computed
     live_res = st.session_state.get("live_benchmark_results")
@@ -1895,7 +1932,7 @@ elif "Evaluation" in nav_tab:
     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-left: 4px solid #2563EB; border-radius: 6px; padding: 10px 14px; margin-top: 12px; margin-bottom: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
             <div style="font-weight: 700; color: #0F172A; font-size: 12.5px;">
-                🔬 Realistic Non-Synthetic Frontier Tuning (95.8% Overall Catch Rate)
+                Realistic Non-Synthetic Frontier Tuning (95.8% Overall Catch Rate)
             </div>
             <div style="font-size: 11px; color: #2563EB; font-weight: 600;">
                 46 of 48 Secured • 1 Semantic Bypass • 1 Benign Over-Defense
@@ -1913,7 +1950,7 @@ elif "Evaluation" in nav_tab:
 
     # Render Live Chart and Category Breakdown
     if live_res:
-        st.markdown("##### 📈 Live Empirical Catch Rate vs Baseline Hijack by Category")
+        st.markdown("##### Live Empirical Catch Rate vs Baseline Hijack by Category")
         
         # Build category bar chart
         chart_data = []
@@ -1940,7 +1977,7 @@ elif "Evaluation" in nav_tab:
         col_exp1, col_exp2 = st.columns([3, 1])
         with col_exp2:
             st.download_button(
-                label="📥 Export Benchmark Data (CSV)",
+                label="Export Benchmark Data (CSV)",
                 data=df_details.to_csv(index=False),
                 file_name="sentinel_live_benchmark_results.csv",
                 mime="text/csv",
@@ -2069,7 +2106,7 @@ elif "Policy Studio" in nav_tab:
     st.markdown("##### 2. No-Code Policy Rule Customizer")
     r_col1, r_col2 = st.columns(2)
     with r_col1:
-        st.markdown("**📁 Filesystem & Resource Access Boundary**")
+        st.markdown("**Filesystem & Resource Access Boundary**")
         st.text_input("Permitted Corpus Directory Prefix", value="data/corpus/", disabled=True)
         custom_paths_input = st.text_area(
             "Forbidden File Keywords (One per line)",
@@ -2077,7 +2114,7 @@ elif "Policy Studio" in nav_tab:
             height=120
         )
     with r_col2:
-        st.markdown("**✉️ Network Egress & Recipient Controls**")
+        st.markdown("**Network Egress & Recipient Controls**")
         custom_domains_input = st.text_input(
             "Approved Internal Domains (Comma separated)",
             value="@company.internal, @corp.internal, @sentinel.security"
@@ -2108,7 +2145,7 @@ elif "Policy Studio" in nav_tab:
 
     with t_col3:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        eval_btn = st.button("⚡ Test Policy Now", use_container_width=True)
+        eval_btn = st.button("Test Policy Now", use_container_width=True)
 
     if eval_btn:
         custom_paths_list = [p.strip() for p in custom_paths_input.splitlines() if p.strip()]
@@ -2121,7 +2158,7 @@ elif "Policy Studio" in nav_tab:
             custom_allowed_domains=custom_domains_list
         )
         
-        v_badge = '<span class="pill-critical">🛑 ACTION BLOCKED</span>' if test_result["verdict"] == "BLOCK" else ('<span class="pill-warning">⏸️ ASK_HUMAN</span>' if test_result["verdict"] == "ASK_HUMAN" else '<span class="pill-safe">✅ ALLOWED</span>')
+        v_badge = '<span class="pill-critical">ACTION BLOCKED</span>' if test_result["verdict"] == "BLOCK" else ('<span class="pill-warning">ASK_HUMAN</span>' if test_result["verdict"] == "ASK_HUMAN" else '<span class="pill-safe">ALLOWED</span>')
         render_html(f"""
         <div class="sentinel-card" style="border-left: 4px solid {'#EF4444' if test_result['verdict'] == 'BLOCK' else ('#F59E0B' if test_result['verdict'] == 'ASK_HUMAN' else '#10B981')}; padding: 16px 20px; margin-top: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -2165,7 +2202,7 @@ elif "Sandbox" in nav_tab:
 
     col_corp, col_conf = st.columns(2, gap="large")
     with col_corp:
-        st.markdown("##### 📂 `data/corpus/` (Permitted Procurement Scope)")
+        st.markdown("##### `data/corpus/` (Permitted Procurement Scope)")
         st.code("""
 data/corpus/
 ├── Vendor_Alpha_Quotation.pdf (Poisoned: Plain Injection)
@@ -2182,7 +2219,7 @@ data/corpus/
         """, language="bash")
 
     with col_conf:
-        st.markdown("##### 🔒 `data/confidential/` (Strictly Restricted Perimeter)")
+        st.markdown("##### `data/confidential/` (Strictly Restricted Perimeter)")
         st.code("""
 data/confidential/
 ├── aws_prod_credentials.json (Simulated Root Access Keys)

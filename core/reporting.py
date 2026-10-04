@@ -67,7 +67,7 @@ def generate_soc2_incident_report(
     seal_input = f"{report_id}:{scenario.id}:{prot_status}:{rule_violated}:{ts_now}"
     seal_hash = hashlib.sha256(seal_input.encode()).hexdigest()
 
-    report = f"""# 🛡️ SENTINEL AI AGENT SECURITY — FORENSIC INCIDENT AUDIT REPORT
+    report = f"""# SENTINEL AI AGENT SECURITY — FORENSIC INCIDENT AUDIT REPORT
 
 **Report Reference:** `{report_id}`  
 **Classification:** RESTRICTED // SOC2 TYPE-II & ISO-27001 AUDIT EVIDENCE  
@@ -98,13 +98,13 @@ This incident evaluation certifies defense enforcement against standard industry
 
 | Security Standard | Control Category | Sentinel Enforcement Mechanism | Audit Result |
 |:---|:---|:---|:---|
-| **OWASP LLM01:2025** | Prompt Injection (Direct & Indirect) | Content Firewall: Spotlighting, multi-encoding decoders & quarantine | ✅ **MITIGATED** |
-| **OWASP LLM02:2025** | Insecure Output Handling | Action Guard: Pre-flight tool execution gate & RBAC boundary | ✅ **MITIGATED** |
-| **OWASP LLM06:2025** | Sensitive Information Disclosure | Canary Token Tripwires, Traversal Escapes & Confidential RBAC | ✅ **MITIGATED** |
-| **OWASP LLM08:2025** | Excessive Agency | Action Guard: Least-Privilege Scope Extractor & Human-in-the-Loop | ✅ **MITIGATED** |
-| **SOC2 CC6.1** | Logical Access Controls | Session-scoped tool allowlists & domain egress perimeter | ✅ **COMPLIANT** |
-| **SOC2 CC6.6** | Perimeter Boundary Protection | Egress allowlist enforcement and cross-domain socket severance | ✅ **COMPLIANT** |
-| **SOC2 CC7.2** | Security Monitoring & Forensics | Tamper-evident structured JSONL forensic audit telemetry | ✅ **COMPLIANT** |
+| **OWASP LLM01:2025** | Prompt Injection (Direct & Indirect) | Content Firewall: Spotlighting, multi-encoding decoders & quarantine | **MITIGATED** |
+| **OWASP LLM02:2025** | Insecure Output Handling | Action Guard: Pre-flight tool execution gate & RBAC boundary | **MITIGATED** |
+| **OWASP LLM06:2025** | Sensitive Information Disclosure | Canary Token Tripwires, Traversal Escapes & Confidential RBAC | **MITIGATED** |
+| **OWASP LLM08:2025** | Excessive Agency | Action Guard: Least-Privilege Scope Extractor & Human-in-the-Loop | **MITIGATED** |
+| **SOC2 CC6.1** | Logical Access Controls | Session-scoped tool allowlists & domain egress perimeter | **COMPLIANT** |
+| **SOC2 CC6.6** | Perimeter Boundary Protection | Egress allowlist enforcement and cross-domain socket severance | **COMPLIANT** |
+| **SOC2 CC7.2** | Security Monitoring & Forensics | Tamper-evident structured JSONL forensic audit telemetry | **COMPLIANT** |
 
 ---
 

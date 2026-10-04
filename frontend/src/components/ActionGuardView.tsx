@@ -150,7 +150,7 @@ export const ActionGuardView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted uppercase">Scope 1</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-status-safe/10 text-status-safe border border-status-safe/30">
-                  ✓ PASS
+                  <span className="material-symbols-outlined text-[13px]">check</span> PASS
                 </span>
               </div>
               <div className="mt-3">
@@ -166,7 +166,7 @@ export const ActionGuardView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted uppercase">Scope 2</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-status-critical/10 text-status-critical border border-status-critical/30">
-                  ✕ FAIL
+                  <span className="material-symbols-outlined text-[13px]">close</span> FAIL
                 </span>
               </div>
               <div className="mt-3">
@@ -182,7 +182,7 @@ export const ActionGuardView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted uppercase">Scope 3</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-status-critical/10 text-status-critical border border-status-critical/30">
-                  ✕ FAIL
+                  <span className="material-symbols-outlined text-[13px]">close</span> FAIL
                 </span>
               </div>
               <div className="mt-3">
@@ -198,7 +198,7 @@ export const ActionGuardView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted uppercase">Scope 4</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-status-critical/10 text-status-critical border border-status-critical/30">
-                  ✕ FAIL
+                  <span className="material-symbols-outlined text-[13px]">close</span> FAIL
                 </span>
               </div>
               <div className="mt-3">
@@ -214,7 +214,7 @@ export const ActionGuardView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted uppercase">Scope 5</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-status-critical/10 text-status-critical border border-status-critical/30">
-                  ✕ FAIL
+                  <span className="material-symbols-outlined text-[13px]">close</span> FAIL
                 </span>
               </div>
               <div className="mt-3">

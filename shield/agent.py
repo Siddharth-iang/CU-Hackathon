@@ -211,7 +211,7 @@ def run_vulnerable_agent(
 
     if not final_answer or not str(final_answer).strip():
         if is_hijacked:
-            final_answer = "⚠️ **AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
+            final_answer = "**AGENT COMPROMISED**: Disregarded user prompt. Injected instruction followed without authorization."
         else:
             final_answer = f"Completed review of '{document_name}'."
 

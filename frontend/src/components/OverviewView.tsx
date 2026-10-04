@@ -45,25 +45,25 @@ export const OverviewView: React.FC<{ onNavigateToPlayground: () => void }> = ({
       case 'ALLOW':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-status-safe/10 text-status-safe border border-status-safe/30">
-            <span>✓</span> ALLOW
+            <span className="material-symbols-outlined text-[13px]">check</span> ALLOW
           </span>
         );
       case 'BLOCK':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-status-critical/10 text-status-critical border border-status-critical/30">
-            <span>✕</span> BLOCK
+            <span className="material-symbols-outlined text-[13px]">close</span> BLOCK
           </span>
         );
       case 'DETECT':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-status-warning/10 text-status-warning border border-status-warning/30">
-            <span>!</span> DETECT
+            <span className="material-symbols-outlined text-[13px]">warning</span> DETECT
           </span>
         );
       case 'ASK HUMAN':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-status-info/10 text-status-info border border-status-info/30">
-            <span>?</span> ASK HUMAN
+            <span className="material-symbols-outlined text-[13px]">help</span> ASK HUMAN
           </span>
         );
     }
