@@ -12,6 +12,15 @@ from core.policy_studio import POLICY_PROFILES, evaluate_custom_policy
 from core.fuzzer import MUTATION_STRATEGIES, fuzz_scenario
 from core.benchmark import run_live_benchmark
 from core.replay import generate_milestone_timeline, render_replay_html
+from core.audio import (
+    VOICE_PROFILES,
+    DEFAULT_VOICE_ID,
+    synthesize_speech,
+    build_incident_alert_text,
+    build_ciso_briefing_text,
+    get_audio_cache_key,
+    _AUDIO_CACHE
+)
 import streamlit.components.v1 as components
 from shield.audit import AuditLogger
 from shield.config import config
@@ -687,6 +696,18 @@ if "current_scenario_id" not in st.session_state:
 if "trigger_run" not in st.session_state:
     st.session_state.trigger_run = False
 
+if "voice_alert_enabled" not in st.session_state:
+    st.session_state.voice_alert_enabled = True
+
+if "voice_alert_autoplay" not in st.session_state:
+    st.session_state.voice_alert_autoplay = True
+
+if "selected_voice_name" not in st.session_state:
+    st.session_state.selected_voice_name = list(VOICE_PROFILES.keys())[0]
+
+if "new_run_audio_ready" not in st.session_state:
+    st.session_state.new_run_audio_ready = False
+
 # -----------------------------------------------------------------------------
 # SIDEBAR: EXACT SENTINEL BRANDING, NAVIGATION & CONFIGURATION
 # -----------------------------------------------------------------------------
@@ -846,6 +867,33 @@ with st.sidebar:
     enable_firewall = st.toggle("Content Firewall (Input L1)", value=True)
     enable_action_guard = st.toggle("Action Guard (Output L2)", value=True)
     enable_taint_check = st.toggle("Confidential Taint Check", value=True)
+
+    render_html('<div style="height: 1px; background: #E2E8F0; margin: 12px 0 14px 0;"></div>')
+
+    # 4b. Voice Dispatch Controls (ElevenLabs Creator Integration)
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #7C3AED; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding-left: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #7C3AED;"></span> Voice Dispatch (ElevenLabs)</div>')
+    
+    enable_voice = st.toggle("Tactical Voice Alerts", value=st.session_state.get("voice_alert_enabled", True), key="sb_voice_enabled")
+    st.session_state.voice_alert_enabled = enable_voice
+
+    if enable_voice:
+        selected_voice = st.selectbox(
+            "Security Voice",
+            options=list(VOICE_PROFILES.keys()),
+            index=0,
+            key="sb_voice_selector"
+        )
+        st.session_state.selected_voice_name = selected_voice
+        st.session_state.voice_alert_autoplay = st.toggle(
+            "Auto-play on Interception",
+            value=st.session_state.get("voice_alert_autoplay", True),
+            key="sb_voice_autoplay"
+        )
+
+        if config.ELEVENLABS_API_KEY:
+            render_html('<div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span> Connected via .env (Creator Plan)</div>')
+        else:
+            render_html('<div style="font-size: 10px; color: #D97706; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #D97706;"></span> ELEVENLABS_API_KEY not found in .env</div>')
 
     render_html('<div style="height: 10px; margin-bottom: 10px;"></div>')
     run_btn = st.button("Run Security Evaluation", type="primary", use_container_width=True)
@@ -1237,6 +1285,122 @@ def render_vertical_forensic_timeline(items=None):
     </div>
     """
 
+def render_voice_alert_player(sc, prot_trace):
+    """
+    Renders an enterprise tactical audio dispatch player powered by ElevenLabs.
+    """
+    if not st.session_state.get("voice_alert_enabled", True):
+        return
+
+    script_text = build_incident_alert_text(sc, prot_trace)
+    voice_name = st.session_state.get("selected_voice_name", list(VOICE_PROFILES.keys())[0])
+    voice_id = VOICE_PROFILES.get(voice_name, DEFAULT_VOICE_ID)
+    api_key = config.ELEVENLABS_API_KEY
+
+    is_blocked = prot_trace and prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK
+    is_human = prot_trace and prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN
+    badge_color = "#DC2626" if is_blocked else ("#D97706" if is_human else "#059669")
+    badge_bg = "#FEF2F2" if is_blocked else ("#FFFBEB" if is_human else "#ECFDF5")
+    badge_border = "#FECACA" if is_blocked else ("#FDE68A" if is_human else "#A7F3D0")
+    badge_text = "TACTICAL THREAT ALERT BROADCAST" if is_blocked else ("HUMAN GATE VOICE PROMPT" if is_human else "CLEAN DISPATCH VERIFICATION")
+
+    render_html(f"""
+    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid {badge_color}; border-radius: 10px; padding: 14px 18px; margin: 12px 0 16px 0; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 20px; color: {badge_color};">campaign</span>
+                <span style="font-size: 11.5px; font-weight: 700; color: {badge_color}; text-transform: uppercase; letter-spacing: 0.05em;">{badge_text}</span>
+                <span style="font-size: 10px; font-weight: 700; color: #7C3AED; background: #F5F3FF; border: 1px solid #DDD6FE; padding: 2px 7px; border-radius: 4px;">ElevenLabs Voice</span>
+            </div>
+            <div style="font-size: 11px; font-weight: 600; color: #64748B; font-family: 'JetBrains Mono', monospace;">
+                Voice: {voice_name.split(' ')[0]}
+            </div>
+        </div>
+        <div style="font-size: 12px; color: #334155; line-height: 1.5; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px; font-style: italic; margin-bottom: 10px;">
+            "{script_text}"
+        </div>
+    </div>
+    """)
+
+    cache_key = get_audio_cache_key(script_text, voice_id)
+    auto_trigger = st.session_state.get("new_run_audio_ready", False) and st.session_state.get("voice_alert_autoplay", True)
+
+    col_v1, col_v2 = st.columns([3, 1])
+    with col_v2:
+        btn_gen = st.button("🎙️ Play Voice Alert", key=f"btn_voice_alert_{sc.id}", use_container_width=True)
+
+    audio_data = None
+    if btn_gen or auto_trigger:
+        if not api_key:
+            with col_v1:
+                st.info("💡 Set ELEVENLABS_API_KEY in your .env file to enable live voice generation.")
+        else:
+            with st.spinner("Synthesizing tactical security voice via ElevenLabs..."):
+                audio_bytes, err = synthesize_speech(script_text, api_key=api_key, voice_id=voice_id)
+                if audio_bytes:
+                    audio_data = audio_bytes
+                    if auto_trigger:
+                        st.session_state.new_run_audio_ready = False
+                elif err:
+                    st.error(f"Voice dispatch warning: {err}")
+
+    if audio_data or (cache_key in _AUDIO_CACHE):
+        play_bytes = audio_data or _AUDIO_CACHE[cache_key]
+        with col_v1:
+            st.audio(play_bytes, format="audio/mp3", autoplay=auto_trigger)
+
+def render_ciso_audio_debrief(sc, prot_trace, unprot_trace):
+    """
+    Renders 1-Click Executive CISO Forensic Audio Debrief card powered by ElevenLabs.
+    """
+    ciso_script = build_ciso_briefing_text(sc, prot_trace, unprot_trace)
+    voice_name = st.session_state.get("selected_voice_name", list(VOICE_PROFILES.keys())[0])
+    voice_id = VOICE_PROFILES.get(voice_name, DEFAULT_VOICE_ID)
+    api_key = config.ELEVENLABS_API_KEY
+    cache_key = get_audio_cache_key(ciso_script, voice_id)
+
+    render_html("""
+    <div style="background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%); border: 1px solid #DDD6FE; border-left: 4px solid #7C3AED; border-radius: 10px; padding: 14px 18px; margin-top: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(124,58,237,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 20px; color: #7C3AED;">podcasts</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: #1E1B4B;">CISO Executive Audio Debrief</span>
+                <span style="font-size: 10px; font-weight: 700; color: #7C3AED; background: #FFFFFF; border: 1px solid #C4B5FD; padding: 2px 7px; border-radius: 4px;">ElevenLabs Creator</span>
+            </div>
+            <div style="font-size: 11px; color: #6D28D9; font-weight: 600;">
+                30s Incident Telemetry Narration
+            </div>
+        </div>
+        <div style="font-size: 12px; color: #4C1D95; margin-top: 5px;">
+            Automated executive security briefing summarizing threat lineage, zero-trust pre-flight mitigation, and SOC2 tamper verification.
+        </div>
+    </div>
+    """)
+
+    col_c1, col_c2 = st.columns([3, 1])
+    with col_c2:
+        btn_ciso = st.button("🎙️ Generate CISO Brief", key=f"btn_ciso_audio_{sc.id}", use_container_width=True)
+
+    audio_bytes = None
+    if btn_ciso:
+        if not api_key:
+            with col_c1:
+                st.info("💡 Set ELEVENLABS_API_KEY in your .env file to enable live audio debriefs.")
+        else:
+            with st.spinner("Synthesizing 30s CISO audio briefing via ElevenLabs..."):
+                ab, err = synthesize_speech(ciso_script, api_key=api_key, voice_id=voice_id)
+                if ab:
+                    audio_bytes = ab
+                elif err:
+                    st.error(f"CISO debrief warning: {err}")
+
+    if audio_bytes or (cache_key in _AUDIO_CACHE):
+        final_bytes = audio_bytes or _AUDIO_CACHE[cache_key]
+        with col_c1:
+            st.audio(final_bytes, format="audio/mp3", autoplay=True)
+        with st.expander("📄 View CISO Audio Briefing Transcript"):
+            st.markdown(f"*{ciso_script}*")
+
 # Helper function to render active scenario context banner
 def render_scenario_context(sc):
     s_badge = '<span style="background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">Development Set</span>' if not sc.is_unseen_split else '<span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">Unseen Test Set</span>'
@@ -1383,6 +1547,8 @@ def render_scenario_context(sc):
             if st.button("Replay Timeline (Full Window)", key=f"btn_ctx_tt_{sc.id}", use_container_width=True):
                 show_time_travel_dialog(sc, st.session_state.get("last_prot_trace"), st.session_state.get("last_unprot_trace"))
 
+        render_ciso_audio_debrief(sc, st.session_state.get("last_prot_trace"), st.session_state.get("last_unprot_trace"))
+
 @st.dialog("Incident Time-Travel Forensic Replay", width="large")
 def show_time_travel_dialog(sc, prot, unprot=None):
     """
@@ -1444,6 +1610,7 @@ if is_run_triggered:
         st.session_state.last_unprot_trace = unprot
         st.session_state.last_prot_trace = prot
         st.session_state.human_approval_state = "IDLE"
+        st.session_state.new_run_audio_ready = True
 
         log_entry = {
             "timestamp": time.strftime("%H:%M:%S"),
@@ -1542,6 +1709,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
     """)
     render_kpi_metrics(prot_trace)
     render_scenario_context(active_scenario)
+    render_voice_alert_player(active_scenario, prot_trace)
     render_attack_flow_diagram(active_scenario, prot_trace)
 
     # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED OR WAITING_APPROVAL)
@@ -2176,6 +2344,7 @@ elif "Action Guard" in nav_tab:
     </div>
     """)
     render_scenario_context(active_scenario)
+    render_voice_alert_player(active_scenario, prot_trace)
 
     guard = prot_trace.guard_result
     is_blocked = guard and guard.decision == DefenseDecision.BLOCK
@@ -2321,6 +2490,7 @@ elif "Audit Log" in nav_tab:
                 mime="text/markdown",
                 use_container_width=True
             )
+        render_ciso_audio_debrief(active_scenario, prot_trace, unprot_trace)
     else:
         st.info("No audit logs recorded yet. Run a simulation scenario to populate live telemetry.")
 
