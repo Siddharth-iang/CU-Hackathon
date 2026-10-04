@@ -438,11 +438,33 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* Sidebar Base */
+    /* Sidebar Base & Remove Top Whitespace Gap */
     section[data-testid="stSidebar"] {
-        background-color: #FFFFFF !important;
+        background: linear-gradient(180deg, #F8FAFD 0%, #FFFFFF 100%) !important;
+        background-color: #F8FAFD !important;
         border-right: 1px solid #E2E8F0 !important;
-        padding: 1.25rem 0.85rem !important;
+    }
+
+    [data-testid="stSidebarHeader"] {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0px !important;
+        height: auto !important;
+        min-height: 0px !important;
+        margin-bottom: 0px !important;
+    }
+
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    section[data-testid="stSidebar"] > div:first-child {
+        padding-top: 0.5rem !important;
+        padding-left: 0.85rem !important;
+        padding-right: 0.85rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+
+    /* Style collapse button nicely at top */
+    [data-testid="stSidebarCollapseButton"] {
+        margin-top: 0.15rem !important;
     }
 
     /* Hide radio dot for clean button appearance */
@@ -453,10 +475,10 @@ st.markdown("""
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label {
         margin-bottom: 3px !important;
         padding: 9px 12px !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        color: #475569 !important;
+        color: #334155 !important;
         transition: all 0.15s ease !important;
         background-color: transparent !important;
         border-left: 3px solid transparent !important;
@@ -464,15 +486,15 @@ st.markdown("""
     }
 
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label:hover {
-        background-color: #F8FAFC !important;
+        background-color: #F1F5F9 !important;
         color: #0F172A !important;
     }
 
     section[data-testid="stSidebar"] div[data-testid="stRadio"] label:has(input:checked) {
         background: linear-gradient(90deg, #EEF2FF 0%, #F5F3FF 100%) !important;
         color: #4F46E5 !important;
-        font-weight: 600 !important;
-        border-left: 3px solid #4F46E5 !important;
+        font-weight: 700 !important;
+        border-left: 3.5px solid #4F46E5 !important;
         box-shadow: 0 1px 4px rgba(79, 70, 229, 0.08) !important;
     }
 
@@ -604,7 +626,7 @@ st.markdown("""
 
 def info_tip(text: str) -> str:
     escaped = html.escape(str(text))
-    return f"""<span class="info-tip" title="{escaped}"><span class="tip-icon">i</span><span class="tip-box">{escaped}</span></span>"""
+    return f"""<span class="info-tip"><span class="tip-icon">i</span><span class="tip-box">{escaped}</span></span>"""
 
 # -----------------------------------------------------------------------------
 # APPLICATION STATE & DYNAMIC FONT SCALING
@@ -660,7 +682,7 @@ if "trigger_run" not in st.session_state:
 with st.sidebar:
     # 1. Top Brand Header matching Sidebar.tsx
     render_html("""
-    <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); margin-bottom: 12px; margin-top: 0px;">
         <div style="width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #1E40AF 0%, #4F46E5 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25); flex-shrink: 0;">
             <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 7L29 11.5V19C29 25.2 25.1 30.8 20 33C14.9 30.8 11 25.2 11 19V11.5L20 7Z" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
@@ -676,7 +698,7 @@ with st.sidebar:
     """)
 
     # 2. Console Navigation Section with Icons matching Sidebar.tsx
-    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Console Navigation</div>')
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding-left: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #4F46E5;"></span> Console Navigation</div>')
     
     nav_tab = st.radio(
         "Navigation",
@@ -693,10 +715,10 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    render_html('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>')
+    render_html('<div style="height: 1px; background: #E2E8F0; margin: 12px 0 14px 0;"></div>')
 
     # 3. Test Suite & Scenario Selector
-    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Attack Vector Selection</div>')
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #D97706; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding-left: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #D97706;"></span> Attack Vector Selection</div>')
     
     category_filter = st.selectbox(
         "Filter Category",
@@ -780,10 +802,10 @@ with st.sidebar:
 
     st.session_state.current_scenario = active_scenario
 
-    render_html('<div style="height: 10px; border-bottom: 1px solid #E5E7EB; margin-bottom: 14px;"></div>')
+    render_html('<div style="height: 1px; background: #E2E8F0; margin: 12px 0 14px 0;"></div>')
 
     # 4. Defense Configuration Toggles
-    render_html('<div style="font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; padding-left: 4px;">Guardrails Configuration</div>')
+    render_html('<div style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding-left: 4px; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span> Guardrails Configuration</div>')
     defense_engine = st.radio(
         "Execution Engine",
         ["PromptShield Live Core", "Instant Demo Simulation"],
@@ -805,17 +827,17 @@ with st.sidebar:
 
     # 5. Bottom System Status Footer matching Sidebar.tsx
     render_html("""
-    <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 11px;">
+    <div style="margin-top: 20px; padding: 10px 12px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); font-size: 11px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="color: #6B7280; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">SYSTEM STATUS</span>
+            <span style="color: #64748B; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">SYSTEM STATUS</span>
             <div style="display: flex; align-items: center; gap: 5px;">
                 <span class="pulse-dot"></span>
-                <span style="color: #10B981; font-weight: 700; font-size: 10px; text-transform: uppercase;">Online</span>
+                <span style="color: #059669; font-weight: 700; font-size: 10px; text-transform: uppercase; background: #ECFDF5; padding: 1px 6px; border-radius: 4px; border: 1px solid #A7F3D0;">Online</span>
             </div>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #6B7280;">Engine Policy</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #374151;">v2.4.1-prod</span>
+            <span style="color: #64748B;">Engine Policy</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 1px 6px; border-radius: 4px; border: 1px solid #C7D2FE;">v2.4.1-prod</span>
         </div>
     </div>
     """)
