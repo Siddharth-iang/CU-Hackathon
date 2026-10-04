@@ -8,7 +8,6 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Groq LPU](https://img.shields.io/badge/Groq-Llama%203.3%20%2F%20Qwen-F55036.svg)](https://groq.com)
 [![ElevenLabs](https://img.shields.io/badge/ElevenLabs-Voice%20Alerts-orange.svg)](https://elevenlabs.io)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
 [![Security Standard](https://img.shields.io/badge/OWASP-LLM01%20%7C%20LLM02%20Mitigated-success.svg)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 [![Compliance](https://img.shields.io/badge/SOC2-CC6.1%20%7C%20CC6.6%20%7C%20CC6.8-blueviolet.svg)](https://www.aicpa.org/topic/audit-assurance/audit-and-assurance-greater-than-soc-2)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -242,7 +241,6 @@ Evaluated against the full **48-scenario benchmark catalog** spanning 33 attacks
 | **Compliance Export** | Jinja2 / Markdown / SHA-256 | Built-in | SOC2 CC6.1 & OWASP LLM01/02 tamper-evident forensic reporting |
 | **Red-Team Fuzzer** | Custom Python Obfuscation | Built-in | Real-time payload mutation (Base64, Zero-Width, Leet, Delimiters) |
 | **Automated Testing** | Pytest & Self-Checks | Built-in | Fast assert-based self-checks & end-to-end verification |
-| **Containerization** | Docker & Compose | Multi-stage | Isolated microservice deployment |
 
 ---
 
@@ -318,19 +316,6 @@ python eval/runner.py --split all
 # 4. Benchmark only the unseen evaluation split
 python eval/runner.py --split unseen
 ```
-
----
-
-## 🐳 Docker Deployment
-
-Run the complete SENTINEL platform in an isolated container:
-
-```bash
-# Build and run container
-docker-compose up --build
-```
-* **Dashboard**: `http://localhost:8501`
-* **API Documentation**: `http://localhost:8000/docs`
 
 ---
 

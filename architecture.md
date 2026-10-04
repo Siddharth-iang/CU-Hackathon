@@ -655,8 +655,6 @@ coding/
 ├── tests/                          # Comprehensive pytest test suite (Phases 1-12, hardening)
 ├── app.py                          # Streamlit Enterprise Security Console (7 interactive views)
 ├── architecture.md                 # THIS COMPLETE SYSTEM SPECIFICATION
-├── Dockerfile                      # Containerization definition
-├── docker-compose.yml              # Multi-container orchestration (FastAPI + Streamlit + DB)
 └── requirements.txt                # Python package dependency manifest
 ```
 
