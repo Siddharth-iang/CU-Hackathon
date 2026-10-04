@@ -1,6 +1,10 @@
 """
 Tests for Sentinel ElevenLabs Voice & Audio Engine.
 """
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from core.audio import (
     build_incident_alert_text,
     build_ciso_briefing_text,

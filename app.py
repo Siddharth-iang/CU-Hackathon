@@ -25,6 +25,17 @@ import streamlit.components.v1 as components
 from shield.audit import AuditLogger
 from shield.config import config
 
+def get_elevenlabs_key() -> str:
+    """Safely resolve ElevenLabs API key from config, os.environ, or Streamlit secrets."""
+    key = getattr(config, "ELEVENLABS_API_KEY", "") or os.environ.get("ELEVENLABS_API_KEY", "")
+    if not key:
+        try:
+            if hasattr(st, "secrets") and "ELEVENLABS_API_KEY" in st.secrets:
+                key = str(st.secrets["ELEVENLABS_API_KEY"])
+        except Exception:
+            pass
+    return key or ""
+
 def render_html(html_str: str):
     """Safely render HTML without Markdown indented-code-block or newline artifacts."""
     clean = "\n".join(line.strip() for line in html_str.splitlines() if line.strip())
@@ -890,10 +901,11 @@ with st.sidebar:
             key="sb_voice_autoplay"
         )
 
-        if config.ELEVENLABS_API_KEY:
-            render_html('<div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span> Connected via .env (Creator Plan)</div>')
+        eleven_key = get_elevenlabs_key()
+        if eleven_key:
+            render_html('<div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span> Connected (ElevenLabs Key Active)</div>')
         else:
-            render_html('<div style="font-size: 10px; color: #D97706; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #D97706;"></span> ELEVENLABS_API_KEY not found in .env</div>')
+            render_html('<div style="font-size: 10px; color: #D97706; font-weight: 600; margin-top: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #D97706;"></span> ELEVENLABS_API_KEY not configured</div>')
 
     render_html('<div style="height: 10px; margin-bottom: 10px;"></div>')
     run_btn = st.button("Run Security Evaluation", type="primary", use_container_width=True)
@@ -1295,7 +1307,7 @@ def render_voice_alert_player(sc, prot_trace):
     script_text = build_incident_alert_text(sc, prot_trace)
     voice_name = st.session_state.get("selected_voice_name", list(VOICE_PROFILES.keys())[0])
     voice_id = VOICE_PROFILES.get(voice_name, DEFAULT_VOICE_ID)
-    api_key = config.ELEVENLABS_API_KEY
+    api_key = get_elevenlabs_key()
 
     is_blocked = prot_trace and prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.BLOCK
     is_human = prot_trace and prot_trace.guard_result and prot_trace.guard_result.decision == DefenseDecision.ASK_HUMAN
@@ -1356,7 +1368,7 @@ def render_ciso_audio_debrief(sc, prot_trace, unprot_trace):
     ciso_script = build_ciso_briefing_text(sc, prot_trace, unprot_trace)
     voice_name = st.session_state.get("selected_voice_name", list(VOICE_PROFILES.keys())[0])
     voice_id = VOICE_PROFILES.get(voice_name, DEFAULT_VOICE_ID)
-    api_key = config.ELEVENLABS_API_KEY
+    api_key = get_elevenlabs_key()
     cache_key = get_audio_cache_key(ciso_script, voice_id)
 
     render_html("""
