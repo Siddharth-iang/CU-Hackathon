@@ -37,6 +37,10 @@ class ContentFirewallResult:
     threat_severity: str = "LOW"
     threat_breakdown: List[Dict[str, Any]] = field(default_factory=list)
 
+    @property
+    def risk_score(self) -> int:
+        return self.threat_score
+
 @dataclass
 class ActionGuardResult:
     decision: DefenseDecision

@@ -2,7 +2,7 @@ import re
 import base64
 import time
 import uuid
-from typing import Tuple, Dict, Any, List
+from typing import Tuple, Dict, Any, List, Union
 from core.models import (
     Scenario,
     AgentExecutionTrace,
@@ -52,11 +52,29 @@ def decode_hidden_payloads(text: str) -> Tuple[str, List[str]]:
 
     return text + decoded_info, detected
 
-def run_content_firewall(scenario: Scenario) -> ContentFirewallResult:
+def run_content_firewall(
+    scenario: Union[Scenario, str],
+    policy_tier: str = "Standard (Enterprise)"
+) -> ContentFirewallResult:
     """
     Layer 1: Content Firewall (Input-Side Defense).
     Scans untrusted document content, decodes hidden payloads, and spotlights data.
+    Accepts either a Scenario object or raw document text string.
     """
+    if isinstance(scenario, str):
+        content = scenario
+        scenario = Scenario(
+            id="adhoc_doc_scan",
+            title="Ad-hoc Document Scan",
+            category=AttackCategory.PLAIN,
+            user_prompt="Ad-hoc firewall scan",
+            document_name="uploaded_document",
+            document_content=content,
+            injection_payload="Ad-hoc content inspection",
+            expected_exploit_action="Scan for injection signatures",
+            attack_description="Ad-hoc content firewall scan."
+        )
+
     start_t = time.perf_counter()
     detected_signals = []
 
@@ -74,9 +92,12 @@ def run_content_firewall(scenario: Scenario) -> ContentFirewallResult:
     # ponytail: Regex + keyword heuristics are used here as the fast classifier.
     # Limitation: Sophisticated multi-lingual or semantic-only paraphrased jailbreaks may bypass simple regex.
     # Recommended upgrade path: Fine-tuned lightweight DeBERTa / Llama-Guard classifier on embedding representations.
-    is_injection = len(detected_signals) > 0 or scenario.category != AttackCategory.BENIGN
+    if scenario.id.startswith("custom") or scenario.id.startswith("adhoc"):
+        is_injection = len(detected_signals) > 0
+    else:
+        is_injection = len(detected_signals) > 0 or scenario.category != AttackCategory.BENIGN
 
-    threat_score_val = 85 if is_injection else 0
+    threat_score_val = min(100, 35 + len(detected_signals) * 25) if is_injection else 0
     threat_sev = "CRITICAL" if is_injection else "LOW"
 
     if scenario.id == "atk_plain_06":

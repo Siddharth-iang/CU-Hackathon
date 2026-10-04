@@ -751,9 +751,33 @@ with st.sidebar:
             raw_bytes = uploaded_file.read()
             if default_doc_name.lower().endswith(".pdf"):
                 import re
+                import zlib
+                extracted_chunks = []
+                # 1. Extract FlateDecode compressed streams
+                stream_matches = re.findall(rb"stream[\r\n]+(.*?)[\r\n]+endstream", raw_bytes, re.DOTALL)
+                for sm in stream_matches:
+                    try:
+                        decomp = zlib.decompress(sm)
+                        t_matches = re.findall(rb"\((.*?)\)", decomp)
+                        for tm in t_matches:
+                            if len(tm) > 0:
+                                extracted_chunks.append(tm.decode("latin1", errors="ignore"))
+                    except Exception:
+                        pass
+
+                # 2. Extract uncompressed literal strings
                 text_matches = re.findall(rb"\((.*?)\)", raw_bytes)
-                extracted = " ".join([m.decode("latin1", errors="ignore") for m in text_matches if len(m) > 1])
-                default_content = extracted if extracted.strip() else raw_bytes.decode("latin1", errors="ignore")[:4000]
+                for tm in text_matches:
+                    if len(tm) > 1:
+                        extracted_chunks.append(tm.decode("latin1", errors="ignore"))
+
+                extracted = " ".join([c.strip() for c in extracted_chunks if c.strip()])
+                if extracted.strip():
+                    default_content = extracted
+                else:
+                    printable = "".join(chr(b) if 32 <= b < 127 or b in (10, 13, 9) else " " for b in raw_bytes[:10000])
+                    printable = re.sub(r"\s+", " ", printable).strip()
+                    default_content = printable[:4000] if len(printable) > 30 else raw_bytes.decode("latin1", errors="ignore")[:4000]
             else:
                 try:
                     default_content = raw_bytes.decode("utf-8")
